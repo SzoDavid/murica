@@ -27,7 +27,7 @@
 
 - Szak
     - név
-    - típus
+    - típus (Bsc/Mester)
     - tartam
 
 - Tanterv
