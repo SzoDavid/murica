@@ -94,4 +94,4 @@ Hallgató felvehet vizsgákat.
 ## Nem funkcionális követelmények
 
 - A jelszavak biztonságosan vannak eltárolva
-- Input mezők kezelése biztonságos ó
+- Input mezők kezelése biztonságos
