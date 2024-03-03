@@ -1,1 +1,1 @@
-Ez az elso commit pushom
+Ez az elso commit pushom kerdesek
