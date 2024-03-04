@@ -33,7 +33,9 @@ Hallgatóként felvehet kurzusokat és amennyiben az előadás, az azokhoz tarto
 
 Egy felhasználó lehet oktató is, ha van olyan kurzus ahol oktatóként van megjelölve. Ilyenkor létrehozhat vizsgákat, jegyeket írhat be az adott kurzust felvett hallgatóknak.
 
-Egy felhasználó lehet admin is, ekkor hozhat létre tárgyakat, kurzusokat és rendelhet hozzájuk oktatókat, szakokat, teljesítési követelményeket és tantervet szerkeszthet. Ő vehet fel további felhasználókat is.
+Egy felhasználó lehet admin is, ekkor hozhat létre tárgyakat, kurzusokat és rendelhet hozzájuk oktatókat, szakokat, tantervet és szerkesztheti azokat. Ő vehet fel további felhasználókat is, valamint módosíthatja az adataikat.
+
+Adminok és oktatók küldhetnek üzeneteket, adminok mindenkinek, oktatók pedig csak az általuk oktatott hallgatóknak.
 
 #### Tárgy
 
