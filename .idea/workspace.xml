@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1cdf99ce-4065-4e0f-8edc-8515d3c00d8a" name="Changes" comment="Én nem tudom miket kéne még ide írni">
-      <change afterPath="$PROJECT_DIR$/szerep-finkció-mátrix.md" afterDir="false" />
+    <list default="true" id="1cdf99ce-4065-4e0f-8edc-8515d3c00d8a" name="Changes" comment="Szerintem meg vannak">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/szerep-finkció-mátrix.md" beforeDir="false" afterPath="$PROJECT_DIR$/szerep-finkció-mátrix.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +57,7 @@
       <updated>1709476462824</updated>
       <workItem from="1709476464960" duration="14344000" />
       <workItem from="1709593039811" duration="445000" />
-      <workItem from="1709656029761" duration="1197000" />
+      <workItem from="1709656029761" duration="2601000" />
     </task>
     <task id="LOCAL-00001" summary="Kérdés, a kurzus felvevésénél A hallgató amikor át jelentkezik egy másik kurzusra olyankor csak Módosítja az előzőt vagy előbb le kell jelentkeznie és utána veszi fel a másikat? &#10;Ez az Vizsgánál is kérdés. &#10;Illetve az üzenetet végül csak az Oktató tudja használni üzenet küldésre?&#10;Bármi észrevétel van szóljatok.">
       <option name="closed" value="true" />
@@ -90,7 +91,15 @@
       <option name="project" value="LOCAL" />
       <updated>1709592844680</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Szerintem meg vannak">
+      <option name="closed" value="true" />
+      <created>1709671010234</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1709671010234</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -113,6 +122,7 @@
     <MESSAGE value="Ezt most azért változtam mert kell" />
     <MESSAGE value="Ami eszembe jutott fel írtam." />
     <MESSAGE value="Én nem tudom miket kéne még ide írni" />
-    <option name="LAST_COMMIT_MESSAGE" value="Én nem tudom miket kéne még ide írni" />
+    <MESSAGE value="Szerintem meg vannak" />
+    <option name="LAST_COMMIT_MESSAGE" value="Szerintem meg vannak" />
   </component>
 </project>
