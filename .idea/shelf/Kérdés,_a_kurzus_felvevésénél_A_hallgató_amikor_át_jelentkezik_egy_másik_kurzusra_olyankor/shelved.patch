@@ -1,0 +1,144 @@
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+new file mode 100644
+--- /dev/null	(date 1709476070378)
++++ b/.idea/misc.xml	(date 1709476070378)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectRootManager" version="2" default="true">
++    <output url="file://$PROJECT_DIR$/out" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+new file mode 100644
+--- /dev/null	(date 1709476146899)
++++ b/.idea/vcs.xml	(date 1709476146899)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="VcsDirectoryMappings">
++    <mapping directory="$PROJECT_DIR$" vcs="Git" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+new file mode 100644
+--- /dev/null	(date 1709476105616)
++++ b/.idea/workspace.xml	(date 1709476105616)
+@@ -0,0 +1,99 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="AutoImportSettings">
++    <option name="autoReloadType" value="SELECTIVE" />
++  </component>
++  <component name="ChangeListManager">
++    <list default="true" id="cbf4ca3a-3209-4d37-a429-3a29d986f534" name="Changes" comment="Kérdés, a kurzus felvevésénél A hallgató amikor át jelentkezik egy másik kurzusra olyankor csak Módosítja az előzőt vagy előbb le kell jelentkeznie és utána veszi fel a másikat? &#10;Ez az Vizsgánál is kérdés. &#10;Illetve az üzenetet végül csak az Oktató tudja használni üzenet küldésre?&#10;Bármi észrevétel van szóljatok.">
++      <changelist_data name="Capek46" email="cako.peti@gmail.com" />
++    </list>
++    <option name="SHOW_DIALOG" value="false" />
++    <option name="HIGHLIGHT_CONFLICTS" value="true" />
++    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
++    <option name="LAST_RESOLUTION" value="IGNORE" />
++  </component>
++  <component name="Git.Settings">
++    <option name="PREVIOUS_COMMIT_AUTHORS">
++      <list>
++        <option value="Capek46 &lt;cako.peti@gmail.com&gt;" />
++      </list>
++    </option>
++    <option name="RECENT_BRANCH_BY_REPOSITORY">
++      <map>
++        <entry key="$PROJECT_DIR$" value="main" />
++      </map>
++    </option>
++    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
++  </component>
++  <component name="MarkdownSettingsMigration">
++    <option name="stateVersion" value="1" />
++  </component>
++  <component name="ProjectColorInfo">{
++  &quot;associatedIndex&quot;: 3
++}</component>
++  <component name="ProjectId" id="2d3PQC31uNXeGxAYVr9RKt65FHX" />
++  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
++  <component name="ProjectViewState">
++    <option name="hideEmptyMiddlePackages" value="true" />
++    <option name="showLibraryContents" value="true" />
++  </component>
++  <component name="PropertiesComponent"><![CDATA[{
++  "keyToString": {
++    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
++    "RunOnceActivity.OpenProjectViewOnStart": "true",
++    "RunOnceActivity.ShowReadmeOnStart": "true",
++    "kotlin-language-version-configured": "true",
++    "node.js.detected.package.eslint": "true",
++    "node.js.detected.package.tslint": "true",
++    "node.js.selected.package.eslint": "(autodetect)",
++    "node.js.selected.package.tslint": "(autodetect)",
++    "nodejs_package_manager_path": "npm",
++    "vue.rearranger.settings.migration": "true"
++  }
++}]]></component>
++  <component name="SharedIndexes">
++    <attachedChunks>
++      <set>
++        <option value="jdk-21.0.2-openjdk-21.0.2-4caba194b151-4f524021" />
++      </set>
++    </attachedChunks>
++  </component>
++  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
++  <component name="TaskManager">
++    <task active="true" id="Default" summary="Default task">
++      <changelist id="cbf4ca3a-3209-4d37-a429-3a29d986f534" name="Changes" comment="" />
++      <created>1709233769583</created>
++      <option name="number" value="Default" />
++      <option name="presentableId" value="Default" />
++      <updated>1709233769583</updated>
++      <workItem from="1709233770653" duration="4564000" />
++      <workItem from="1709475931183" duration="174000" />
++    </task>
++    <task id="LOCAL-00001" summary="eddig igy haladtam">
++      <option name="closed" value="true" />
++      <created>1709234573333</created>
++      <option name="number" value="00001" />
++      <option name="presentableId" value="LOCAL-00001" />
++      <option name="project" value="LOCAL" />
++      <updated>1709234573333</updated>
++    </task>
++    <task id="LOCAL-00002" summary="Kérdés, a kurzus felvevésénél A hallgató amikor át jelentkezik egy másik kurzusra olyankor csak Módosítja az előzőt vagy előbb le kell jelentkeznie és utána veszi fel a másikat? &#10;Ez az Vizsgánál is kérdés. &#10;Illetve az üzenetet végül csak az Oktató tudja használni üzenet küldésre?&#10;Bármi észrevétel van szóljatok.">
++      <option name="closed" value="true" />
++      <created>1709474754889</created>
++      <option name="number" value="00002" />
++      <option name="presentableId" value="LOCAL-00002" />
++      <option name="project" value="LOCAL" />
++      <updated>1709474754889</updated>
++    </task>
++    <option name="localTasksCounter" value="3" />
++    <servers />
++  </component>
++  <component name="TypeScriptGeneratedFilesManager">
++    <option name="version" value="3" />
++  </component>
++  <component name="VcsManagerConfiguration">
++    <MESSAGE value="eddig igy haladtam" />
++    <MESSAGE value="Kérdés, a kurzus felvevésénél A hallgató amikor át jelentkezik egy másik kurzusra olyankor csak Módosítja az előzőt vagy előbb le kell jelentkeznie és utána veszi fel a másikat? &#10;Ez az Vizsgánál is kérdés. &#10;Illetve az üzenetet végül csak az Oktató tudja használni üzenet küldésre?&#10;Bármi észrevétel van szóljatok." />
++    <option name="LAST_COMMIT_MESSAGE" value="Kérdés, a kurzus felvevésénél A hallgató amikor át jelentkezik egy másik kurzusra olyankor csak Módosítja az előzőt vagy előbb le kell jelentkeznie és utána veszi fel a másikat? &#10;Ez az Vizsgánál is kérdés. &#10;Illetve az üzenetet végül csak az Oktató tudja használni üzenet küldésre?&#10;Bármi észrevétel van szóljatok." />
++  </component>
++</project>
+\ No newline at end of file
