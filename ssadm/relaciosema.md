@@ -10,7 +10,7 @@ Hallgató(*<u>kód</u>*, <u>kezdésÉve</u>)
 
 Szak(<u>név</u>, típus, időtartam)
 
-MilyenSzakon(<u>*Hallgató.kód*</u>, <u>*Szak.név*</u>)
+MilyenSzakon(<u>*Hallgató.kód*</u>, *<u>kezdésÉve</u>*, <u>*Szak.név*</u>)
 
 Tárgy(<u>kód</u>, név, jóváhagyásos, kredit, típus, előfeltételKód, melyik, mihez)
 
