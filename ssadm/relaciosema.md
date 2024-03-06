@@ -1,4 +1,4 @@
-Időszak(<u>kód</u>, kezdésIdőpont, végIdőpont, időszak típus)
+Időszak(<u>kód</u>, kezdésIdőpont, végIdőpont, időszakTípus)
 
 Felhasználó(<u>kód</u>, születésiIdő, név, jelszó, email)
 
