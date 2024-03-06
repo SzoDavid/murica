@@ -6,7 +6,7 @@ Admin(*<u>kód</u>*)
 
 Hallgató(*<u>kód</u>*, <u>kezdésÉve</u>)
 
-Üzenet(<u>kód</u>, tartalom, időpont, tárgy, *Felhasználó.küldőKód*, *Felhasználó.feladóKód*)
+Üzenet(<u>kód</u>, tartalom, időpont, tárgy, *Felhasználó.címzettKód*, *Felhasználó.feladóKód*)
 
 Szak(<u>név</u>, típus, időtartam)
 
