@@ -35,6 +35,14 @@ Egy felhasználó lehet oktató is, ha van olyan kurzus ahol oktatóként van me
 
 Egy felhasználó lehet admin is, ekkor hozhat létre tárgyakat, kurzusokat és rendelhet hozzájuk oktatókat, szakokat, tantervet és szerkesztheti azokat. Ő vehet fel további felhasználókat is, valamint módosíthatja az adataikat.
 
+#### Üzenet
+
+- Szerző
+- Címzett
+- Tágy
+- Tartalom
+- Idő
+
 Adminok és oktatók küldhetnek üzeneteket, adminok mindenkinek, oktatók pedig csak az általuk oktatott hallgatóknak.
 
 #### Tárgy
