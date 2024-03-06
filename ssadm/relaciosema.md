@@ -4,7 +4,7 @@ Felhasználó(<u>kód</u>, születésiIdő, név, jelszó, email)
 
 Admin(*<u>kód</u>*)
 
-Hallgató(*<u>kód</u>*, <u>kezdés éve</u>)
+Hallgató(*<u>kód</u>*, <u>kezdésÉve</u>)
 
 Üzenet(<u>kód</u>, tartalom, időpont, tárgy, *Felhasználó.küldőKód*, *Felhasználó.feladóKód*)
 
