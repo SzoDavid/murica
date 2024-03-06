@@ -20,8 +20,10 @@ Terem(<u>kód</u>, férőhely)
 
 Kurzus(<u>kód</u>, férőhely, időpont, félév, *Terem.kód*)
 
+FelvettKurzus(*<u>Hallgató.kód</u>*, *<u>kezdésÉve</u>*, *<u>Kurzus.kód</u>*, érdemjegy, jóváhagyva)
+
 KurzustOktat(<u>*Felhasználó.kód*</u>, <u>*Kurzus.kód*</u>)
 
 Vizsga(<u>kód</u>, időpont, vizsgáztató, férőhely, *Terem.kód*, *Tárgy.kód*)
 
-FelvettVizsga(*<u>Hallgató.kód</u>*, *<u>Vizsga.kód</u>*)
+FelvettVizsga(*<u>Hallgató.kód</u>*, *<u>kezdésÉve</u>*, *<u>Vizsga.kód</u>*)
