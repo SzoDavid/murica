@@ -14,7 +14,7 @@ MilyenSzakon(<u>*Hallgató.kód*</u>, <u>*Szak.név*</u>)
 
 Tárgy(<u>kód</u>, név, jóváhagyásos, kredit, típus, előfeltételKód, melyik, mihez)
 
-Tanterv(<u>*Szak.kód*</u>, <u>*Tárgy.kód*</u>, típus, ajánlottFélév)
+Tanterv(<u>*Szak.név*</u>, <u>*Tárgy.kód*</u>, típus, ajánlottFélév)
 
 Terem(<u>kód</u>, férőhely)
 
