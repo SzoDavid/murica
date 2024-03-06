@@ -2,9 +2,9 @@ Időszak(<u>kód</u>, kezdésIdőpont, végIdőpont, időszakTípus)
 
 Felhasználó(<u>kód</u>, születésiIdő, név, jelszó, email)
 
-Admin(<u>kód</u>)
+Admin(*<u>kód</u>*)
 
-Hallgató(<u>kód</u>, kezdés éve)
+Hallgató(*<u>kód</u>*, <u>kezdés éve</u>)
 
 Üzenet(<u>kód</u>, tartalom, időpont, tárgy, *Felhasználó.küldőKód*, *Felhasználó.feladóKód*)
 
