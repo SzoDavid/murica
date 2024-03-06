@@ -22,6 +22,6 @@ Kurzus(<u>kód</u>, férőhely, időpont, félév, *Terem.kód*)
 
 KurzustOktat(<u>*Felhasználó.kód*</u>, <u>*Kurzus.kód*</u>)
 
-Vizsga(<u>kód</u>, idő, vizsgáztató, férőhely, *Terem.kód*, *Tárgy.kód*)
+Vizsga(<u>kód</u>, időpont, vizsgáztató, férőhely, *Terem.kód*, *Tárgy.kód*)
 
 FelvettVizsga(*<u>Hallgató.kód</u>*, *<u>Vizsga.kód</u>*)
