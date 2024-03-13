@@ -1,0 +1,26 @@
+.dropDownRow > td:first-child::before {
+    content: '▶';
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.dropDownRow.open > td:first-child::before {
+    content: '▼';
+}
+
+.dropDownContainer {
+    padding: 0;
+}
+
+table, tr, td, th {
+    border: black 1px solid;
+    border-collapse: collapse;
+}
+
+table {
+    width: 100%;
+}
+
+td, th {
+    padding: 5px;
+}
