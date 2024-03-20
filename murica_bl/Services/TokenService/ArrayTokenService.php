@@ -11,7 +11,7 @@ class ArrayTokenService implements ITokenService
     public function __construct()
     {
         $this->tokens = [
-            ['token' => '0b8d1835-2fda-4cd0-af11-1f737cec65e0', 'expires_at' => 1711042089],
+            '0b8d1835-2fda-4cd0-af11-1f737cec65e0' => ['username' => 'YTWK3B', 'expires_at' => 1711042089],
         ];
     }
 
