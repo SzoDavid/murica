@@ -2,9 +2,9 @@
 
 namespace murica_api\Controllers;
 
-use murica_bl\DAO\_Interfaces\IUserDao;
-use murica_bl\DTO\User;
-use murica_bl\Services\TokenService\_Interfaces\ITokenService;
+use murica_bl\Dao\IUserDao;
+use murica_bl\Services\TokenService\ITokenService;
+use murica_bl_impl\Dto\User;
 
 class AuthController extends Controller
 {

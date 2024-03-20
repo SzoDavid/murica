@@ -1,6 +1,6 @@
 <?php
 
-namespace murica_bl\Services\TokenService\_Interfaces;
+namespace murica_bl\Services\TokenService;
 
 interface ITokenService
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace murica_bl\DTO;
+namespace murica_bl_impl\Dto;
 
-use murica_bl\DTO\_Interfaces\IUser;
+use murica_bl\Dto\IUser;
 
 class User implements IUser
 {

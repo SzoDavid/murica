@@ -1,8 +1,8 @@
 <?php
 
-namespace murica_bl\Services\TokenService;
+namespace murica_bl_impl\Services\TokenService;
 
-use murica_bl\Services\TokenService\_Interfaces\ITokenService;
+use murica_bl\Services\TokenService\ITokenService;
 
 class ArrayTokenService implements ITokenService
 {

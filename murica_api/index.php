@@ -8,20 +8,18 @@ use murica_api\Controllers\AuthController;
 use murica_api\Controllers\BaseController;
 use murica_api\Controllers\Controller;
 use murica_api\Controllers\ErrorController;
-use murica_bl\DAO\MoqUserDao;
-use murica_bl\Services\TokenService\ArrayTokenService;
+use murica_bl_impl\Dao\MoqUserDao;
+use murica_bl_impl\Services\TokenService\ArrayTokenService;
 
-$BASE_URI = "/murica_api/";
+$BASE_URI = '/murica_api/';
 
 $tokenService = new ArrayTokenService();
 $userDAo = new MoqUserDao();
 
-$errorController = new ErrorController("error/");
-
 $controllers = [
-    new BaseController(""),
-    $authController = new AuthController("auth/", $tokenService, $userDAo),
-    $errorController
+    new BaseController(''),
+    new AuthController('auth/', $tokenService, $userDAo),
+    $errorController = new ErrorController('error/')
 ];
 
 $requestData = array();
@@ -47,19 +45,18 @@ switch ($_SERVER['REQUEST_METHOD']) {
         break;
 }
 
-if (isset($_SERVER["HTTP_X_API_KEY"])) {
-    $requestData["token"] = $_SERVER["HTTP_X_API_KEY"];
+if (isset($_SERVER['HTTP_X_API_KEY'])) {
+    $requestData['token'] = $_SERVER['HTTP_X_API_KEY'];
 }
 
-$parsedURI = parse_url($_SERVER["REQUEST_URI"]);
-$endpointName = str_replace($BASE_URI, "", $parsedURI["path"]);
+$parsedURI = parse_url($_SERVER['REQUEST_URI']);
+$endpointName = str_replace($BASE_URI, '', $parsedURI['path']);
 
 if (empty($endpointName)) {
-    $endpointName = "/";
+    $endpointName = '/';
 }
 
-header("Content-Type: application/json; charset=UTF-8");
-
+header('Content-Type: application/json; charset=UTF-8');
 
 /* @var $controller Controller */
 foreach ($controllers as $controller) {
@@ -82,4 +79,4 @@ foreach ($controllers as $controller) {
     exit;
 }
 
-echo $errorController->notFound(array("endpointName" => $endpointName));
+echo $errorController->notFound(array('endpointName' => $endpointName));

@@ -1,6 +1,6 @@
 <?php
 
-namespace murica_bl\DTO\_Interfaces;
+namespace murica_bl\Dto;
 
 interface IUser
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace murica_bl\DAO\_Interfaces;
+namespace murica_bl\Dao;
 
-use murica_bl\DTO\_Interfaces\IUser;
+use murica_bl\Dto\IUser;
 
 interface IUserDao
 {
