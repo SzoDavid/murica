@@ -29,5 +29,9 @@ class Controller
     {
         return array();
     }
+
+    public function getPublicEndpoints(): array {
+        return array();
+    }
     //endregion
 }

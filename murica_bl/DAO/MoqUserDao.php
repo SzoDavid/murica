@@ -1,9 +1,10 @@
 <?php
 
-namespace murica_bl\DTO;
+namespace murica_bl\DAO;
 
 use murica_bl\DAO\_Interfaces\IUserDao;
 use murica_bl\DTO\_Interfaces\IUser;
+use murica_bl\DTO\User;
 
 
 class MoqUserDao implements IUserDao

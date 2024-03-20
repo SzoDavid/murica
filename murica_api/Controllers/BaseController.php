@@ -13,6 +13,13 @@ class BaseController extends Controller
             $this->baseUri . 'sayhello' => 'greeting'
         ];
     }
+
+    #[\Override] public function getPublicEndpoints(): array
+    {
+        return [
+            'welcome' => ''
+        ];
+    }
     //endregion
 
     //region Endpoints
