@@ -1,0 +1,9 @@
+{
+  "data_source" : {
+    "type": "oci",
+    "user": "",
+    "password": "",
+    "tns": "(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = orania2.inf.u-szeged.hu)(PORT = 1521))) (CONNECT_DATA = (SID = orania2)))",
+    "encoding": "UTF-8"
+  }
+}
