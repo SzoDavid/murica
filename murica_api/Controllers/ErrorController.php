@@ -12,6 +12,7 @@ class ErrorController extends Controller
             $this->baseUri . '401' => 'unauthorized',
             $this->baseUri . '403' => 'forbidden',
             $this->baseUri . '404' => 'notFound',
+            $this->baseUri . '500' => 'internalServerError'
         ];
     }
 
@@ -21,6 +22,7 @@ class ErrorController extends Controller
             'unauthorized' => '',
             'forbidden' => '',
             'notFound' => '',
+            'internalServerError' => ''
         ];
     }
     //endregion
@@ -48,6 +50,14 @@ class ErrorController extends Controller
             'error' => [
                 'code' => 404,
                 'message' => 'Endpoint ' . $requestData['endpointName'] . ' not found.']]);
+    }
+
+    public function internalServerError($requestData): string
+    {
+        return json_encode([
+            'error' => [
+                'code' => 500,
+                'message' => 'Internal server error: ' . $requestData['errorMessage']]]);
     }
     //endregion
 }

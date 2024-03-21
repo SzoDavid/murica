@@ -2,10 +2,25 @@
 
 namespace murica_api\Controllers;
 
+use murica_bl\Dao\IUserDao;
+use Override;
+
 class BaseController extends Controller
 {
+    //region Properties
+    private IUserDao $userDao;
+    //endregion
+
+    //region Ctor
+    public function __construct(string $baseUri, IUserDao $userDao)
+    {
+        parent::__construct($baseUri);
+        $this->userDao = $userDao;
+    }
+    //endregion
+
     //region Controller members
-    #[\Override]
+    #[Override]
     public function getEndpoints(): array
     {
         return [
@@ -14,7 +29,8 @@ class BaseController extends Controller
         ];
     }
 
-    #[\Override] public function getPublicEndpoints(): array
+    #[Override]
+    public function getPublicEndpoints(): array
     {
         return [
             'welcome' => ''
@@ -25,7 +41,7 @@ class BaseController extends Controller
     //region Endpoints
     public function welcome(array $requestData): string
     {
-        return json_encode("Welcome");
+        return json_encode($this->userDao->findAll());
     }
 
     public function greeting(array $requestData): string
