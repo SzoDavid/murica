@@ -23,6 +23,10 @@ class OracleDataSourceConfigService implements IDataSourceConfigService
     public function __construct(array $config)
     {
         try {
+            if (!isset($raw_configs['user'])) throw new ConfigLoadingException('Missing "user" field');
+            if (!isset($raw_configs['password'])) throw new ConfigLoadingException('Missing "password" field');
+            if (!isset($raw_configs['connection_string'])) throw new ConfigLoadingException('Missing "connection_string" field');
+
             $this->user = $config['user'];
             $this->password = $config['password'];
             $this->connectionString = $config['connection_string'];
