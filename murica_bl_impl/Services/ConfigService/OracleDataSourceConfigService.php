@@ -13,7 +13,6 @@ class OracleDataSourceConfigService implements IDataSourceConfigService
     private string $user;
     private string $password;
     private string $connectionString;
-    private string $encoding;
     private array $tableNames;
     //endregion
 
@@ -27,7 +26,6 @@ class OracleDataSourceConfigService implements IDataSourceConfigService
             $this->user = $config['user'];
             $this->password = $config['password'];
             $this->connectionString = $config['connection_string'];
-            $this->encoding = $config['encoding'];
             $this->tableNames['user'] = $config['tables']['user'];
         } catch (Exception $ex) {
             throw new ConfigLoadingException('Could not load data source config', $ex);
@@ -61,11 +59,6 @@ class OracleDataSourceConfigService implements IDataSourceConfigService
     public function getConnectionString(): string
     {
         return $this->connectionString;
-    }
-
-    public function getEncoding(): string
-    {
-        return $this->encoding;
     }
     //endregion
 }

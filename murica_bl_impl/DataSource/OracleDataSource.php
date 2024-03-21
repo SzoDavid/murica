@@ -34,8 +34,7 @@ class OracleDataSource implements IDataSource
             $this->connection = oci_connect(
                 $configService->getUser(),
                 $configService->getPassword(),
-                $configService->getConnectionString(),
-                $configService->getEncoding()
+                $configService->getConnectionString()
             );
         } catch (Exception $ex) {
             throw new DataSourceException('Could not establish database connection', $ex);
