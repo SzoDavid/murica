@@ -6,9 +6,10 @@ $(() => {
     let tokenObj = JSON.parse(localStorage.getItem('token'))
 
     bindClickListener($('#logoutButton'), () => {
-        requestInvoker.executeQuery(tokenObj._links.logout.href, { token: tokenObj.token}).then(() => {})
-        localStorage.removeItem('token');
-        window.location.href = 'login.html';
+        requestInvoker.executeQuery(tokenObj._links.logout.href, { token: tokenObj.token}).then((response) => {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        })
     })
 
     const contentElement = $('#content')
