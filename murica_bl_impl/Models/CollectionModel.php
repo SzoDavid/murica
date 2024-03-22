@@ -44,6 +44,9 @@ class CollectionModel extends Model {
             $elements[] = $item->jsonSerialize();
         }
 
+        $links = $this->getLinks();
+        if(empty(empty($links['_links']))) return ['_embedded' => [$this->name => $elements]];
+
         return array_merge(['_embedded' => [$this->name => $elements]], $this->getLinks());
     }
 }

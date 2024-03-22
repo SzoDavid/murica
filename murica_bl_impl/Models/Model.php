@@ -18,7 +18,7 @@ abstract class Model implements IModel, JsonSerializable {
     }
 
     #[Override]
-    public function linkTo(string $name, string $endpoint, array $parameters): IModel {
+    public function linkTo(string $name, string $endpoint, array $parameters=array()): IModel {
         $uri = $this->configService->getHostName() . $this->configService->getBaseUri() . $endpoint;
 
         if (!empty($parameters)) {

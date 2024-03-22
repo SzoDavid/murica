@@ -5,6 +5,7 @@ namespace murica_bl_impl\Services\TokenService;
 use murica_bl\Dao\ITokenDao;
 use murica_bl\Exceptions\NotImplementedException;
 use murica_bl\Services\TokenService\ITokenService;
+use murica_bl_impl\Dto\Token;
 use Override;
 
 class DataSourceTokenService implements ITokenService {
@@ -32,12 +33,14 @@ class DataSourceTokenService implements ITokenService {
     }
 
     #[Override]
-    public function verifyToken(string $token): bool {
+    public function verifyToken(string $token): false|Token {
         $tokenDto = $this->tokenDao->findByToken($token);
 
-        return $tokenDto && strtotime($tokenDto->getExpiresAt()) > time();
+        if ($tokenDto && strtotime($tokenDto->getExpiresAt()) > time()) {
+            return $tokenDto;
+        }
 
-        // TODO: Implement verifyToken() method.
+        return false;
     }
     //endregion
 

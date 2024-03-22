@@ -19,10 +19,18 @@ use murica_bl_impl\Services\TokenService\DataSourceTokenService;
 //ini_set('display_errors',0);
 header('Content-Type: application/json; charset=UTF-8');
 
-$errorController = new ErrorController('error');
-
 try {
     $configService = new ConfigService(__DIR__ . '/configs.json');
+
+} catch (MuricaException $ex) {
+    exit($ex->getTraceMessages());
+} catch (Exception $ex) {
+    exit($ex->getMessage());
+}
+
+$errorController = new ErrorController('error', $configService);
+
+try {
     $dataSource = (new DataSourceFactory($configService))->createDataSource();
     $userDao = $dataSource->createUserDao();
     $tokenService = new DataSourceTokenService($dataSource->createTokenDao());

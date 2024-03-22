@@ -2,10 +2,24 @@
 
 namespace murica_api\Controllers;
 
+use murica_bl\Models\IModel;
+use murica_bl\Services\ConfigService\IConfigService;
+use murica_bl_impl\Models\ErrorModel;
 use Override;
 
 class ErrorController extends Controller
 {
+    //region Parameters
+    private IConfigService $configService;
+    //endregion
+
+    //region Ctor
+    public function __construct(string $baseUri, IConfigService $configService) {
+        parent::__construct($baseUri);
+        $this->configService = $configService;
+    }
+    //endregion
+
     //region IController members
     #[Override]
     public function getEndpoints(): array {
@@ -29,19 +43,22 @@ class ErrorController extends Controller
     //endregion
 
     //region Endpoints
-    public function unauthorized($requestData): array {
-        return ['error' => [
-                    'code' => 401,
-                    'message' => 'Client request has not been completed because it lacks valid authentication credentials for the requested resource.']];
+    public function unauthorized($requestData): IModel {
+        return (new ErrorModel($this->configService))
+            ->of(['error' => [
+                'code' => 401,
+                'message' => 'Client request has not been completed because it lacks valid authentication credentials for the requested resource.']])
+            ->linkTo('login', 'auth/login');
     }
 
-    public function forbidden($requestData): array {
-        return ['error' => [
-                    'code' => 403,
-                    'message' => 'Client request has not been completed because client has no rights to access the requested resource.']];
+    public function forbidden($requestData): IModel {
+        return (new ErrorModel($this->configService))
+            ->of(['error' => [
+                'code' => 403,
+                'message' => 'Client request has not been completed because client has no rights to access the requested resource.']]);
     }
 
-    public function notFound($requestData): array {
+    public function notFound($requestData): IModel {
         $message = 'Requested resource not found';
         if (isset($requestData['endpoint'])) {
             $message = 'Endpoint ' . $requestData['endpoint'] . ' not found.';
@@ -49,20 +66,22 @@ class ErrorController extends Controller
             $message = $requestData['resource'];
         }
 
-        return ['error' => [
-                    'code' => 404,
-                    'message' => $message]];
+        return (new ErrorModel($this->configService))
+            ->of(['error' => [
+                'code' => 404,
+                'message' => $message]]);
     }
 
-    public function internalServerError($requestData): array {
+    public function internalServerError($requestData): IModel {
         $message = 'Internal server error';
         if (isset($requestData['errorMessage'])) {
             $message .= ': ' . $requestData['errorMessage'];
         }
 
-        return ['error' => [
-                    'code' => 500,
-                    'message' => $message]];
+        return (new ErrorModel($this->configService))
+            ->of(['error' => [
+                'code' => 500,
+                'message' => $message]]);
     }
     //endregion
 }

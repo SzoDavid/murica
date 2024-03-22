@@ -6,15 +6,16 @@ use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Services\ConfigService\IConfigService;
 use Override;
 
-class EntityModel extends Model {
-    private Entity $entity;
+class ErrorModel extends Model {
+
+    private array $message;
 
     public function __construct(IConfigService $configService) {
         parent::__construct($configService);
     }
 
-    public function of(Entity $entity): EntityModel {
-        $this->entity = $entity;
+    public function of(array $message): ErrorModel {
+        $this->message = $message;
         return $this;
     }
 
@@ -23,11 +24,11 @@ class EntityModel extends Model {
      */
     #[Override]
     public function jsonSerialize(): array {
-        if (!isset($this->entity)) throw new ModelException('Entity is not set');
+        if (empty($this->message)) throw new ModelException('Message is not set');
 
         $links = $this->getLinks();
-        if(empty(empty($links['_links']))) return $this->entity->jsonSerialize();
+        if (empty($links['_links'])) return $this->message;
 
-        return array_merge($this->entity->jsonSerialize(), $this->getLinks());
+        return array_merge($this->message, $this->getLinks());
     }
 }
