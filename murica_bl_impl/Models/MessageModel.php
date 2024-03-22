@@ -6,7 +6,7 @@ use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Services\ConfigService\IConfigService;
 use Override;
 
-class ErrorModel extends Model {
+class MessageModel extends Model {
 
     private array $message;
 
@@ -14,7 +14,7 @@ class ErrorModel extends Model {
         parent::__construct($configService);
     }
 
-    public function of(array $message): ErrorModel {
+    public function of(array $message): MessageModel {
         $this->message = $message;
         return $this;
     }

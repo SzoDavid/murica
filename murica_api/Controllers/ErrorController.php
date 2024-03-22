@@ -4,7 +4,7 @@ namespace murica_api\Controllers;
 
 use murica_bl\Models\IModel;
 use murica_bl\Services\ConfigService\IConfigService;
-use murica_bl_impl\Models\ErrorModel;
+use murica_bl_impl\Models\MessageModel;
 use Override;
 
 class ErrorController extends Controller
@@ -44,7 +44,7 @@ class ErrorController extends Controller
 
     //region Endpoints
     public function unauthorized($requestData): IModel {
-        return (new ErrorModel($this->configService))
+        return (new MessageModel($this->configService))
             ->of(['error' => [
                 'code' => 401,
                 'message' => 'Client request has not been completed because it lacks valid authentication credentials for the requested resource.']])
@@ -52,7 +52,7 @@ class ErrorController extends Controller
     }
 
     public function forbidden($requestData): IModel {
-        return (new ErrorModel($this->configService))
+        return (new MessageModel($this->configService))
             ->of(['error' => [
                 'code' => 403,
                 'message' => 'Client request has not been completed because client has no rights to access the requested resource.']]);
@@ -66,7 +66,7 @@ class ErrorController extends Controller
             $message = $requestData['resource'];
         }
 
-        return (new ErrorModel($this->configService))
+        return (new MessageModel($this->configService))
             ->of(['error' => [
                 'code' => 404,
                 'message' => $message]]);
@@ -78,7 +78,7 @@ class ErrorController extends Controller
             $message .= ': ' . $requestData['errorMessage'];
         }
 
-        return (new ErrorModel($this->configService))
+        return (new MessageModel($this->configService))
             ->of(['error' => [
                 'code' => 500,
                 'message' => $message]]);

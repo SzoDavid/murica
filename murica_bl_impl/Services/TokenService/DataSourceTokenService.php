@@ -2,9 +2,11 @@
 
 namespace murica_bl_impl\Services\TokenService;
 
+use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\ITokenDao;
 use murica_bl\Exceptions\NotImplementedException;
 use murica_bl\Services\TokenService\ITokenService;
+use murica_bl\Dto\IToken;
 use murica_bl_impl\Dto\Token;
 use Override;
 
@@ -24,16 +26,20 @@ class DataSourceTokenService implements ITokenService {
 
     //region ITokenService members
     /**
-     * @throws NotImplementedException
+     * @inheritDoc
      */
     #[Override]
-    public function generateToken(string $username): array {
-        // TODO: Implement generateToken() method.
-        throw new NotImplementedException('generateToken not implemented');
+    public function generateToken(string $userId): IToken {
+        // TODO: if user already has a token, then extend its expirationDate
+
+        return $this->tokenDao->register($this->guidv4(), $userId, time() + (24 * 60 * 60));
     }
 
+    /**
+     * @inheritDoc
+     */
     #[Override]
-    public function verifyToken(string $token): false|Token {
+    public function verifyToken(string $token): IToken|false {
         $tokenDto = $this->tokenDao->findByToken($token);
 
         if ($tokenDto && strtotime($tokenDto->getExpiresAt()) > time()) {
@@ -42,6 +48,15 @@ class DataSourceTokenService implements ITokenService {
 
         return false;
     }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function removeToken(string $token): void {
+        $this->tokenDao->remove($token);
+    }
+
     //endregion
 
     private function guidv4($data = null) {

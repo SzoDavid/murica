@@ -4,6 +4,7 @@ namespace murica_api\Controllers;
 
 use murica_api\Exceptions\ControllerException;
 use murica_api\Exceptions\QueryException;
+use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
@@ -33,7 +34,8 @@ class UserController extends Controller {
     public function getEndpoints(): array {
         return [
             $this->baseUri . '' => 'allUsers',
-            $this->baseUri . '/user' => 'getUserById'
+            $this->baseUri . '/user' => 'getUserById',
+            $this->baseUri . '/create' => 'createUser'
         ];
     }
 
@@ -41,7 +43,8 @@ class UserController extends Controller {
     public function getPublicEndpoints(): array {
         return [
             'allUsers' => '',
-            'getUserById' => ''
+            'getUserById' => '',
+            'createUser' => '' // TODO: make secured
         ];
     }
     //endregion
@@ -58,7 +61,7 @@ class UserController extends Controller {
         /* @var $user User */
         foreach ($users as $user) {
             $userEntities[] = (new EntityModel($this->configService))->of($user)
-                ->linkTo('allUsers', $this->baseUri, array())
+                ->linkTo('allUsers', $this->baseUri)
                 ->withSelfRef($this->baseUri . '/user', ['id' => $user->getId()]);
         }
 
@@ -81,8 +84,31 @@ class UserController extends Controller {
         if (empty($users)) throw new QueryException('Failed to get user with id "' . $requestData['id'] . '"');
 
         return (new EntityModel($this->configService))->of($users[0])
-            ->linkTo('allUsers', $this->baseUri, array())
+            ->linkTo('allUsers', $this->baseUri)
             ->withSelfRef($this->baseUri . '/user', ['id' => $users[0]->getId()]);
+    }
+
+    /**
+     * @throws ControllerException
+     * @throws DataAccessException
+     */
+    public function createUser(array $requestData): IModel {
+        //TODO: make private
+        if (!isset($requestData['id'])) throw new ControllerException('Parameter "id" is not provided');
+        if (!isset($requestData['name'])) throw new ControllerException('Parameter "name" is not provided');
+        if (!isset($requestData['email'])) throw new ControllerException('Parameter "email" is not provided');
+        if (!isset($requestData['password'])) throw new ControllerException('Parameter "password" is not provided');
+        if (!isset($requestData['birth_date'])) throw new ControllerException('Parameter "birth_date" is not provided');
+
+        $user = $this->userDao->insert(new User($requestData['id'],
+                                                $requestData['name'],
+                                                $requestData['email'],
+                                                password_hash($requestData['password'], PASSWORD_DEFAULT),
+                                                $requestData['birth_date']));
+
+        return (new EntityModel($this->configService))->of($user)
+            ->linkTo('allUsers', $this->baseUri)
+            ->withSelfRef($this->baseUri . '/user', ['id' => $user->getId()]);
     }
     //endregion
 

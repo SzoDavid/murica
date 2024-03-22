@@ -6,8 +6,10 @@ use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\IUser;
+use murica_bl\Exceptions\NotImplementedException;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use murica_bl_impl\DataSource\OracleDataSource;
+use murica_bl_impl\Dto\QueryDto\QueryUser;
 use murica_bl_impl\Dto\User;
 use Override;
 
@@ -24,9 +26,9 @@ class OracleUserDao implements IUserDao {
     }
     //endregion
 
-    //region SELECT
+    //region IUserDao members
     /**
-     * @throws DataAccessException
+     * @inheritDoc
      */
     #[Override]
     public function findAll(): array {
@@ -64,7 +66,7 @@ class OracleUserDao implements IUserDao {
     }
 
     /**
-     * @throws DataAccessException
+     * @inheritDoc
      */
     #[Override]
     public function findByCrit(IUser $model): array {
@@ -105,17 +107,55 @@ class OracleUserDao implements IUserDao {
 
         return $res;
     }
-    //endregion
 
-
+    /**
+     * @inheritDoc
+     */
     #[Override]
     public function insert(IUser $model): User {
-        // TODO: Implement
-        return new User("YTWK3B", "Szobonya Dávid", "szobonya.david@gmail.com", "asd", "2003-05-22");
+        //TODO: error handling
+        $sql = sprintf("INSERT INTO %s.%s (%s, %s, %s, %s, %s) VALUES (:id, :name, :email, :password, TO_DATE(:birth_date, 'YYYY-MM-DD'))",
+                       $this->configService->getTableOwner(),
+                       TableDefinition::USER_TABLE,
+                       TableDefinition::USER_TABLE_FIELD_ID,
+                       TableDefinition::USER_TABLE_FIELD_NAME,
+                       TableDefinition::USER_TABLE_FIELD_EMAIL,
+                       TableDefinition::USER_TABLE_FIELD_PASSWORD,
+                       TableDefinition::USER_TABLE_FIELD_BIRTH_DATE);
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql)) {
+            throw new DataAccessException(oci_error($stmt));
+        }
+
+        $id = $model->getId();
+        $name = $model->getName();
+        $email = $model->getEmail();
+        $password = $model->getPassword();
+        $birth_date = $model->getBirthDate();
+
+        if (!oci_bind_by_name($stmt, ':id', $id, -1) ||
+            !oci_bind_by_name($stmt, ':name', $name, -1) ||
+            !oci_bind_by_name($stmt, ':email', $email, -1) ||
+            !oci_bind_by_name($stmt, ':password', $password, -1) ||
+            !oci_bind_by_name($stmt, ':birth_date', $birth_date, -1))
+            throw new DataAccessException(oci_error($stmt));
+
+
+        if (!oci_execute($stmt, OCI_COMMIT_ON_SUCCESS)) {
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+        }
+
+        // TODO: fix this
+        return $this->findByCrit(new QueryUser($model->getId(), null, null, null, null))[0];
     }
 
+    /**
+     * @throws NotImplementedException
+     */
     #[Override]
     public function remove(IUser $model): void {
         // TODO: Implement remove() method.
+        throw new NotImplementedException('remove is not implemented');
     }
+    //endregion
 }

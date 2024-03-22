@@ -27,8 +27,9 @@ class OracleTokenDao implements ITokenDao {
     }
     //endregion
 
+    //region ITokenDao members
     /**
-     * @throws DataAccessException
+     * @inheritDoc
      */
     #[Override]
     public function findByToken(string $token): Token|false {
@@ -77,20 +78,54 @@ class OracleTokenDao implements ITokenDao {
     }
 
     /**
-     * @throws NotImplementedException
+     * @inheritDoc
      */
     #[Override]
-    public function insert(IToken $model): Token {
-        // TODO: Implement insert() method.
-        throw new NotImplementedException('insert not implemented');
+    public function register(string $token, string $userId, int $expirationDate): Token {
+        //TODO: error handling
+        $sql = sprintf("INSERT INTO %s.%s (%s, %s, %s)
+            VALUES (:token, :userId, TO_DATE(:expirationDate, 'YYYY-MM-DD HH24:MI'))",
+                       $this->configService->getTableOwner(),
+                       TableDefinition::TOKEN_TABLE,
+                       TableDefinition::TOKEN_TABLE_FIELD_TOKEN,
+                       TableDefinition::TOKEN_TABLE_FIELD_USER_ID,
+                       TableDefinition::TOKEN_TABLE_FIELD_EXPIRES_AT);
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql)) {
+            throw new DataAccessException(oci_error($stmt));
+        }
+
+        $date = date('Y-m-d H:i', $expirationDate);
+        oci_bind_by_name($stmt, ':token', $token, -1);
+        oci_bind_by_name($stmt, ':userId', $userId, -1);
+        oci_bind_by_name($stmt, ':expirationDate', $date, -1);
+
+        if (!oci_execute($stmt, OCI_COMMIT_ON_SUCCESS)) {
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+        }
+
+        return $this->findByToken($token);
     }
 
     /**
-     * @throws NotImplementedException
+     * @throws DataAccessException
      */
     #[Override]
-    public function remove(IToken $model): void {
-        // TODO: Implement remove() method.
-        throw new NotImplementedException('remove not implemented');
+    public function remove(string $token): void {
+        //TODO: error handling
+        $sql = sprintf("DELETE FROM %s.%s WHERE %s=:token",
+                       $this->configService->getTableOwner(),
+                       TableDefinition::TOKEN_TABLE,
+                       TableDefinition::TOKEN_TABLE_FIELD_TOKEN);
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(oci_error($stmt));
+
+        if (!oci_bind_by_name($stmt, ':token', $token, -1))
+            throw new DataAccessException(oci_error($stmt));
+
+        if (!oci_execute($stmt, OCI_COMMIT_ON_SUCCESS))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
     }
+    //endregion
 }
