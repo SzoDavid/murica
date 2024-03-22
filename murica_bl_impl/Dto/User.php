@@ -3,8 +3,10 @@
 namespace murica_bl_impl\Dto;
 
 use murica_bl\Dto\IUser;
+use murica_bl_impl\Models\Entity;
+use Override;
 
-class User implements IUser
+class User extends Entity implements IUser
 {
     //region Properties
     private string $id;
@@ -34,31 +36,31 @@ class User implements IUser
     //endregion
 
     //region getters
-    #[\Override]
+    #[Override]
     public function getId(): string
     {
         return $this->id;
     }
 
-    #[\Override]
+    #[Override]
     public function getName(): string
     {
         return $this->name;
     }
 
-    #[\Override]
+    #[Override]
     public function getEmail(): string
     {
         return $this->email;
     }
 
-    #[\Override]
+    #[Override]
     public function getPassword(): string
     {
         return $this->password;
     }
 
-    #[\Override]
+    #[Override]
     public function getBirthDate(): string
     {
         return $this->birthDate;
@@ -66,7 +68,6 @@ class User implements IUser
     //endregion
 
     //region Setters
-    #[\Override]
     public function setId(string $id): IUser
     {
         // TODO: validation
@@ -74,7 +75,6 @@ class User implements IUser
         return $this;
     }
 
-    #[\Override]
     public function setName(string $name): IUser
     {
         // TODO: validation
@@ -82,7 +82,6 @@ class User implements IUser
         return $this;
     }
 
-    #[\Override]
     public function setEmail(string $email): IUser
     {
         // TODO: validation
@@ -90,7 +89,6 @@ class User implements IUser
         return $this;
     }
 
-    #[\Override]
     public function setPassword(string $password): IUser
     {
         // TODO: validation
@@ -98,12 +96,27 @@ class User implements IUser
         return $this;
     }
 
-    #[\Override]
     public function setBirthDate(string $birth_date): IUser
     {
         // TODO: validation
         $this->birthDate = $birth_date;
         return $this;
+    }
+    //endregion
+
+    //region JsonSerializable members
+    /**
+     * @inheritDoc
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'email' => $this->email,
+            'password' => $this->password,
+            'birth_date' => $this->birthDate
+        ];
     }
     //endregion
 }

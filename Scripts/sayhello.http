@@ -1,22 +1,25 @@
-### welcome
+### welcome (test)
 
-GET http://localhost/murica_api/
+GET https://localhost/murica_api/
 
 ### login
 
-POST http://localhost/murica_api/auth/login
+POST https://localhost/murica_api/auth/login
 Content-Type: application/x-www-form-urlencoded
 
 username = YTWK3B
 password = 69696969
 
-### sayhello
+### sayhello (test)
 
-POST http://localhost/murica_api/sayhello
+POST https://localhost/murica_api/sayhello
 x-api-key: 0b8d1835-2fda-4cd0-af11-1f737cec65e0
 Content-Type: application/x-www-form-urlencoded
 
 name = Szobonya
 
-###
+### users
 
+GET https://localhost/murica_api/users/
+
+###

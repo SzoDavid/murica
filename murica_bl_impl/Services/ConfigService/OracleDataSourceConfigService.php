@@ -6,6 +6,7 @@ use Exception;
 use murica_bl\Services\ConfigService\EDataSourceTypes;
 use murica_bl\Services\ConfigService\Exceptions\ConfigLoadingException;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
+use Override;
 
 class OracleDataSourceConfigService implements IDataSourceConfigService
 {
@@ -13,7 +14,7 @@ class OracleDataSourceConfigService implements IDataSourceConfigService
     private string $user;
     private string $password;
     private string $connectionString;
-    private array $tableNames;
+    private string $tableOwner;
     //endregion
 
     //region Ctor
@@ -23,14 +24,15 @@ class OracleDataSourceConfigService implements IDataSourceConfigService
     public function __construct(array $config)
     {
         try {
-            if (!isset($raw_configs['user'])) throw new ConfigLoadingException('Missing "user" field');
-            if (!isset($raw_configs['password'])) throw new ConfigLoadingException('Missing "password" field');
-            if (!isset($raw_configs['connection_string'])) throw new ConfigLoadingException('Missing "connection_string" field');
+            if (!isset($config['user'])) throw new ConfigLoadingException('Missing "user" field');
+            if (!isset($config['password'])) throw new ConfigLoadingException('Missing "password" field');
+            if (!isset($config['connection_string'])) throw new ConfigLoadingException('Missing "connection_string" field');
+            if (!isset($config['table_owner'])) throw new ConfigLoadingException('Missing "table_owner" field');
 
             $this->user = $config['user'];
             $this->password = $config['password'];
             $this->connectionString = $config['connection_string'];
-            $this->tableNames['user'] = $config['tables']['user'];
+            $this->tableOwner = $config['table_owner'];
         } catch (Exception $ex) {
             throw new ConfigLoadingException('Could not load data source config', $ex);
         }
@@ -38,16 +40,10 @@ class OracleDataSourceConfigService implements IDataSourceConfigService
     //endregion
 
     //region Getters
-    #[\Override]
+    #[Override]
     public function getType(): EDataSourceTypes
     {
         return EDataSourceTypes::Oracle;
-    }
-
-    #[\Override]
-    public function getUserTableName(): string
-    {
-        return $this->tableNames['user'];
     }
 
     public function getUser(): string
@@ -63,6 +59,11 @@ class OracleDataSourceConfigService implements IDataSourceConfigService
     public function getConnectionString(): string
     {
         return $this->connectionString;
+    }
+
+    public function getTableOwner(): string
+    {
+        return $this->tableOwner;
     }
     //endregion
 }

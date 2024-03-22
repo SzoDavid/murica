@@ -14,7 +14,7 @@ class MoqUserDao implements IUserDao
     {}
 
     #[\Override]
-    public function insert(IUser $model): IUser
+    public function insert(IUser $model): User
     {
         return new User("YTWK3B", "Szobonya Dávid", "szobonya.david@gmail.com", "asd", "2003-05-22");
     }
@@ -30,8 +30,8 @@ class MoqUserDao implements IUserDao
     }
 
     #[\Override]
-    public function findByCrit(IUser $model): IUser
+    public function findByCrit(IUser $model): array
     {
-        return new User("YTWK3B", "Szobonya Dávid", "szobonya.david@gmail.com", "asd", "2003-05-22");
+        return [new User("YTWK3B", "Szobonya Dávid", "szobonya.david@gmail.com", "asd", "2003-05-22")];
     }
 }

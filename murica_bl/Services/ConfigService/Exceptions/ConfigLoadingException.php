@@ -2,11 +2,11 @@
 
 namespace murica_bl\Services\ConfigService\Exceptions;
 
-use Exception;
 use JetBrains\PhpStorm\Pure;
+use murica_bl\Exceptions\MuricaException;
 use Throwable;
 
-class ConfigLoadingException extends Exception
+class ConfigLoadingException extends MuricaException
 {
     #[Pure]
     public function __construct(string $message = "", ?Throwable $previous = null)

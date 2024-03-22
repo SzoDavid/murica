@@ -24,8 +24,8 @@ class BaseController extends Controller
     public function getEndpoints(): array
     {
         return [
-            $this->baseUri . '/' => 'welcome',
-            $this->baseUri . 'sayhello' => 'greeting'
+            $this->baseUri . '' => 'welcome',
+            $this->baseUri . '/sayhello' => 'greeting'
         ];
     }
 

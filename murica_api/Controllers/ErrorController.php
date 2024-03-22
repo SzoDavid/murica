@@ -9,10 +9,10 @@ class ErrorController extends Controller
     public function getEndpoints(): array
     {
         return [
-            $this->baseUri . '401' => 'unauthorized',
-            $this->baseUri . '403' => 'forbidden',
-            $this->baseUri . '404' => 'notFound',
-            $this->baseUri . '500' => 'internalServerError'
+            $this->baseUri . '/401' => 'unauthorized',
+            $this->baseUri . '/403' => 'forbidden',
+            $this->baseUri . '/404' => 'notFound',
+            $this->baseUri . '/500' => 'internalServerError'
         ];
     }
 

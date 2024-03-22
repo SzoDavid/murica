@@ -5,10 +5,8 @@ Fill in user and password and remove .template file extension
         "user": "USER",
         "password": "PASSWORD",
         "connection_string": "(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))) (CONNECT_DATA = (SID = orania2)))",
-        "tables": {
-            "user": "MURICA_USER"
-        }
+        "table_owner": "USER"
     },
-    "host_name": "http://localhost",
+    "host_name": "https://localhost",
     "base_uri": "/murica_api/"
 }

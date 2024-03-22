@@ -1,12 +1,12 @@
 <?php
 
-namespace murica_bl\DataSource\Exceptions;
+namespace murica_bl\Models\Exceptions;
 
 use JetBrains\PhpStorm\Pure;
 use murica_bl\Exceptions\MuricaException;
 use Throwable;
 
-class DataSourceException extends MuricaException
+class ModelException extends MuricaException
 {
     #[Pure]
     public function __construct(string $message = "", ?Throwable $previous = null)

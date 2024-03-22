@@ -9,24 +9,32 @@ use murica_api\Controllers\AuthController;
 use murica_api\Controllers\BaseController;
 use murica_api\Controllers\Controller;
 use murica_api\Controllers\ErrorController;
+use murica_api\Controllers\UserController;
+use murica_bl\Exceptions\MuricaException;
 use murica_bl_impl\DataSource\Factories\DataSourceFactory;
 use murica_bl_impl\Services\ConfigService\ConfigService;
 use murica_bl_impl\Services\TokenService\ArrayTokenService;
 
-$errorController = new ErrorController('error/');
+//ini_set('display_errors',0);
+header('Content-Type: application/json; charset=UTF-8');
+
+$errorController = new ErrorController('error');
 
 $tokenService = new ArrayTokenService();
 try {
     $configService = new ConfigService(__DIR__ . '/configs.json');
     $dataSource = (new DataSourceFactory($configService))->createDataSource();
     $userDao = $dataSource->createUserDao();
+} catch (MuricaException $ex) {
+    exit($errorController->internalServerError(['errorMessage' => $ex->getTraceMessages()]));
 } catch (Exception $ex) {
     exit($errorController->internalServerError(['errorMessage' => $ex->getMessage()]));
 }
 
 $controllers = [
-    new BaseController('', $userDao),
-    new AuthController('auth/', $tokenService, $userDao),
+    new BaseController('/', $userDao),
+    new AuthController('auth', $tokenService, $userDao),
+    new UserController('users', $userDao, $configService),
     $errorController
 ];
 
@@ -64,8 +72,6 @@ if (empty($endpointName)) {
     $endpointName = '/';
 }
 
-header('Content-Type: application/json; charset=UTF-8');
-
 /* @var $controller Controller */
 foreach ($controllers as $controller) {
     $endpoints = $controller->getEndpoints();
@@ -83,7 +89,14 @@ foreach ($controllers as $controller) {
         exit;
     }
 
-    echo $controller->$endpoint($requestData);
+    try {
+        echo json_encode($controller->$endpoint($requestData));
+    } catch (MuricaException $ex) {
+        exit($errorController->internalServerError(['errorMessage' => $ex->getTraceMessages()]));
+    } catch (Exception $ex) {
+        exit($errorController->internalServerError(['errorMessage' => $ex->getMessage()]));
+    }
+
     exit;
 }
 

@@ -5,6 +5,7 @@ namespace murica_api\Controllers;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Services\TokenService\ITokenService;
 use murica_bl_impl\Dto\User;
+use Override;
 
 class AuthController extends Controller
 {
@@ -23,15 +24,15 @@ class AuthController extends Controller
     //endregion
 
     //region Controller members
-    #[\Override]
+    #[Override]
     public function getEndpoints(): array
     {
         return [
-            $this->baseUri . 'login' => 'login'
+            $this->baseUri . '/login' => 'login'
         ];
     }
 
-    #[\Override] public function getPublicEndpoints(): array
+    #[Override] public function getPublicEndpoints(): array
     {
         return [
             'login' => ''
