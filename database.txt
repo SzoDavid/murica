@@ -190,11 +190,11 @@ ADD CONSTRAINT MURICA_TOKENS_FK1 FOREIGN KEY ( USER_ID )
 REFERENCES MURICA_USER ( ID )
 ON DELETE CASCADE ENABLE;
 
-INSERT INTO murica_user VALUES ('ADMIN0', 'Admin 1', 'admin1@murica.com', '{bcrypt}$2a$10$KiMu5eh4RYOTb4FGndtok.fydhh4nSNzf9IIumJwRxdHIaI/5Fvym', TO_DATE('2001-01-01', 'YYYY-MM-DD'));
-INSERT INTO murica_user VALUES ('OKTAT1', 'Oktato 2', 'oktato2@murica.com', '{bcrypt}$2a$10$duXcB30uGrgWqjVB1JQWq..peBbAJxBTCuJ1NOTH7IOmPJorcy3wq', TO_DATE('2002-02-02', 'YYYY-MM-DD'));
-INSERT INTO murica_user VALUES ('A16BQN', 'Teszt Elek', 'teszt.elek@murica.com', '{bcrypt}$2a$10$NLWs74OTglbHR3s2DJM5huR3F5cBi7rslGb4.1RjewvfslzW.ikyO', TO_DATE('2003-03-03', 'YYYY-MM-DD'));
-INSERT INTO murica_user VALUES ('NPM4AC', 'Proba Odon', 'proba.odon@murica.com', '{bcrypt}$2a$10$/JCpYKFLMC.WvZ7gC/ariuFFoPEequUvzFqjFIhHjBHTMCNKa7qTi', TO_DATE('2004-04-04', 'YYYY-MM-DD'));
-INSERT INTO murica_user VALUES ('AX3RW4', 'Elleno Rezso', 'elleno.rezso@murica.com', '{bcrypt}$2a$10$8DX/Vg0GLSIpwsT2ziS8zupAaTDaVoYcCtxDxmEWpef7m224TiE1O', TO_DATE('2005-05-05', 'YYYY-MM-DD'));
+INSERT INTO murica_user VALUES ('ADMIN0', 'Admin 1', 'admin1@murica.com', '$2y$10$0oorIkBjl7Ba/XGecVsMi.LGDAHma5DbdqTo41GzURmtiddE4l6jK', TO_DATE('2001-01-01', 'YYYY-MM-DD'));
+INSERT INTO murica_user VALUES ('OKTAT1', 'Oktato 2', 'oktato2@murica.com', '$2y$10$YrxcOQ1fIodTO2Gh7r0EF.fQZROeQAuidSc4.ObuNfqLq4g4Ty9j2', TO_DATE('2002-02-02', 'YYYY-MM-DD'));
+INSERT INTO murica_user VALUES ('A16BQN', 'Teszt Elek', 'teszt.elek@murica.com', '$2y$10$oMJkEvK5Vq.CH4RJCN7POOdj3kA45Swspq6bZf76dD./3FTv.ESNC', TO_DATE('2003-03-03', 'YYYY-MM-DD'));
+INSERT INTO murica_user VALUES ('NPM4AC', 'Proba Odon', 'proba.odon@murica.com', '$2y$10$G6sCKNF9thlgO14iQCNqlulNsKctgX5Sv4ZdqEhUTaiMNshstH9lm', TO_DATE('2004-04-04', 'YYYY-MM-DD'));
+INSERT INTO murica_user VALUES ('AX3RW4', 'Elleno Rezso', 'elleno.rezso@murica.com', '$2y$10$od/uWjGQxmCE/fH.hjCNR.COuQbYPqNiYrTzIGqJq2OxcEEQKnUwa', TO_DATE('2005-05-05', 'YYYY-MM-DD'));
 
 INSERT INTO murica_programme VALUES ('Programtervezo informatikus', 'BSc', '6');
 INSERT INTO murica_programme VALUES ('Programtervezo informatikus', 'MSc', '4');
