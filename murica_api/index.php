@@ -14,18 +14,18 @@ use murica_api\Exceptions\QueryException;
 use murica_bl\Exceptions\MuricaException;
 use murica_bl_impl\DataSource\Factories\DataSourceFactory;
 use murica_bl_impl\Services\ConfigService\ConfigService;
-use murica_bl_impl\Services\TokenService\ArrayTokenService;
+use murica_bl_impl\Services\TokenService\DataSourceTokenService;
 
 //ini_set('display_errors',0);
 header('Content-Type: application/json; charset=UTF-8');
 
 $errorController = new ErrorController('error');
 
-$tokenService = new ArrayTokenService();
 try {
     $configService = new ConfigService(__DIR__ . '/configs.json');
     $dataSource = (new DataSourceFactory($configService))->createDataSource();
     $userDao = $dataSource->createUserDao();
+    $tokenService = new DataSourceTokenService($dataSource->createTokenDao());
 } catch (MuricaException $ex) {
     exit($errorController->internalServerError(['errorMessage' => $ex->getTraceMessages()]));
 } catch (Exception $ex) {
