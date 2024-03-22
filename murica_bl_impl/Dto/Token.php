@@ -7,8 +7,7 @@ use murica_bl\Dto\IUser;
 use murica_bl_impl\Models\Entity;
 use Override;
 
-class Token Extends Entity implements IToken
-{
+class Token Extends Entity implements IToken {
     //region Properties
     private string $token;
     private IUser $user;
@@ -21,8 +20,7 @@ class Token Extends Entity implements IToken
      * @param IUser $user
      * @param string $expiresAt
      */
-    public function __construct(string $token, IUser $user, string $expiresAt)
-    {
+    public function __construct(string $token, IUser $user, string $expiresAt) {
         $this->token = $token;
         $this->user = $user;
         $this->expiresAt = $expiresAt;
@@ -31,20 +29,17 @@ class Token Extends Entity implements IToken
 
     //region Getters
     #[Override]
-    public function getToken(): string
-    {
+    public function getToken(): string {
         return $this->token;
     }
 
     #[Override]
-    public function getUser(): IUser
-    {
+    public function getUser(): IUser {
         return $this->user;
     }
 
     #[Override]
-    public function getExpiresAt(): string
-    {
+    public function getExpiresAt(): string {
         return $this->expiresAt;
     }
     //endregion
@@ -54,8 +49,7 @@ class Token Extends Entity implements IToken
      * @inheritDoc
      */
     #[Override]
-    public function jsonSerialize(): array
-    {
+    public function jsonSerialize(): array {
         return [
             'token' => $this->token,
             'user' => $this->user,

@@ -2,8 +2,7 @@
 
 namespace murica_bl\Constants;
 
-class TableDefinition
-{
+class TableDefinition {
     //region User table
     const USER_TABLE = 'MURICA_USER';
     const USER_TABLE_FIELD_ID = 'ID';

@@ -11,15 +11,13 @@ use murica_bl\Services\ConfigService\IConfigService;
 use murica_bl_impl\DataSource\OracleDataSource;
 use Override;
 
-class DataSourceFactory implements IDataSourceFactory
-{
+class DataSourceFactory implements IDataSourceFactory {
     //region Properties
     private IConfigService $configs;
     //endregion
 
     //region Constructor
-    public function __construct(IConfigService $configService)
-    {
+    public function __construct(IConfigService $configService) {
         $this->configs = $configService;
     }
     //endregion
@@ -28,8 +26,8 @@ class DataSourceFactory implements IDataSourceFactory
     /**
      * @inheritDoc
      */
-    #[Override] public function createDataSource(): IDataSource
-    {
+    #[Override]
+    public function createDataSource(): IDataSource {
         try {
             return match ($this->configs->getDataSourceConfigService()->getType()) {
                 EDataSourceTypes::Oracle => new OracleDataSource($this->configs->getDataSourceConfigService())

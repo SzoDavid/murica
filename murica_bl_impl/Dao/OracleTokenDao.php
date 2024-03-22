@@ -7,73 +7,90 @@ use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\ITokenDao;
 use murica_bl\Dto\IToken;
 use murica_bl\Dto\IUser;
+use murica_bl\Exceptions\NotImplementedException;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\User;
 use murica_bl_impl\Dto\Token;
 use Override;
 
-class OracleTokenDao implements ITokenDao
-{
+class OracleTokenDao implements ITokenDao {
     //region Properties
     private OracleDataSource $dataSource;
     private IDataSourceConfigService $configService;
     //endregion
 
     //region Ctor
-    public function __construct(OracleDataSource $dataSource, IDataSourceConfigService $configService)
-    {
+    public function __construct(OracleDataSource $dataSource, IDataSourceConfigService $configService) {
         $this->dataSource = $dataSource;
         $this->configService = $configService;
     }
     //endregion
 
+    /**
+     * @throws DataAccessException
+     */
     #[Override]
-    public function findByToken(string $token): Token
-    {
-        //TODO
-        /*$res = array();
+    public function findByToken(string $token): Token|false {
+        //TODO: error handling
 
-        $sql = sprintf("SELECT %s AS ID, %s AS NAME, %s AS EMAIL, %s AS PASSWORD, TO_CHAR(%s,'YYYY-MM-DD') AS BIRTH_DATE 
-                              FROM %s.%s WHERE ID LIKE :id",
+        $sql = sprintf("SELECT TOKENS.%s AS TOKEN, TO_CHAR(TOKENS.%s, 'YYYY-MM-DD HH24:MI') AS EXPIRES_AT,
+                                      USERS.%s AS ID, USERS.%s AS NAME, USERS.%s AS EMAIL, USERS.%s AS PASSWORD, 
+                                      TO_CHAR(USERS.%s,'YYYY-MM-DD') AS BIRTH_DATE
+                               FROM %s.%s TOKENS, %s.%s USERS
+                               WHERE TOKENS.%s=USERS.%s AND TOKENS.%s=:token",
+            TableDefinition::TOKEN_TABLE_FIELD_TOKEN,
+            TableDefinition::TOKEN_TABLE_FIELD_EXPIRES_AT,
             TableDefinition::USER_TABLE_FIELD_ID,
             TableDefinition::USER_TABLE_FIELD_NAME,
             TableDefinition::USER_TABLE_FIELD_EMAIL,
             TableDefinition::USER_TABLE_FIELD_PASSWORD,
             TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
             $this->configService->getTableOwner(),
+            TableDefinition::TOKEN_TABLE,
+            $this->configService->getTableOwner(),
             TableDefinition::USER_TABLE,
+            TableDefinition::TOKEN_TABLE_FIELD_USER_ID,
+            TableDefinition::USER_TABLE_FIELD_ID,
+            TableDefinition::TOKEN_TABLE_FIELD_TOKEN
         );
 
         $stmt = oci_parse($this->dataSource->getConnection(), $sql);
-        $id = $model->getId();
-        oci_bind_by_name($stmt, ':id', $id, -1);
+        oci_bind_by_name($stmt, ':token', $token, -1);
         oci_execute($stmt, OCI_DEFAULT);
 
         if (!$stmt) {
             throw new DataAccessException(oci_error($stmt));
         }
 
-        while (oci_fetch($stmt)) {
-            $res[] = new User(
+        if (!oci_fetch($stmt)) return false;
+
+        return new Token(
+            oci_result($stmt, 'TOKEN'),
+            new User(
                 oci_result($stmt, 'ID'),
                 oci_result($stmt, 'NAME'),
                 oci_result($stmt, 'EMAIL'),
                 oci_result($stmt, 'PASSWORD'),
-                oci_result($stmt, 'BIRTH_DATE')
-            );
-        }*/
+                oci_result($stmt, 'BIRTH_DATE')),
+            oci_result($stmt, 'EXPIRES_AT'));
     }
 
+    /**
+     * @throws NotImplementedException
+     */
     #[Override]
-    public function insert(IToken $model): Token
-    {
+    public function insert(IToken $model): Token {
         // TODO: Implement insert() method.
+        throw new NotImplementedException('insert not implemented');
     }
 
+    /**
+     * @throws NotImplementedException
+     */
     #[Override]
-    public function remove(IToken $model): void
-    {
+    public function remove(IToken $model): void {
         // TODO: Implement remove() method.
+        throw new NotImplementedException('remove not implemented');
     }
 }

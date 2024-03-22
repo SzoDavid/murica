@@ -8,20 +8,17 @@ use murica_bl\Models\IModel;
 use murica_bl\Services\ConfigService\IConfigService;
 use Override;
 
-abstract class Model implements IModel, JsonSerializable
-{
+abstract class Model implements IModel, JsonSerializable {
     private IConfigService $configService;
     protected array $links;
 
-    public function __construct(IConfigService $configService)
-    {
+    public function __construct(IConfigService $configService) {
         $this->configService = $configService;
         $this->links = array();
     }
 
     #[Override]
-    public function linkTo(string $name, string $endpoint, array $parameters): IModel
-    {
+    public function linkTo(string $name, string $endpoint, array $parameters): IModel {
         $uri = $this->configService->getHostName() . $this->configService->getBaseUri() . $endpoint;
 
         if (!empty($parameters)) {
@@ -40,8 +37,7 @@ abstract class Model implements IModel, JsonSerializable
     }
 
     #[Override]
-    public function withSelfRef(string $endpoint, array $parameters): IModel
-    {
+    public function withSelfRef(string $endpoint, array $parameters): IModel {
         $this->linkTo('self', $endpoint, $parameters);
         return $this;
     }

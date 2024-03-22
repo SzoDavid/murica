@@ -10,6 +10,7 @@ use murica_api\Controllers\BaseController;
 use murica_api\Controllers\Controller;
 use murica_api\Controllers\ErrorController;
 use murica_api\Controllers\UserController;
+use murica_api\Exceptions\QueryException;
 use murica_bl\Exceptions\MuricaException;
 use murica_bl_impl\DataSource\Factories\DataSourceFactory;
 use murica_bl_impl\Services\ConfigService\ConfigService;
@@ -32,7 +33,7 @@ try {
 }
 
 $controllers = [
-    new BaseController('/', $userDao),
+    new BaseController('', $userDao),
     new AuthController('auth', $tokenService, $userDao),
     new UserController('users', $userDao, $configService),
     $errorController
@@ -85,19 +86,21 @@ foreach ($controllers as $controller) {
     if (!isset($controller->getPublicEndpoints()[$endpoint])
         && !(isset($requestData['token']) && $tokenService->verifyToken($requestData['token']))) {
 
-        echo $errorController->unauthorized(null);
+        echo json_encode($errorController->unauthorized(null));
         exit;
     }
 
     try {
         echo json_encode($controller->$endpoint($requestData));
+    } catch (QueryException $ex) {
+        exit(json_encode($errorController->notFound(['resource' => $ex->getMessage()])));
     } catch (MuricaException $ex) {
-        exit($errorController->internalServerError(['errorMessage' => $ex->getTraceMessages()]));
+        exit(json_encode($errorController->internalServerError(['errorMessage' => $ex->getTraceMessages()])));
     } catch (Exception $ex) {
-        exit($errorController->internalServerError(['errorMessage' => $ex->getMessage()]));
+        exit(json_encode($errorController->internalServerError(['errorMessage' => $ex->getMessage()])));
     }
 
     exit;
 }
 
-echo $errorController->notFound(['endpointName' => $endpointName]);
+echo json_encode($errorController->notFound(['endpoint' => $endpointName]));

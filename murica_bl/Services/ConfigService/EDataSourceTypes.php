@@ -2,7 +2,6 @@
 
 namespace murica_bl\Services\ConfigService;
 
-enum EDataSourceTypes
-{
+enum EDataSourceTypes {
     case Oracle;
 }

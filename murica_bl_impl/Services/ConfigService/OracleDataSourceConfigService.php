@@ -8,8 +8,7 @@ use murica_bl\Services\ConfigService\Exceptions\ConfigLoadingException;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use Override;
 
-class OracleDataSourceConfigService implements IDataSourceConfigService
-{
+class OracleDataSourceConfigService implements IDataSourceConfigService {
     //region Properties
     private string $user;
     private string $password;
@@ -21,8 +20,7 @@ class OracleDataSourceConfigService implements IDataSourceConfigService
     /**
      * @throws ConfigLoadingException
      */
-    public function __construct(array $config)
-    {
+    public function __construct(array $config) {
         try {
             if (!isset($config['user'])) throw new ConfigLoadingException('Missing "user" field');
             if (!isset($config['password'])) throw new ConfigLoadingException('Missing "password" field');
@@ -41,28 +39,23 @@ class OracleDataSourceConfigService implements IDataSourceConfigService
 
     //region Getters
     #[Override]
-    public function getType(): EDataSourceTypes
-    {
+    public function getType(): EDataSourceTypes {
         return EDataSourceTypes::Oracle;
     }
 
-    public function getUser(): string
-    {
+    public function getUser(): string {
         return $this->user;
     }
 
-    public function getPassword(): string
-    {
+    public function getPassword(): string {
         return $this->password;
     }
 
-    public function getConnectionString(): string
-    {
+    public function getConnectionString(): string {
         return $this->connectionString;
     }
 
-    public function getTableOwner(): string
-    {
+    public function getTableOwner(): string {
         return $this->tableOwner;
     }
     //endregion

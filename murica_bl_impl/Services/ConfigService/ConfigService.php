@@ -8,8 +8,7 @@ use murica_bl\Services\ConfigService\IConfigService;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use Override;
 
-class ConfigService implements IConfigService
-{
+class ConfigService implements IConfigService {
     //region Properties
     private IDataSourceConfigService $dataSourceConfigService;
     private string $hostName;
@@ -19,8 +18,7 @@ class ConfigService implements IConfigService
     /**
      * @throws ConfigLoadingException
      */
-    public function __construct(string $configPath)
-    {
+    public function __construct(string $configPath) {
         try {
             $raw_configs = json_decode(file_get_contents($configPath), true);
 
@@ -42,20 +40,17 @@ class ConfigService implements IConfigService
     }
 
     #[Override]
-    public function getDataSourceConfigService(): IDataSourceConfigService
-    {
+    public function getDataSourceConfigService(): IDataSourceConfigService {
         return $this->dataSourceConfigService;
     }
 
     #[Override]
-    public function getHostName(): string
-    {
+    public function getHostName(): string {
         return $this->hostName;
     }
 
     #[Override]
-    public function getBaseUri(): string
-    {
+    public function getBaseUri(): string {
         return $this->baseUri;
     }
 }

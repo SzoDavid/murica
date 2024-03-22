@@ -1,4 +1,3 @@
-Fill in user and password and remove .template file extension
 {
     "data_source" : {
         "type": "oci",

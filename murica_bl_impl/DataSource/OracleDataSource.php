@@ -11,8 +11,7 @@ use murica_bl_impl\Dao\OracleUserDao;
 use murica_bl_impl\Services\ConfigService\OracleDataSourceConfigService;
 use Override;
 
-class OracleDataSource implements IDataSource
-{
+class OracleDataSource implements IDataSource {
     //region Properties
     private IDataSourceConfigService $configService;
     private $connection;
@@ -22,8 +21,7 @@ class OracleDataSource implements IDataSource
     /**
      * @throws DataSourceException
      */
-    public function __construct(IDataSourceConfigService $configService)
-    {
+    public function __construct(IDataSourceConfigService $configService) {
         $this->configService = $configService;
 
         try {
@@ -45,20 +43,17 @@ class OracleDataSource implements IDataSource
         }
     }
 
-    public function __destruct()
-    {
+    public function __destruct() {
         oci_close($this->connection);
     }
     //endregion
 
     #[Override]
-    public function createUserDao(): IUserDao
-    {
+    public function createUserDao(): IUserDao {
         return new OracleUserDao($this, $this->configService);
     }
 
-    public function getConnection()
-    {
+    public function getConnection() {
         return $this->connection;
     }
 }

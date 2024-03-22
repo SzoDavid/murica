@@ -3,6 +3,7 @@
 namespace murica_api\Controllers;
 
 use murica_api\Exceptions\ControllerException;
+use murica_api\Exceptions\QueryException;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
@@ -13,16 +14,14 @@ use murica_bl_impl\Models\CollectionModel;
 use murica_bl_impl\Models\EntityModel;
 use Override;
 
-class UserController extends Controller
-{
+class UserController extends Controller {
     //region Properties
     private IUserDao $userDao;
     private IConfigService $configService;
     //endregion
 
     //region Ctor
-    public function __construct(string $baseUri, IUserDao $userDao, IConfigService $configService)
-    {
+    public function __construct(string $baseUri, IUserDao $userDao, IConfigService $configService) {
         parent::__construct($baseUri);
         $this->userDao = $userDao;
         $this->configService = $configService;
@@ -31,8 +30,7 @@ class UserController extends Controller
 
     //region Controller members
     #[Override]
-    public function getEndpoints(): array
-    {
+    public function getEndpoints(): array {
         return [
             $this->baseUri . '' => 'allUsers',
             $this->baseUri . '/user' => 'getUserById'
@@ -40,8 +38,7 @@ class UserController extends Controller
     }
 
     #[Override]
-    public function getPublicEndpoints(): array
-    {
+    public function getPublicEndpoints(): array {
         return [
             'allUsers' => '',
             'getUserById' => ''
@@ -53,8 +50,7 @@ class UserController extends Controller
     /**
      * @throws ControllerException
      */
-    public function allUsers(array $requestData): IModel
-    {
+    public function allUsers(array $requestData): IModel {
         $users = $this->userDao->findAll();
 
         $userEntities = array();
@@ -75,16 +71,18 @@ class UserController extends Controller
 
     /**
      * @throws ControllerException
+     * @throws QueryException
      */
-    public function getUserById(array $requestData): IModel
-    {
+    public function getUserById(array $requestData): IModel {
         if (!isset($requestData['id'])) throw new ControllerException('Parameter "id" is not provided');
 
-        $user = $this->userDao->findByCrit(new QueryUser($requestData['id'], null, null, null, null))[0];
+        $users = $this->userDao->findByCrit(new QueryUser($requestData['id'], null, null, null, null));
 
-        return (new EntityModel($this->configService))->of($user)
+        if (empty($users)) throw new QueryException('Failed to get user with id "' . $requestData['id'] . '"');
+
+        return (new EntityModel($this->configService))->of($users[0])
             ->linkTo('allUsers', $this->baseUri, array())
-            ->withSelfRef($this->baseUri . '/user', ['id' => $user->getId()]);
+            ->withSelfRef($this->baseUri . '/user', ['id' => $users[0]->getId()]);
     }
     //endregion
 

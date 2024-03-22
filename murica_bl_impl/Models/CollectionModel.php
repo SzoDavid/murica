@@ -6,21 +6,18 @@ use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Services\ConfigService\IConfigService;
 use Override;
 
-class CollectionModel extends Model
-{
+class CollectionModel extends Model {
     private array $collection;
     private string $name;
 
-    public function __construct(IConfigService $configService)
-    {
+    public function __construct(IConfigService $configService) {
         parent::__construct($configService);
     }
 
     /**
      * @throws ModelException
      */
-    public function of(array $collection, string $name): CollectionModel
-    {
+    public function of(array $collection, string $name): CollectionModel {
         foreach ($collection as $item) {
             if (!$item instanceof EntityModel && !$item instanceof CollectionModel)
                 throw new ModelException('Collection item is not EntityModel or CollectionModel: ' . $item);
@@ -36,8 +33,7 @@ class CollectionModel extends Model
      * @inheritDoc
      */
     #[Override]
-    public function jsonSerialize(): array
-    {
+    public function jsonSerialize(): array {
         if (!isset($this->collection)) throw new ModelException('Collection is not set');
         if (!isset($this->name)) throw new ModelException('Name is not set');
 

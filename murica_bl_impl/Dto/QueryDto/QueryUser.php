@@ -5,8 +5,7 @@ namespace murica_bl_impl\Dto\QueryDto;
 use murica_bl\Dto\IUser;
 use Override;
 
-class QueryUser implements IUser
-{
+class QueryUser implements IUser {
     //region Properties
     private ?string $id;
     private ?string $name;
@@ -23,8 +22,7 @@ class QueryUser implements IUser
      * @param ?string $password
      * @param ?string $birthDate
      */
-    public function __construct(?string $id, ?string $name, ?string $email, ?string $password, ?string $birthDate)
-    {
+    public function __construct(?string $id, ?string $name, ?string $email, ?string $password, ?string $birthDate) {
         $this->id = $id;
         $this->name = $name;
         $this->email = $email;
@@ -35,32 +33,27 @@ class QueryUser implements IUser
 
     //region Getters
     #[Override]
-    public function getId(): ?string
-    {
+    public function getId(): ?string {
         return $this->id;
     }
 
     #[Override]
-    public function getName(): ?string
-    {
+    public function getName(): ?string {
         return $this->name;
     }
 
     #[Override]
-    public function getEmail(): ?string
-    {
+    public function getEmail(): ?string {
         return $this->email;
     }
 
     #[Override]
-    public function getPassword(): ?string
-    {
+    public function getPassword(): ?string {
         return $this->password;
     }
 
     #[Override]
-    public function getBirthDate(): ?string
-    {
+    public function getBirthDate(): ?string {
         return $this->birthDate;
     }
     //endregion

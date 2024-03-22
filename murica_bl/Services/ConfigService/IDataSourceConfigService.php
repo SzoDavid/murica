@@ -2,7 +2,6 @@
 
 namespace murica_bl\Services\ConfigService;
 
-interface IDataSourceConfigService
-{
+interface IDataSourceConfigService {
     public function getType(): EDataSourceTypes;
 }

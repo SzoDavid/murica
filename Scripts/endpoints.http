@@ -1,0 +1,63 @@
+# BaseController
+
+### sayhello (invalid token)
+
+POST https://localhost/murica_api/sayhello
+x-api-key: 0b8d1835-2fda-4cd0-af11-1f737cec65e0
+Content-Type: application/x-www-form-urlencoded
+
+name = Szobonya
+
+### sayhello (valid token)
+
+POST https://localhost/murica_api/sayhello
+x-api-key: 48a38d49-143b-4bdf-bd2d-47e255dbbf57
+Content-Type: application/x-www-form-urlencoded
+
+name = Szobonya
+
+# AuthController
+
+### login
+
+POST https://localhost/murica_api/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+username = YTWK3B
+password = 69696969
+
+# UserController
+
+### users
+
+GET https://localhost/murica_api/users
+
+### user (valid)
+
+GET https://localhost/murica_api/users/user?id=ADMIN0
+
+### user (invalid)
+
+GET https://localhost/murica_api/users/user?id=ADMIN
+
+# ErrorController
+
+### 401
+
+GET https://localhost/murica_api/error/401
+
+### 403
+
+GET https://localhost/murica_api/error/403
+
+### 404
+
+GET https://localhost/murica_api/error/404?endpointName=Test
+
+### 500 (no message)
+
+GET https://localhost/murica_api/error/500
+
+### 500 (with message)
+
+GET https://localhost/murica_api/error/500?errorMessage=Test

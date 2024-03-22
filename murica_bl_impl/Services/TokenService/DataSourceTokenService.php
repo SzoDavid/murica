@@ -2,35 +2,44 @@
 
 namespace murica_bl_impl\Services\TokenService;
 
+use murica_bl\Dao\ITokenDao;
+use murica_bl\Exceptions\NotImplementedException;
 use murica_bl\Services\TokenService\ITokenService;
 use Override;
 
-class ArrayTokenService implements ITokenService {
-    public array $tokens;
+class DataSourceTokenService implements ITokenService {
+    //region Properties
+    private ITokenDao $tokenDao;
+    //endregion
 
-    public function __construct() {
-        $this->tokens = [
-            '0b8d1835-2fda-4cd0-af11-1f737cec65e0' => ['username' => 'YTWK3B', 'expires_at' => 1711042089],
-        ];
+    //region Ctor
+    /**
+     * @param ITokenDao $tokenDao
+     */
+    public function __construct(ITokenDao $tokenDao) {
+        $this->tokenDao = $tokenDao;
     }
+    //endregion
 
+    //region ITokenService members
+    /**
+     * @throws NotImplementedException
+     */
     #[Override]
     public function generateToken(string $username): array {
-        // TODO: check if username already has token
-        do {
-            $token = $this->guidv4();
-        } while (isset($this->tokens[$token]));
-
-        $expirationDate = time() + (24 * 60 * 60);
-        $this->tokens[$token] = ['username' => $username, 'expires_at' => $expirationDate];
-
-        return ['token' => $token, 'expires_at' => $expirationDate];
+        // TODO: Implement generateToken() method.
+        throw new NotImplementedException('generateToken not implemented');
     }
 
     #[Override]
     public function verifyToken(string $token): bool {
-        return isset($this->tokens[$token]) && $this->tokens[$token]['expires_at'] > time();
+        $tokenDto = $this->tokenDao->findByToken($token);
+
+        return $tokenDto && strtotime($tokenDto->getExpiresAt()) > time();
+
+        // TODO: Implement verifyToken() method.
     }
+    //endregion
 
     private function guidv4($data = null) {
         // Generate 16 bytes (128 bits) of random data or use the data passed into the function.

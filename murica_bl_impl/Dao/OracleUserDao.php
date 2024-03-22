@@ -11,16 +11,14 @@ use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\User;
 use Override;
 
-class OracleUserDao implements IUserDao
-{
+class OracleUserDao implements IUserDao {
     //region Properties
     private OracleDataSource $dataSource;
     private IDataSourceConfigService $configService;
     //endregion
 
     //region Ctor
-    public function __construct(OracleDataSource $dataSource, IDataSourceConfigService $configService)
-    {
+    public function __construct(OracleDataSource $dataSource, IDataSourceConfigService $configService) {
         $this->dataSource = $dataSource;
         $this->configService = $configService;
     }
@@ -31,8 +29,8 @@ class OracleUserDao implements IUserDao
      * @throws DataAccessException
      */
     #[Override]
-    public function findAll(): array
-    {
+    public function findAll(): array {
+        //TODO: error handling
         $res = array();
 
         $sql = sprintf("SELECT %s AS ID, %s AS NAME, %s AS EMAIL, %s AS PASSWORD, TO_CHAR(%s,'YYYY-MM-DD') AS BIRTH_DATE FROM %s.%s",
@@ -69,8 +67,8 @@ class OracleUserDao implements IUserDao
      * @throws DataAccessException
      */
     #[Override]
-    public function findByCrit(IUser $model): array
-    {
+    public function findByCrit(IUser $model): array {
+        //TODO: error handling
         $res = array();
 
         //TODO: fix search
@@ -111,14 +109,13 @@ class OracleUserDao implements IUserDao
 
 
     #[Override]
-    public function insert(IUser $model): User
-    {
+    public function insert(IUser $model): User {
+        // TODO: Implement
         return new User("YTWK3B", "Szobonya Dávid", "szobonya.david@gmail.com", "asd", "2003-05-22");
     }
 
     #[Override]
-    public function remove(IUser $model): void
-    {
+    public function remove(IUser $model): void {
         // TODO: Implement remove() method.
     }
 }
