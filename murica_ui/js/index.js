@@ -5,6 +5,8 @@ $(() => {
 
     let tokenObj = JSON.parse(localStorage.getItem('token'))
 
+    $('#username').text(tokenObj.user.name)
+
     bindClickListener($('#logoutButton'), () => {
         requestInvoker.executeQuery(tokenObj._links.logout.href, { token: tokenObj.token}).then((response) => {
             localStorage.removeItem('token');
