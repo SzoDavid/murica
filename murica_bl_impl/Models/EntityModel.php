@@ -26,7 +26,7 @@ class EntityModel extends Model {
         if (!isset($this->entity)) throw new ModelException('Entity is not set');
 
         $links = $this->getLinks();
-        if(empty(empty($links['_links']))) return $this->entity->jsonSerialize();
+        if(empty($links['_links'])) return $this->entity->jsonSerialize();
 
         return array_merge($this->entity->jsonSerialize(), $this->getLinks());
     }

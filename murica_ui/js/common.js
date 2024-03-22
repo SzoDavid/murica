@@ -1,3 +1,5 @@
+const apiUrl = 'https://localhost/murica_api/'
+
 const bindClickListener = (observer, event, unbindOtherListeners = true) => {
     if (unbindOtherListeners) {
         $(observer).off()
@@ -110,5 +112,48 @@ const tableBuilder = {
         })
 
         return rowElement
+    }
+}
+
+const requestInvoker = {
+    executeQuery: async (url, args) => {
+        return requestInvoker.sendRequest(url, 'GET', args)
+    },
+    executeCommand: async (url, args) => {
+        return requestInvoker.sendRequest(url, 'POST', args)
+    },
+    executeUpdate: async (url, args) => {
+        return requestInvoker.sendRequest(url, 'PUT', args)
+    },
+    executeDelete: async (url, args) => {
+        return requestInvoker.sendRequest(url, 'DELETE', args)
+    },
+
+    sendRequest: (url, requestType, args) => {
+        let callback = () => {}
+        let result = {
+            then: (responseHandler) => {
+                callback = responseHandler
+            }
+        }
+
+        if (!url.startsWith('http')) {
+            url = apiUrl + url
+        }
+
+        $.ajax({
+            url: url,
+            type: requestType,
+            data: args,
+            success: (response) => {
+                console.log(args)
+                callback(response)
+            },
+            error: (xhr, status, error) => {
+                console.error(error)
+            },
+        })
+
+        return result
     }
 }

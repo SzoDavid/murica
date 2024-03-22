@@ -101,7 +101,6 @@ class User extends Entity implements IUser {
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'password' => $this->password,
             'birth_date' => $this->birthDate
         ];
     }

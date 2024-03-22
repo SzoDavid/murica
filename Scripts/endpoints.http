@@ -23,8 +23,8 @@ name = Szobonya
 POST https://localhost/murica_api/auth/login
 Content-Type: application/x-www-form-urlencoded
 
-username = YTWK3B
-password = 69696969
+id=G1P52N &
+password=G1P52N
 
 # UserController
 
@@ -39,6 +39,13 @@ GET https://localhost/murica_api/users/user?id=ADMIN0
 ### user (invalid)
 
 GET https://localhost/murica_api/users/user?id=ADMIN
+
+### CREATE
+
+POST https://localhost/murica_api/users/create
+Content-Type: application/x-www-form-urlencoded
+
+id=G1P52N&name=Gipsz%20%C3%96d%C3%B6n&email=gipsz.odon%40murica.com&password=G1P52N&birth_date=2003-03-22
 
 # ErrorController
 

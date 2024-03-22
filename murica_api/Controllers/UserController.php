@@ -42,8 +42,6 @@ class UserController extends Controller {
     #[Override]
     public function getPublicEndpoints(): array {
         return [
-            'allUsers' => '',
-            'getUserById' => '',
             'createUser' => '' // TODO: make secured
         ];
     }
@@ -52,6 +50,7 @@ class UserController extends Controller {
     //region Endpoints
     /**
      * @throws ControllerException
+     * @throws DataAccessException
      */
     public function allUsers(array $requestData): IModel {
         $users = $this->userDao->findAll();
@@ -75,6 +74,7 @@ class UserController extends Controller {
     /**
      * @throws ControllerException
      * @throws QueryException
+     * @throws DataAccessException
      */
     public function getUserById(array $requestData): IModel {
         if (!isset($requestData['id'])) throw new ControllerException('Parameter "id" is not provided');

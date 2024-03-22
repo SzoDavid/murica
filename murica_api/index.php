@@ -91,11 +91,10 @@ foreach ($controllers as $controller) {
     $endpoint = $endpoints[$endpointName];
 
     if (!isset($controller->getPublicEndpoints()[$endpoint])) {
-        if (isset($requestData['token']) && $token = $tokenService->verifyToken($requestData['token']))
-            $requestData['token'] = $token;
+        if (!isset($requestData['token']) || !$token = $tokenService->verifyToken($requestData['token']))
+            exit(json_encode($errorController->unauthorized($requestData)));
 
-        echo json_encode($errorController->unauthorized(null));
-        exit;
+        $requestData['token'] = $token;
     }
 
     try {

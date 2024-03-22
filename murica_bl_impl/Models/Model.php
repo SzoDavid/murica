@@ -56,7 +56,6 @@ abstract class Model implements IModel, JsonSerializable {
             }
         }
 
-
         return ['_links' => $_links];
     }
 }

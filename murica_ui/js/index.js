@@ -1,55 +1,26 @@
-const subjects = [
-    {
-        subjectName: 'Webtervezés',
-        subjectCode: 'INF0001',
-        credit: 2,
-        type: 'Gyakorlat'
-    },
-    {
-        subjectName: 'Pronya',
-        subjectCode: 'INF0002',
-        credit: 2,
-        type: 'Előadás'
-    }
-]
-
-const WTCourses = [
-    {
-        curseCode: 'INF0001-1',
-        classroomCode: 'IR217-3',
-        time: 'Kedd 16:00-17:00',
-        teacher: 'Szobonya Dávid'
-    },
-    {
-        curseCode: 'INF0001-2',
-        classroomCode: 'IR217-3',
-        time: 'Csütörtök 15:00-16:00',
-        teacher: 'Kolláth István Tibor'
-    }
-]
-
 // on load function:
 $(() => {
+    if (!localStorage.getItem('token'))
+        window.location.href = 'login.html';
+
+    let tokenObj = JSON.parse(localStorage.getItem('token'))
+
+    bindClickListener($('#logoutButton'), () => {
+        requestInvoker.executeQuery(tokenObj._links.logout.href, { token: tokenObj.token}).then(() => {})
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+    })
+
     const contentElement = $('#content')
-
-    const columns = {
-        subjectName: 'Név',
-        subjectCode: 'Kód',
-        credit: 'Kredit',
-        type: 'Típus'
-    }
-
-    const subjectTable = tableBuilder.createDropDownTable(columns, subjects, openSubject)
-    contentElement.append(subjectTable)
+    requestInvoker.executeQuery('users', { token: tokenObj.token }).then((response) => {
+        console.log(response)
+        const tableColumns = {
+            id: 'Kód',
+            name: 'Név',
+            email: 'E-mail cím',
+            birth_date: 'Születési dátum'
+        }
+        const usersTable = tableBuilder.createTable(tableColumns, response._embedded.users)
+        contentElement.append(usersTable)
+    })
 })
-
-function openSubject() {
-    const columns = {
-        curseCode: 'Kurzus kód',
-        classroomCode: 'Tanterem',
-        time: 'Időpont',
-        teacher: 'Oktató'
-    }
-
-    return tableBuilder.createDropDownTable(columns, WTCourses, () => { return 'asd' })
-}
