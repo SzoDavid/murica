@@ -6,4 +6,5 @@ interface IConfigService {
     public function getDataSourceConfigService(): IDataSourceConfigService;
     public function getHostName(): string;
     public function getBaseUri(): string;
+    public function getDisplayError(): int;
 }

@@ -8,45 +8,29 @@ use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\IToken;
 use murica_bl\Dto\IUser;
-use murica_bl\Exceptions\NotImplementedException;
 use murica_bl\Models\IModel;
-use murica_bl\Services\ConfigService\IConfigService;
+use murica_bl\Router\IRouter;
 use murica_bl\Services\TokenService\ITokenService;
 use murica_bl_impl\Dto\QueryDto\QueryUser;
 use murica_bl_impl\Models\EntityModel;
 use murica_bl_impl\Models\MessageModel;
-use Override;
+use murica_bl_impl\Router\EndpointRoute;
 
 class AuthController extends Controller {
     //region Fields
-    private IConfigService $configService;
     private ITokenService $tokenService;
     private IUserDao $userDao;
     //endregion
 
     //region Ctor
-    public function __construct(string $baseUri ,IUserDao $userDao, ITokenService $tokenService, IConfigService $configService) {
-        parent::__construct($baseUri);
+    public function __construct(IRouter $router ,IUserDao $userDao, ITokenService $tokenService) {
+        parent::__construct($router);
         $this->userDao = $userDao;
         $this->tokenService = $tokenService;
-        $this->configService = $configService;
-    }
-    //endregion
 
-    //region Controller members
-    #[Override]
-    public function getEndpoints(): array {
-        return [
-            implode('/', [$this->baseUri, 'login']) => 'login',
-            implode('/', [$this->baseUri, 'logout']) => 'logout'
-        ];
-    }
-
-    #[Override]
-    public function getPublicEndpoints(): array {
-        return [
-            'login' => ''
-        ];
+        $this->getRouter()->registerController($this, 'user')
+            ->registerEndpoint('login', 'login', EndpointRoute::VISIBILITY_PUBLIC)
+            ->registerEndpoint('logout', 'logout', EndpointRoute::VISIBILITY_PRIVATE);
     }
     //endregion
 
@@ -56,7 +40,7 @@ class AuthController extends Controller {
      * @throws QueryException
      * @throws DataAccessException
      */
-    public function login(array $requestData): IModel {
+    public function login(string $uri, array $requestData): IModel {
         if (!isset($requestData['id'])) throw new ControllerException('Parameter "id" is not provided');
         if (!isset($requestData['password'])) throw new ControllerException('Parameter "password" is not provided');
 
@@ -80,7 +64,7 @@ class AuthController extends Controller {
     /**
      * @throws ControllerException
      */
-    public function logout(array $requestData): IModel {
+    public function logout(string $uri, array $requestData): IModel {
         if (!isset($requestData['token'])) throw new ControllerException('Parameter "token" is not provided');
 
         /* @var $token IToken */

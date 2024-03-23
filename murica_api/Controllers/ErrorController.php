@@ -7,7 +7,7 @@ use murica_bl\Services\ConfigService\IConfigService;
 use murica_bl_impl\Models\MessageModel;
 use Override;
 
-class ErrorController extends Controller
+class ErrorController
 {
     //region Parameters
     private IConfigService $configService;
@@ -15,32 +15,10 @@ class ErrorController extends Controller
 
     //region Ctor
     public function __construct(string $baseUri, IConfigService $configService) {
-        parent::__construct($baseUri);
         $this->configService = $configService;
     }
     //endregion
 
-    //region IController members
-    #[Override]
-    public function getEndpoints(): array {
-        return [
-            $this->baseUri . '/401' => 'unauthorized',
-            $this->baseUri . '/403' => 'forbidden',
-            $this->baseUri . '/404' => 'notFound',
-            $this->baseUri . '/500' => 'internalServerError'
-        ];
-    }
-
-    #[Override]
-    public function getPublicEndpoints(): array {
-        return [
-            'unauthorized' => '',
-            'forbidden' => '',
-            'notFound' => '',
-            'internalServerError' => ''
-        ];
-    }
-    //endregion
 
     //region Endpoints
     public function unauthorized($requestData): IModel {

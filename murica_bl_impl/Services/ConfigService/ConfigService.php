@@ -13,6 +13,7 @@ class ConfigService implements IConfigService {
     private IDataSourceConfigService $dataSourceConfigService;
     private string $hostName;
     private string $baseUri;
+    private int $displayError;
     //endregion
 
     /**
@@ -26,9 +27,11 @@ class ConfigService implements IConfigService {
             if (!isset($raw_configs['data_source']['type'])) throw new ConfigLoadingException('Missing "data_source/type" field');
             if (!isset($raw_configs['host_name'])) throw new ConfigLoadingException('Missing "host_name" field');
             if (!isset($raw_configs['base_uri'])) throw new ConfigLoadingException('Missing "base_uri" field');
+            if (!isset($raw_configs['display_error'])) throw new ConfigLoadingException('Missing "display_error" field');
 
             $this->hostName = $raw_configs['host_name'];
             $this->baseUri = $raw_configs['base_uri'];
+            $this->displayError = $raw_configs['display_error'] === 0 ? 0 : 1;
 
             $this->dataSourceConfigService = match ($raw_configs['data_source']['type']) {
                 'oci' => new OracleDataSourceConfigService($raw_configs['data_source']),
@@ -52,5 +55,10 @@ class ConfigService implements IConfigService {
     #[Override]
     public function getBaseUri(): string {
         return $this->baseUri;
+    }
+
+    #[Override]
+    public function getDisplayError(): int {
+        return $this->displayError;
     }
 }

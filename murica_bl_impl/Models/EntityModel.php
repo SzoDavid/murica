@@ -2,29 +2,19 @@
 
 namespace murica_bl_impl\Models;
 
-use murica_bl\Models\Exceptions\ModelException;
-use murica_bl\Services\ConfigService\IConfigService;
+use murica_bl_impl\Router\Router;
 use Override;
 
 class EntityModel extends Model {
     private Entity $entity;
 
-    public function __construct(IConfigService $configService) {
-        parent::__construct($configService);
-    }
-
-    public function of(Entity $entity): EntityModel {
+    public function __construct(Router $router, Entity $entity) {
+        parent::__construct($router);
         $this->entity = $entity;
-        return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[Override]
     public function jsonSerialize(): array {
-        if (!isset($this->entity)) throw new ModelException('Entity is not set');
-
         $links = $this->getLinks();
         if(empty($links['_links'])) return $this->entity->jsonSerialize();
 

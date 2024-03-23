@@ -2,32 +2,19 @@
 
 namespace murica_api\Controllers;
 
-class Controller {
-    //region Parameters
-    protected string $baseUri;
-    //endregion
+use murica_bl\Controller\IController;
+use murica_bl\Router\IRouter;
+use Override;
 
-    //region Ctor
-    /**
-     * @param string $baseUri
-     */
-    public function __construct(string $baseUri) {
-        $this->baseUri = $baseUri;
-    }
-    //endregion
+class Controller implements IController {
+    protected IRouter $router;
 
-
-    //region IController members
-    public function getBaseUri(): string {
-        return $this->baseUri;
+    public function __construct(IRouter $router) {
+        $this->router = $router;
     }
 
-    public function getEndpoints(): array {
-        return array();
+    #[Override]
+    public function getRouter(): IRouter {
+        return $this->router;
     }
-
-    public function getPublicEndpoints(): array {
-        return array();
-    }
-    //endregion
 }

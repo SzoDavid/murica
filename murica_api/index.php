@@ -6,45 +6,45 @@ require_once 'autoloader.php';
 
 use Exception;
 use murica_api\Controllers\AuthController;
-use murica_api\Controllers\BaseController;
-use murica_api\Controllers\Controller;
-use murica_api\Controllers\ErrorController;
 use murica_api\Controllers\UserController;
-use murica_api\Exceptions\QueryException;
 use murica_bl\Exceptions\MuricaException;
 use murica_bl_impl\DataSource\Factories\DataSourceFactory;
+use murica_bl_impl\Router\Router;
 use murica_bl_impl\Services\ConfigService\ConfigService;
 use murica_bl_impl\Services\TokenService\DataSourceTokenService;
 
-//ini_set('display_errors',0);
+header('Content-Type: application/json; charset=UTF-8');
 
 try {
     $configService = new ConfigService(__DIR__ . '/configs.json');
+    ini_set('display_errors', $configService->getDisplayError());
 } catch (MuricaException $ex) {
-    exit($ex->getTraceMessages());
+    exit(json_encode(['error' => [
+        'code' => 500,
+        'message' => 'Failed to load configs: ' . $ex->getTraceMessages()]]));
 } catch (Exception $ex) {
-    exit($ex->getMessage());
+    exit(json_encode(['error' => [
+        'code' => 500,
+        'message' => 'Failed to load configs: ' . $ex->getMessage()]]));
 }
 
-header('Content-Type: application/json; charset=UTF-8');
-$errorController = new ErrorController('error', $configService);
-
 try {
+    $router = new Router($configService);
     $dataSource = (new DataSourceFactory($configService))->createDataSource();
     $userDao = $dataSource->createUserDao();
     $tokenService = new DataSourceTokenService($dataSource->createTokenDao());
-} catch (MuricaException $ex) {
-    exit($errorController->internalServerError(['errorMessage' => $ex->getTraceMessages()]));
-} catch (Exception $ex) {
-    exit($errorController->internalServerError(['errorMessage' => $ex->getMessage()]));
-}
 
-$controllers = [
-    new BaseController('', $userDao),
-    new AuthController('auth', $userDao, $tokenService, $configService),
-    new UserController('users', $userDao, $configService),
-    $errorController
-];
+    $authController = new AuthController($router, $userDao, $tokenService);
+    $userController = new UserController($router, $userDao);
+} catch (MuricaException $ex) {
+    exit(json_encode(['error' => [
+        'code' => 500,
+        'message' => 'Failed to initialize system: ' . $ex->getTraceMessages()]]));
+} catch (Exception $ex) {
+    exit(json_encode(['error' => [
+        'code' => 500,
+        'message' => 'Failed to initialize system: ' . $ex->getMessage()]]));
+}
 
 $requestData = array();
 switch ($_SERVER['REQUEST_METHOD']) {
@@ -74,13 +74,15 @@ if (isset($_SERVER['HTTP_X_API_KEY'])) {
 }
 
 $parsedURI = parse_url($_SERVER['REQUEST_URI']);
-$endpointName = str_replace($configService->getBaseUri(), '', $parsedURI['path']);
+$requestURI = str_replace($configService->getBaseUri(), '', $parsedURI['path']);
 
-if (empty($endpointName)) {
-    $endpointName = '/';
+if (empty($requestURI)) {
+    $requestURI = '/';
 }
 
-/* @var $controller Controller */
+echo json_encode($router->resolveRequest($requestURI, $requestData));
+
+/*
 foreach ($controllers as $controller) {
     $endpoints = $controller->getEndpoints();
 
@@ -111,3 +113,4 @@ foreach ($controllers as $controller) {
 }
 
 echo json_encode($errorController->notFound(['endpoint' => $endpointName]));
+*/

@@ -7,5 +7,6 @@
         "table_owner": "USER"
     },
     "host_name": "https://localhost",
-    "base_uri": "/murica_api/"
+    "base_uri": "/murica_api/",
+    "display_errors": 0
 }

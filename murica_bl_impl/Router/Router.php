@@ -1,0 +1,66 @@
+<?php
+
+namespace murica_bl_impl\Router;
+
+use murica_bl\Controller\IController;
+use murica_bl\Exceptions\NotImplementedException;
+use murica_bl\Models\IModel;
+use murica_bl\Router\Exceptions\UriAssemblingException;
+use murica_bl\Router\IControllerRoute;
+use murica_bl\Router\IRouter;
+use murica_bl\Services\ConfigService\IConfigService;
+use murica_bl_impl\Models\MessageModel;
+use Override;
+
+class Router implements IRouter {
+    private IConfigService $configService;
+    private array $controllerRoutes;
+
+    public function __construct(IConfigService $configService) {
+        $this->configService = $configService;
+        $this->controllerRoutes = array();
+    }
+
+    #[Override]
+    public function registerController(IController $controller, $route): IControllerRoute {
+        $controllerRoute = new ControllerRoute($controller);
+        $this->controllerRoutes[$route] = $controllerRoute;
+        return $controllerRoute;
+    }
+
+    #[Override]
+    public function resolveRequest(string $uri, array $requestData): IModel {
+        $uriElements = explode('/', $uri);
+
+        if (!isset($this->controllerRoutes[$uriElements[0]]))
+            return new MessageModel($this, ['error' => ['code' => 404, 'message' => "Endpoint `$uri` not found"]]);
+
+        array_shift($uriElements);
+
+        return $this->controllerRoutes[$uriElements[0]]->resolveRequest(implode('/', $uriElements), $requestData);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function assembleUri(string $class, string $method, array $uriParameters, array $parameters): string {
+        /* @var $controllerRoute ControllerRoute */
+        foreach ($this->controllerRoutes as $route => $controllerRoute) {
+            if ($controllerRoute->getControllerType() !== $class) continue;
+
+            return implode('/', [
+                        $this->configService->getHostName(),
+                        $this->configService->getBaseUri(),
+                        $route,
+                        $controllerRoute->assembleUri($method, $uriParameters, $parameters)]);
+        }
+
+        throw new UriAssemblingException("Could not find controller with type <$class>");
+    }
+
+    #[Override]
+    public function getConfigService(): IConfigService {
+        return $this->configService;
+    }
+}

@@ -8,42 +8,27 @@ use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
-use murica_bl\Services\ConfigService\IConfigService;
+use murica_bl\Router\IRouter;
 use murica_bl_impl\Dto\QueryDto\QueryUser;
 use murica_bl_impl\Dto\User;
 use murica_bl_impl\Models\CollectionModel;
 use murica_bl_impl\Models\EntityModel;
-use Override;
+use murica_bl_impl\Router\EndpointRoute;
 
 class UserController extends Controller {
     //region Properties
     private IUserDao $userDao;
-    private IConfigService $configService;
     //endregion
 
     //region Ctor
-    public function __construct(string $baseUri, IUserDao $userDao, IConfigService $configService) {
-        parent::__construct($baseUri);
+    public function __construct(IRouter $router, IUserDao $userDao) {
+        parent::__construct($router);
         $this->userDao = $userDao;
-        $this->configService = $configService;
-    }
-    //endregion
 
-    //region Controller members
-    #[Override]
-    public function getEndpoints(): array {
-        return [
-            $this->baseUri . '' => 'allUsers',
-            $this->baseUri . '/user' => 'getUserById',
-            $this->baseUri . '/create' => 'createUser'
-        ];
-    }
-
-    #[Override]
-    public function getPublicEndpoints(): array {
-        return [
-            'createUser' => '' // TODO: make secured
-        ];
+        $this->getRouter()->registerController($this, 'user')
+            ->registerEndpoint('allUsers', 'all', EndpointRoute::VISIBILITY_PUBLIC) // TODO: Set to private
+            ->registerEndpoint('getUserById', '', EndpointRoute::VISIBILITY_PUBLIC) // TODO: Set to private
+            ->registerEndpoint('createUser', 'new', EndpointRoute::VISIBILITY_PUBLIC); // TODO: Set to private
     }
     //endregion
 
@@ -52,16 +37,16 @@ class UserController extends Controller {
      * @throws ControllerException
      * @throws DataAccessException
      */
-    public function allUsers(array $requestData): IModel {
+    public function allUsers(string $uri, array $requestData): IModel {
         $users = $this->userDao->findAll();
 
         $userEntities = array();
 
         /* @var $user User */
         foreach ($users as $user) {
-            $userEntities[] = (new EntityModel($this->configService))->of($user)
-                ->linkTo('allUsers', $this->baseUri)
-                ->withSelfRef($this->baseUri . '/user', ['id' => $user->getId()]);
+            $userEntities[] = (new EntityModel($this->getRouter(), $user))
+                ->linkTo('allUsers', UserController::class, 'allUsers')
+                ->withSelfRef(UserController::class, 'getUserById', [$user->getId()]);
         }
 
         try {
@@ -76,7 +61,7 @@ class UserController extends Controller {
      * @throws QueryException
      * @throws DataAccessException
      */
-    public function getUserById(array $requestData): IModel {
+    public function getUserById(string $uri, array $requestData): IModel {
         if (!isset($requestData['id'])) throw new ControllerException('Parameter "id" is not provided');
 
         $users = $this->userDao->findByCrit(new QueryUser($requestData['id'], null, null, null, null));
@@ -92,7 +77,7 @@ class UserController extends Controller {
      * @throws ControllerException
      * @throws DataAccessException
      */
-    public function createUser(array $requestData): IModel {
+    public function createUser(string $uri, array $requestData): IModel {
         //TODO: make private
         if (!isset($requestData['id'])) throw new ControllerException('Parameter "id" is not provided');
         if (!isset($requestData['name'])) throw new ControllerException('Parameter "name" is not provided');

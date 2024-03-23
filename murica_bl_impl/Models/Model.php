@@ -5,47 +5,31 @@ namespace murica_bl_impl\Models;
 use JsonSerializable;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
-use murica_bl\Services\ConfigService\IConfigService;
+use murica_bl\Router\IRouter;
 use Override;
 
 abstract class Model implements IModel, JsonSerializable {
-    private IConfigService $configService;
+    private IRouter $router;
     protected array $links;
 
-    public function __construct(IConfigService $configService) {
-        $this->configService = $configService;
+    public function __construct(IRouter $router) {
+        $this->router = $router;
         $this->links = array();
     }
 
     #[Override]
-    public function linkTo(string $name, string $endpoint, array $parameters=array()): IModel {
-        $uri = $this->configService->getHostName() . $this->configService->getBaseUri() . $endpoint;
-
-        if (!empty($parameters)) {
-            $serializedParameters = array();
-
-            foreach ($parameters as $key => $value) {
-                $serializedParameters[] = "$key=$value";
-            }
-
-            $uri .= '?' . implode('&', $serializedParameters);
-        }
-
-        $this->links[$name] = $uri;
+    public function linkTo(string $name, string $class, string $method, array $uriParameters=array(), array $parameters=array()): IModel {
+        // TODO: handle exception
+        $this->links[$name] = $this->router->assembleUri($class, $method, $uriParameters, $parameters);
 
         return $this;
     }
 
     #[Override]
-    public function withSelfRef(string $endpoint, array $parameters): IModel {
-        $this->linkTo('self', $endpoint, $parameters);
+    public function withSelfRef(string $class, string $method, array $uriParameters=array(), array $parameters=array()): IModel {
+        $this->linkTo('self', $class, $method, $uriParameters, $parameters);
         return $this;
     }
-
-    /**
-     * @throws ModelException
-     */
-    public abstract function jsonSerialize(): mixed;
 
     protected function getLinks(): array {
         $_links = array();
