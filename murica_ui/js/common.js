@@ -146,7 +146,6 @@ const requestInvoker = {
             type: requestType,
             data: args,
             success: (response) => {
-                console.log(args)
                 callback(response)
             },
             error: (xhr, status, error) => {

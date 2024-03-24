@@ -2,8 +2,6 @@
 
 namespace murica_api\Controllers;
 
-use murica_api\Exceptions\ControllerException;
-
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Models\Exceptions\ModelException;
@@ -28,8 +26,8 @@ class UserController extends Controller {
         $this->userDao = $userDao;
 
         $this->router->registerController($this, 'user')
-            ->registerEndpoint('allUsers', 'all', EndpointRoute::VISIBILITY_PUBLIC) // TODO: Set to private
-            ->registerEndpoint('getUserById', '', EndpointRoute::VISIBILITY_PUBLIC) // TODO: Set to private
+            ->registerEndpoint('allUsers', 'all', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getUserById', '', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('createUser', 'new', EndpointRoute::VISIBILITY_PUBLIC); // TODO: Set to private
     }
     //endregion
@@ -40,6 +38,7 @@ class UserController extends Controller {
      * No parameters required. User must have admin role, to access.
      */
     public function allUsers(string $uri, array $requestData): IModel {
+        //TODO: check if user is admin
         try {
             $users = $this->userDao->findAll();
         } catch (DataAccessException $e) {
@@ -53,9 +52,13 @@ class UserController extends Controller {
 
         /* @var $user User */
         foreach ($users as $user) {
-            $userEntities[] = (new EntityModel($this->router, $user, true))
-                ->linkTo('allUsers', UserController::class, 'allUsers')
-                ->withSelfRef(UserController::class, 'getUserById', [$user->getId()]);
+            try {
+                $userEntities[] = (new EntityModel($this->router, $user, true))
+                    ->linkTo('allUsers', UserController::class, 'allUsers')
+                    ->withSelfRef(UserController::class, 'getUserById', [$user->getId()]);
+            } catch (ModelException $e) {
+                return new ErrorModel($this->router, 500, 'Failed to query users', $e->getTraceMessages());
+            }
         }
 
         try {
@@ -75,6 +78,7 @@ class UserController extends Controller {
      * Id must be part of the uri. User must have admin role, to access.
      */
     public function getUserById(string $uri, array $requestData): IModel {
+        //TODO: check if user is admin
         // TODO: validate $uri as user id
         if (empty($uri)) {
             return new ErrorModel($this->router,
@@ -99,9 +103,13 @@ class UserController extends Controller {
                                   "User not found with id '$uri'");
         }
 
-        return (new EntityModel($this->router, $users[0], true))
-            ->linkTo('allUsers', UserController::class, 'allUsers')
-            ->withSelfRef(UserController::class, 'getUserById', [$uri]);
+        try {
+            return (new EntityModel($this->router, $users[0], true))
+                ->linkTo('allUsers', UserController::class, 'allUsers')
+                ->withSelfRef(UserController::class, 'getUserById', [$uri]);
+        } catch (ModelException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to query user', $e->getTraceMessages());
+        }
     }
 
     /**
@@ -110,7 +118,7 @@ class UserController extends Controller {
      * User must have admin role, to access.
      */
     public function createUser(string $uri, array $requestData): IModel {
-        //TODO: make private
+        //TODO: check if user is admin
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to create user', 'Parameter "id" is not provided in uri');
         if (!isset($requestData['name']))
@@ -129,15 +137,16 @@ class UserController extends Controller {
                                                     password_hash($requestData['password'], PASSWORD_DEFAULT),
                                                     $requestData['birth_date']));
         } catch (DataAccessException $e) {
-            return new ErrorModel($this->router,
-                                  500,
-                                  'Failed to create user',
-                                  $e->getTraceMessages());
+            return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
         }
 
-        return (new EntityModel($this->router, $user, true))
-            ->linkTo('allUsers', UserController::class, 'allUsers')
-            ->withSelfRef(UserController::class, 'getUserById', [$user->getId()]);
+        try {
+            return (new EntityModel($this->router, $user, true))
+                ->linkTo('allUsers', UserController::class, 'allUsers')
+                ->withSelfRef(UserController::class, 'getUserById', [$user->getId()]);
+        } catch (ModelException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
+        }
     }
     //endregion
 

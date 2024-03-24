@@ -14,10 +14,14 @@ class EntityModel extends Model {
     }
 
     #[Override]
-    public function jsonSerialize(): array {
+    public function jsonSerialize(bool $root=true): array {
         $links = $this->getLinks();
-        if(empty($links['_links'])) return $this->entity->jsonSerialize();
 
-        return array_merge($this->entity->jsonSerialize(), $this->getLinks(), ['_success' => $this->success]);
+        $result = $this->entity->jsonSerialize();
+
+        if (!empty($links['_links'])) $result = array_merge($result, $links);
+        if ($root) $result['_success'] = $this->success;
+
+        return $result;
     }
 }

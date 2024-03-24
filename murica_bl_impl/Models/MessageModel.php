@@ -17,8 +17,8 @@ class MessageModel extends Model {
     #[Override]
     public function jsonSerialize(): array {
         $links = $this->getLinks();
-        if (empty($links['_links'])) return $this->message;
+        if (empty($links['_links'])) return array_merge($this->message, ['_success' => $this->success]);
 
-        return array_merge($this->message, $this->getLinks(), ['success' => $this->success]);
+        return array_merge($this->message, $links, ['_success' => $this->success]);
     }
 }

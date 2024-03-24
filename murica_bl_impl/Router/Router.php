@@ -9,16 +9,19 @@ use murica_bl\Router\Exceptions\UriAssemblingException;
 use murica_bl\Router\IControllerRoute;
 use murica_bl\Router\IRouter;
 use murica_bl\Services\ConfigService\IConfigService;
+use murica_bl\Services\TokenService\ITokenService;
 use murica_bl_impl\Models\ErrorModel;
 use murica_bl_impl\Models\MessageModel;
 use Override;
 
 class Router implements IRouter {
     private IConfigService $configService;
+    private ITokenService $tokenService;
     private array $controllerRoutes;
 
-    public function __construct(IConfigService $configService) {
+    public function __construct(IConfigService $configService, ITokenService $tokenService) {
         $this->configService = $configService;
+        $this->tokenService = $tokenService;
         $this->controllerRoutes = array();
     }
 
@@ -64,5 +67,10 @@ class Router implements IRouter {
     #[Override]
     public function getConfigService(): IConfigService {
         return $this->configService;
+    }
+
+    #[Override]
+    public function getTokenService(): ITokenService {
+        return $this->tokenService;
     }
 }

@@ -2,33 +2,31 @@
 
 namespace murica_api\Controllers;
 
-use murica_api\Exceptions\ControllerException;
-use murica_api\Exceptions\QueryException;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\IToken;
 use murica_bl\Dto\IUser;
+use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
 use murica_bl\Router\IRouter;
 use murica_bl\Services\TokenService\ITokenService;
 use murica_bl_impl\Dto\QueryDto\QueryUser;
 use murica_bl_impl\Models\EntityModel;
+use murica_bl_impl\Models\ErrorModel;
 use murica_bl_impl\Models\MessageModel;
 use murica_bl_impl\Router\EndpointRoute;
 
 class AuthController extends Controller {
     //region Fields
-    private ITokenService $tokenService;
     private IUserDao $userDao;
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router ,IUserDao $userDao, ITokenService $tokenService) {
+    public function __construct(IRouter $router ,IUserDao $userDao) {
         parent::__construct($router);
         $this->userDao = $userDao;
-        $this->tokenService = $tokenService;
 
-        $this->router->registerController($this, 'user')
+        $this->router->registerController($this, 'auth')
             ->registerEndpoint('login', 'login', EndpointRoute::VISIBILITY_PUBLIC)
             ->registerEndpoint('logout', 'logout', EndpointRoute::VISIBILITY_PRIVATE);
     }
@@ -36,53 +34,61 @@ class AuthController extends Controller {
 
     //region Endpoints
     /**
-     * @throws ControllerException
-     * @throws QueryException
-     * @throws DataAccessException
+     * Returns with a token model after authenticating with the given id and password.
+     * Parameters are excepted as part of request.
      */
     public function login(string $uri, array $requestData): IModel {
-        if (!isset($requestData['id'])) throw new ControllerException('Parameter "id" is not provided');
-        if (!isset($requestData['password'])) throw new ControllerException('Parameter "password" is not provided');
+        if (!isset($requestData['id']))
+            return new ErrorModel($this->router, 400, 'Failed to authenticate', 'Parameter "id" is not provided in request');
+        if (!isset($requestData['password']))
+            return new ErrorModel($this->router, 400, 'Failed to authenticate', 'Parameter "password" is not provided in request');
 
-        $users = $this->userDao->findByCrit(new QueryUser($requestData['id'], null, null, null, null));
+        try {
+            $users = $this->userDao->findByCrit(new QueryUser($requestData['id'], null, null, null, null));
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router,
+                                  500,
+                                  'Failed to authenticate',
+                                  $e->getTraceMessages());
+        }
 
-        if (empty($users)) throw new QueryException('Failed to get user with id "' . $requestData['id'] . '"');
+        if (empty($users))
+            return new ErrorModel($this->router, 401, 'Authentication failed', 'Invalid id or password');
+
         /* @var $user IUser */
         $user = $users[0];
 
-        if (password_verify($requestData['password'], $user->getPassword()))
-            return (new EntityModel($this->configService))
-                ->of($this->tokenService->generateToken($requestData['id']))
-                ->linkTo('logout', implode('/', [$this->baseUri, 'logout']));
+        if (password_verify($requestData['password'], $user->getPassword())) {
+            try {
+                return (new EntityModel($this->router, $this->router->getTokenService()->generateToken($requestData['id']), true))
+                    ->linkTo('logout', AuthController::class, 'logout');
+            } catch (DataAccessException|ModelException $e) {
+                return new ErrorModel($this->router, 500, 'Authentication failed', $e->getTraceMessages());
+            }
+        }
 
-        return (new MessageModel($this->configService))
-            ->of(['error' => [
-                'code' => 401,
-                'message' => 'Authentication failed']]);
+        return new ErrorModel($this->router, 401, 'Authentication failed', 'Invalid id or password');
     }
 
     /**
-     * @throws ControllerException
+     * Logs user out, by removing access token.
+     * Token is expected as part of request.
+     * Only logged in users can access.
      */
     public function logout(string $uri, array $requestData): IModel {
-        if (!isset($requestData['token'])) throw new ControllerException('Parameter "token" is not provided');
+        if (!isset($requestData['token']))
+            return new ErrorModel($this->router, 400, 'Failed to log out', 'Parameter "token" is not provided in request');
 
         /* @var $token IToken */
         $token = $requestData['token'];
 
         try {
-            $this->tokenService->removeToken($token->getToken());
-        } catch (DataAccessException $ex) {
-            return (new MessageModel($this->configService))
-                ->of(['error' => [
-                    'code' => 500,
-                    'message' => 'An unexpected error happened'
-                ]]);
+            $this->router->getTokenService()->removeToken($token->getToken());
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to log out', $e->getTraceMessages());
         }
 
-        return (new MessageModel($this->configService))
-            ->of(['success' => [
-                'message' => 'Logged out successfully']]);
+        return (new MessageModel($this->router, ['message' => 'Logged out successfully'], true));
     }
     //endregion
 }

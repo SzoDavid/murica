@@ -8,23 +8,40 @@ Content-Type: application/x-www-form-urlencoded
 id=G1P52N &
 password=G1P52N
 
+### logout
+
+POST https://localhost/murica_api/auth/logout
+x-api-key: e00f0d7c-1ac0-44b1-9547-8e9b1d336553
+
 # UserController
 
-### Get all users
+### Get all users (valid)
+
+POST https://localhost/murica_api/user/all
+x-api-key: b04f00fe-7ad0-47c2-bd31-e0242cd5c3b4
+
+### Get all users (unaunthicated)
 
 GET https://localhost/murica_api/user/all
 
 ### Get user by id (valid)
 
+POST https://localhost/murica_api/user/ADMIN0
+x-api-key: b04f00fe-7ad0-47c2-bd31-e0242cd5c3b4
+
+### Get user by id (unaunthicated)
+
 GET https://localhost/murica_api/user/ADMIN0
 
 ### Get user by id (invalid id)
 
-GET https://localhost/murica_api/user/ADMIN
+POST https://localhost/murica_api/user/ADMIN
+x-api-key: b04f00fe-7ad0-47c2-bd31-e0242cd5c3b4
 
 ### Get user by id (invalid request)
 
-GET https://localhost/murica_api/user?id=ADMIN0
+POST https://localhost/murica_api/user?id=ADMIN0
+x-api-key: b04f00fe-7ad0-47c2-bd31-e0242cd5c3b4
 
 ### Create user (valid)
 

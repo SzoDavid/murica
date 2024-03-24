@@ -15,7 +15,7 @@ $(() => {
     })
 
     const contentElement = $('#content')
-    requestInvoker.executeQuery('users', { token: tokenObj.token }).then((response) => {
+    requestInvoker.executeQuery('user/all', { token: tokenObj.token }).then((response) => {
         console.log(response)
         const tableColumns = {
             id: 'Kód',

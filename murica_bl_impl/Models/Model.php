@@ -3,7 +3,9 @@
 namespace murica_bl_impl\Models;
 
 use JsonSerializable;
+use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
+use murica_bl\Router\Exceptions\UriAssemblingException;
 use murica_bl\Router\IRouter;
 use Override;
 
@@ -18,14 +20,23 @@ abstract class Model implements IModel, JsonSerializable {
         $this->links = array();
     }
 
+    /**
+     * @inheritDoc
+     */
     #[Override]
     public function linkTo(string $name, string $class, string $method, array $uriParameters=array(), array $parameters=array()): IModel {
-        // TODO: handle exception
-        $this->links[$name] = $this->router->assembleUri($class, $method, $uriParameters, $parameters);
+        try {
+            $this->links[$name] = $this->router->assembleUri($class, $method, $uriParameters, $parameters);
+        } catch (UriAssemblingException $e) {
+            throw new ModelException('Failed to link endpoint', $e);
+        }
 
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     #[Override]
     public function withSelfRef(string $class, string $method, array $uriParameters=array(), array $parameters=array()): IModel {
         $this->linkTo('self', $class, $method, $uriParameters, $parameters);

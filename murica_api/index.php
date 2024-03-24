@@ -19,33 +19,40 @@ try {
     $configService = new ConfigService(__DIR__ . '/configs.json');
     ini_set('display_errors', $configService->getDisplayError());
 } catch (MuricaException $ex) {
-    exit(json_encode(['error' => [
-        'code' => 500,
-        'message' => 'Failed to load configs',
-        'details' => $ex->getTraceMessages()]]));
+    exit(json_encode(['_success' => false,
+                         'error' => [
+                             'code' => 500,
+                             'message' => 'Failed to load configs',
+                             'details' => $ex->getTraceMessages()]]));
 } catch (Exception $ex) {
-    exit(json_encode(['error' => [
-        'code' => 500,
-        'message' => 'Failed to load configs',
-        'details' => $ex->getMessage()]]));
+    exit(json_encode(['_success' => false,
+                         'error' => [
+                            'code' => 500,
+                            'message' => 'Failed to load configs',
+                            'details' => $ex->getMessage()]]));
 }
 
 try {
-    $router = new Router($configService);
     $dataSource = (new DataSourceFactory($configService))->createDataSource();
     $userDao = $dataSource->createUserDao();
-    $tokenService = new DataSourceTokenService($dataSource->createTokenDao());
 
-    $authController = new AuthController($router, $userDao, $tokenService);
+    $router = new Router($configService,
+                         new DataSourceTokenService($dataSource->createTokenDao()));
+
+    $authController = new AuthController($router, $userDao);
     $userController = new UserController($router, $userDao);
 } catch (MuricaException $ex) {
-    exit(json_encode(['error' => [
-        'code' => 500,
-        'message' => 'Failed to initialize system: ' . $ex->getTraceMessages()]]));
+    exit(json_encode(['_success' => false,
+                         'error' => [
+                             'code' => 500,
+                             'message' => 'Failed to initialize system',
+                             'details' => $ex->getTraceMessages()]]));
 } catch (Exception $ex) {
-    exit(json_encode(['error' => [
-        'code' => 500,
-        'message' => 'Failed to initialize system: ' . $ex->getMessage()]]));
+    exit(json_encode(['_success' => false,
+                         'error' => [
+                             'code' => 500,
+                             'message' => 'Failed to initialize system',
+                             'details' => $ex->getMessage()]]));
 }
 
 $requestData = array();
@@ -83,36 +90,3 @@ if (empty($requestURI)) {
 }
 
 echo json_encode($router->resolveRequest($requestURI, $requestData));
-
-/*
-foreach ($controllers as $controller) {
-    $endpoints = $controller->getEndpoints();
-
-    if (!isset($endpoints[$endpointName])) {
-        continue;
-    }
-
-    $endpoint = $endpoints[$endpointName];
-
-    if (!isset($controller->getPublicEndpoints()[$endpoint])) {
-        if (!isset($requestData['token']) || !$token = $tokenService->verifyToken($requestData['token']))
-            exit(json_encode($errorController->unauthorized($requestData)));
-
-        $requestData['token'] = $token;
-    }
-
-    try {
-        echo json_encode($controller->$endpoint($requestData));
-    } catch (QueryException $ex) {
-        exit(json_encode($errorController->notFound(['resource' => $ex->getMessage()])));
-    } catch (MuricaException $ex) {
-        exit(json_encode($errorController->internalServerError(['errorMessage' => $ex->getTraceMessages()])));
-    } catch (Exception $ex) {
-        exit(json_encode($errorController->internalServerError(['errorMessage' => $ex->getMessage()])));
-    }
-
-    exit;
-}
-
-echo json_encode($errorController->notFound(['endpoint' => $endpointName]));
-*/

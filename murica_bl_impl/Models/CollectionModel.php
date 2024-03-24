@@ -28,17 +28,20 @@ class CollectionModel extends Model {
      * @inheritDoc
      */
     #[Override]
-    public function jsonSerialize(): array {
+    public function jsonSerialize(bool $root=true): array {
         $elements = array();
 
         /* @var $item Model */
         foreach ($this->collection as $item) {
-            $elements[] = $item->jsonSerialize();
+            $elements[] = $item->jsonSerialize(false);
         }
 
-        $links = $this->getLinks();
-        if(empty(empty($links['_links']))) return ['_embedded' => [$this->name => $elements]];
+        $result = ['_embedded' => [$this->name => $elements]];
 
-        return array_merge(['_embedded' => [$this->name => $elements]], $this->getLinks(), ['_success' => $this->success]);
+        $links = $this->getLinks();
+        if (!empty($links['_links'])) $result = array_merge($result, $links);
+        if ($root) $result['_success'] = $this->success;
+
+        return $result;
     }
 }

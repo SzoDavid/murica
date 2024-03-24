@@ -2,14 +2,16 @@
 
 namespace murica_bl_impl\Router;
 
+use murica_api\Controllers\AuthController;
 use murica_bl\Controller\IController;
+use murica_bl\Dao\Exceptions\DataAccessException;
+use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
 use murica_bl\Router\Exceptions\UriAssemblingException;
 use murica_bl\Router\IControllerRoute;
 use murica_bl\Router\IEndpointRoute;
 use murica_bl\Router\IRouter;
 use murica_bl_impl\Models\ErrorModel;
-use murica_bl_impl\Models\MessageModel;
 use Override;
 
 class ControllerRoute implements IControllerRoute {
@@ -47,7 +49,17 @@ class ControllerRoute implements IControllerRoute {
 
         $endpoint = $endpointRoute->getEndpoint();
 
-        // TODO: check visibility
+        if (!$endpointRoute->isVisible()) {
+            try {
+                if (!isset($requestData['token']) || !$token = $this->router->getTokenService()->verifyToken($requestData['token']))
+                    return (new ErrorModel($this->router, 401, 'Unauthorized', 'Missing or invalid token'))
+                        ->linkTo('login', AuthController::class, 'login');
+
+                $requestData['token'] = $token;
+            } catch (DataAccessException|ModelException $e) {
+                return new ErrorModel($this->router, 500, 'Internal server error', 'Failed to verify token');
+            }
+        }
 
         return $this->controller->$endpoint($uri, $requestData);
     }
