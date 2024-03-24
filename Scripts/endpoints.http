@@ -1,21 +1,3 @@
-# BaseController
-
-### sayhello (invalid token)
-
-POST https://localhost/murica_api/sayhello
-x-api-key: 0b8d1835-2fda-4cd0-af11-1f737cec65e0
-Content-Type: application/x-www-form-urlencoded
-
-name = Szobonya
-
-### sayhello (valid token)
-
-POST https://localhost/murica_api/sayhello
-x-api-key: 48a38d49-143b-4bdf-bd2d-47e255dbbf57
-Content-Type: application/x-www-form-urlencoded
-
-name = Szobonya
-
 # AuthController
 
 ### login
@@ -28,43 +10,60 @@ password=G1P52N
 
 # UserController
 
-### users
+### Get all users
 
-GET https://localhost/murica_api/users
+GET https://localhost/murica_api/user/all
 
-### user (valid)
+### Get user by id (valid)
 
-GET https://localhost/murica_api/users/user?id=ADMIN0
+GET https://localhost/murica_api/user/ADMIN0
 
-### user (invalid)
+### Get user by id (invalid id)
 
-GET https://localhost/murica_api/users/user?id=ADMIN
+GET https://localhost/murica_api/user/ADMIN
 
-### CREATE
+### Get user by id (invalid request)
 
-POST https://localhost/murica_api/users/create
+GET https://localhost/murica_api/user?id=ADMIN0
+
+### Create user (valid)
+
+POST https://localhost/murica_api/user/new
 Content-Type: application/x-www-form-urlencoded
 
-id=G1P52N&name=Gipsz%20%C3%96d%C3%B6n&email=gipsz.odon%40murica.com&password=G1P52N&birth_date=2003-03-22
+id=G1P52N&name=Gipsz%20Odon&email=gipsz.odon%40murica.com&password=G1P52N&birth_date=2003-03-22
 
-# ErrorController
+### Create user (no id)
 
-### 401
+POST https://localhost/murica_api/user/new
+Content-Type: application/x-www-form-urlencoded
 
-GET https://localhost/murica_api/error/401
+name=Gipsz%20Odon&email=gipsz.odon%40murica.com&password=G1P52N&birth_date=2003-03-22
 
-### 403
+### Create user (no name)
 
-GET https://localhost/murica_api/error/403
+POST https://localhost/murica_api/user/new
+Content-Type: application/x-www-form-urlencoded
 
-### 404
+id=G1P52N&email=gipsz.odon%40murica.com&password=G1P52N&birth_date=2003-03-22
 
-GET https://localhost/murica_api/error/404?endpointName=Test
+### Create user (no email)
 
-### 500 (no message)
+POST https://localhost/murica_api/user/new
+Content-Type: application/x-www-form-urlencoded
 
-GET https://localhost/murica_api/error/500
+id=G1P52N&name=Gipsz%20Odon&password=G1P52N&birth_date=2003-03-22
 
-### 500 (with message)
+### Create user (no password)
 
-GET https://localhost/murica_api/error/500?errorMessage=Test
+POST https://localhost/murica_api/user/new
+Content-Type: application/x-www-form-urlencoded
+
+id=G1P52N&name=Gipsz%20Odon&email=gipsz.odon%40murica.com&birth_date=2003-03-22
+
+### Create user (no birth date)
+
+POST https://localhost/murica_api/user/new
+Content-Type: application/x-www-form-urlencoded
+
+id=G1P52N&name=Gipsz%20Odon&email=gipsz.odon%40murica.com&password=G1P52N

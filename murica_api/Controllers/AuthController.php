@@ -28,7 +28,7 @@ class AuthController extends Controller {
         $this->userDao = $userDao;
         $this->tokenService = $tokenService;
 
-        $this->getRouter()->registerController($this, 'user')
+        $this->router->registerController($this, 'user')
             ->registerEndpoint('login', 'login', EndpointRoute::VISIBILITY_PUBLIC)
             ->registerEndpoint('logout', 'logout', EndpointRoute::VISIBILITY_PRIVATE);
     }

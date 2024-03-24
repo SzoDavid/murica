@@ -21,11 +21,13 @@ try {
 } catch (MuricaException $ex) {
     exit(json_encode(['error' => [
         'code' => 500,
-        'message' => 'Failed to load configs: ' . $ex->getTraceMessages()]]));
+        'message' => 'Failed to load configs',
+        'details' => $ex->getTraceMessages()]]));
 } catch (Exception $ex) {
     exit(json_encode(['error' => [
         'code' => 500,
-        'message' => 'Failed to load configs: ' . $ex->getMessage()]]));
+        'message' => 'Failed to load configs',
+        'details' => $ex->getMessage()]]));
 }
 
 try {

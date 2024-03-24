@@ -9,8 +9,8 @@ class MessageModel extends Model {
 
     private array $message;
 
-    public function __construct(IRouter $router, array $message) {
-        parent::__construct($router);
+    public function __construct(IRouter $router, array $message, bool $success) {
+        parent::__construct($router, $success);
         $this->message = $message;
     }
 
@@ -19,6 +19,6 @@ class MessageModel extends Model {
         $links = $this->getLinks();
         if (empty($links['_links'])) return $this->message;
 
-        return array_merge($this->message, $this->getLinks());
+        return array_merge($this->message, $this->getLinks(), ['success' => $this->success]);
     }
 }

@@ -3,17 +3,18 @@
 namespace murica_bl_impl\Models;
 
 use JsonSerializable;
-use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
 use murica_bl\Router\IRouter;
 use Override;
 
 abstract class Model implements IModel, JsonSerializable {
     private IRouter $router;
+    protected bool $success;
     protected array $links;
 
-    public function __construct(IRouter $router) {
+    public function __construct(IRouter $router, $success) {
         $this->router = $router;
+        $this->success = $success;
         $this->links = array();
     }
 

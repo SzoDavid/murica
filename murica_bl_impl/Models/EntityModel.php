@@ -8,8 +8,8 @@ use Override;
 class EntityModel extends Model {
     private Entity $entity;
 
-    public function __construct(Router $router, Entity $entity) {
-        parent::__construct($router);
+    public function __construct(Router $router, Entity $entity, bool $success) {
+        parent::__construct($router, $success);
         $this->entity = $entity;
     }
 
@@ -18,6 +18,6 @@ class EntityModel extends Model {
         $links = $this->getLinks();
         if(empty($links['_links'])) return $this->entity->jsonSerialize();
 
-        return array_merge($this->entity->jsonSerialize(), $this->getLinks());
+        return array_merge($this->entity->jsonSerialize(), $this->getLinks(), ['_success' => $this->success]);
     }
 }

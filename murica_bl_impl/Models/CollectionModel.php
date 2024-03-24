@@ -13,8 +13,8 @@ class CollectionModel extends Model {
     /**
      * @throws ModelException
      */
-    public function __construct(IRouter $router, array $collection, string $name) {
-        parent::__construct($router);
+    public function __construct(IRouter $router, array $collection, string $name, bool $success) {
+        parent::__construct($router, $success);
         foreach ($collection as $item) {
             if (!$item instanceof EntityModel && !$item instanceof CollectionModel)
                 throw new ModelException('Collection item is not EntityModel or CollectionModel: ' . $item);
@@ -39,6 +39,6 @@ class CollectionModel extends Model {
         $links = $this->getLinks();
         if(empty(empty($links['_links']))) return ['_embedded' => [$this->name => $elements]];
 
-        return array_merge(['_embedded' => [$this->name => $elements]], $this->getLinks());
+        return array_merge(['_embedded' => [$this->name => $elements]], $this->getLinks(), ['_success' => $this->success]);
     }
 }

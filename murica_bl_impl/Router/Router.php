@@ -9,6 +9,7 @@ use murica_bl\Router\Exceptions\UriAssemblingException;
 use murica_bl\Router\IControllerRoute;
 use murica_bl\Router\IRouter;
 use murica_bl\Services\ConfigService\IConfigService;
+use murica_bl_impl\Models\ErrorModel;
 use murica_bl_impl\Models\MessageModel;
 use Override;
 
@@ -23,7 +24,7 @@ class Router implements IRouter {
 
     #[Override]
     public function registerController(IController $controller, $route): IControllerRoute {
-        $controllerRoute = new ControllerRoute($controller);
+        $controllerRoute = new ControllerRoute($this, $controller);
         $this->controllerRoutes[$route] = $controllerRoute;
         return $controllerRoute;
     }
@@ -33,11 +34,12 @@ class Router implements IRouter {
         $uriElements = explode('/', $uri);
 
         if (!isset($this->controllerRoutes[$uriElements[0]]))
-            return new MessageModel($this, ['error' => ['code' => 404, 'message' => "Endpoint `$uri` not found"]]);
+            return new ErrorModel($this, 404, 'Not found', "Endpoint `$uri` not found");
 
+        $controller = $uriElements[0];
         array_shift($uriElements);
 
-        return $this->controllerRoutes[$uriElements[0]]->resolveRequest(implode('/', $uriElements), $requestData);
+        return $this->controllerRoutes[$controller]->resolveRequest(implode('/', $uriElements), $requestData);
     }
 
     /**

@@ -8,6 +8,7 @@ use murica_bl\Router\Exceptions\UriAssemblingException;
 use murica_bl\Router\IControllerRoute;
 use murica_bl\Router\IEndpointRoute;
 use murica_bl\Router\IRouter;
+use murica_bl_impl\Models\ErrorModel;
 use murica_bl_impl\Models\MessageModel;
 use Override;
 
@@ -37,7 +38,7 @@ class ControllerRoute implements IControllerRoute {
             if (isset($this->endpointRoutes[''])) {
                 $endpointRoute = $this->endpointRoutes[''];
             } else {
-                return new MessageModel($this->router, ['error' => ['code' => 404, 'message' => "Endpoint `$uri` not found"]]);
+                return new ErrorModel($this->router, 404, 'Not found', "Endpoint `$uri` not found");
             }
         } else {
             $endpointRoute = $this->endpointRoutes[$uriElements[0]];

@@ -59,4 +59,18 @@ class User extends Entity implements IUser {
         return $this->birthDate;
     }
     //endregion
+
+    //region JsonSerializable members
+    /**
+     * @inheritDoc
+     */
+    public function jsonSerialize(): array {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'email' => $this->email,
+            'birth_date' => $this->birthDate
+        ];
+    }
+    //endregion
 }

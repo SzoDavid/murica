@@ -12,9 +12,4 @@ class Controller implements IController {
     public function __construct(IRouter $router) {
         $this->router = $router;
     }
-
-    #[Override]
-    public function getRouter(): IRouter {
-        return $this->router;
-    }
 }
