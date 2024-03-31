@@ -1,0 +1,12 @@
+{
+    "data_source" : {
+        "type": "oci",
+        "user": "USER",
+        "password": "PASSWORD",
+        "connection_string": "(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))) (CONNECT_DATA = (SID = orania2)))",
+        "table_owner": "USER"
+    },
+    "host_name": "https://localhost",
+    "base_uri": "/murica_api/",
+    "display_errors": 0
+}
