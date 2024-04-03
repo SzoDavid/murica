@@ -35,11 +35,11 @@ try {
 try {
     $dataSource = (new DataSourceFactory($configService))->createDataSource();
     $userDao = $dataSource->createUserDao();
+    $tokenService = new DataSourceTokenService($dataSource->createTokenDao());
 
-    $router = new Router($configService,
-                         new DataSourceTokenService($dataSource->createTokenDao()));
+    $router = new Router($configService, $tokenService);
 
-    $authController = new AuthController($router, $userDao);
+    $authController = new AuthController($router, $userDao, $tokenService);
     $userController = new UserController($router, $userDao);
 } catch (MuricaException $ex) {
     exit(json_encode(['_success' => false,

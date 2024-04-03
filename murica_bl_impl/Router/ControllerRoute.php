@@ -11,6 +11,7 @@ use murica_bl\Router\Exceptions\UriAssemblingException;
 use murica_bl\Router\IControllerRoute;
 use murica_bl\Router\IEndpointRoute;
 use murica_bl\Router\IRouter;
+use murica_bl\Services\TokenService\ITokenService;
 use murica_bl_impl\Models\ErrorModel;
 use Override;
 
@@ -18,11 +19,13 @@ class ControllerRoute implements IControllerRoute {
     private IRouter $router;
     private array $endpointRoutes;
     private IController $controller;
+    private ITokenService $tokenService;
 
-    public function __construct(IRouter $router, IController $controller) {
+    public function __construct(IRouter $router, IController $controller, ITokenService $tokenService) {
         $this->endpointRoutes = array();
         $this->router = $router;
         $this->controller = $controller;
+        $this->tokenService = $tokenService;
     }
 
     #[Override]
@@ -51,7 +54,7 @@ class ControllerRoute implements IControllerRoute {
 
         if (!$endpointRoute->isVisible()) {
             try {
-                if (!isset($requestData['token']) || !$token = $this->router->getTokenService()->verifyToken($requestData['token']))
+                if (!isset($requestData['token']) || !$token = $this->tokenService->verifyToken($requestData['token']))
                     return (new ErrorModel($this->router, 401, 'Unauthorized', 'Missing or invalid token'))
                         ->linkTo('login', AuthController::class, 'login');
 

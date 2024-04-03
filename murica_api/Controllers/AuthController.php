@@ -19,12 +19,14 @@ use murica_bl_impl\Router\EndpointRoute;
 class AuthController extends Controller {
     //region Fields
     private IUserDao $userDao;
+    private ITokenService $tokenService;
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router ,IUserDao $userDao) {
+    public function __construct(IRouter $router, IUserDao $userDao, ITokenService $tokenService) {
         parent::__construct($router);
         $this->userDao = $userDao;
+        $this->tokenService = $tokenService;
 
         $this->router->registerController($this, 'auth')
             ->registerEndpoint('login', 'login', EndpointRoute::VISIBILITY_PUBLIC)
@@ -60,7 +62,7 @@ class AuthController extends Controller {
 
         if (password_verify($requestData['password'], $user->getPassword())) {
             try {
-                return (new EntityModel($this->router, $this->router->getTokenService()->generateToken($requestData['id']), true))
+                return (new EntityModel($this->router, $this->tokenService->generateToken($requestData['id']), true))
                     ->linkTo('logout', AuthController::class, 'logout');
             } catch (DataAccessException|ModelException $e) {
                 return new ErrorModel($this->router, 500, 'Authentication failed', $e->getTraceMessages());
@@ -83,7 +85,7 @@ class AuthController extends Controller {
         $token = $requestData['token'];
 
         try {
-            $this->router->getTokenService()->removeToken($token->getToken());
+            $this->tokenService->removeToken($token->getToken());
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to log out', $e->getTraceMessages());
         }
