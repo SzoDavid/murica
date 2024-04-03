@@ -41,22 +41,22 @@ class User extends Entity implements IUser {
     }
 
     #[Override]
-    public function getName(): ?string {
+    public function getName(): string {
         return $this->name;
     }
 
     #[Override]
-    public function getEmail(): ?string {
+    public function getEmail(): string {
         return $this->email;
     }
 
     #[Override]
-    public function getPassword(): ?string {
+    public function getPassword(): string {
         return $this->password;
     }
 
     #[Override]
-    public function getBirthDate(): ?string {
+    public function getBirthDate(): string {
         return $this->birthDate;
     }
     // endregion
