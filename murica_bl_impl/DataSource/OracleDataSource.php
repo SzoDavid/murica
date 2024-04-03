@@ -6,6 +6,7 @@ use Exception;
 use murica_bl\Dao\IAdminDao;
 use murica_bl\Dao\IMessageDao;
 use murica_bl\Dao\IProgrammeDao;
+use murica_bl\Dao\ISubjectDao;
 use murica_bl\Dao\ITokenDao;
 use murica_bl\Dao\IUserDao;
 use murica_bl\DataSource\Exceptions\DataSourceException;
@@ -14,6 +15,7 @@ use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use murica_bl_impl\Dao\OracleAdminDao;
 use murica_bl_impl\Dao\OracleMessageDao;
 use murica_bl_impl\Dao\OracleProgrammeDao;
+use murica_bl_impl\Dao\OracleSubjectDao;
 use murica_bl_impl\Dao\OracleTokenDao;
 use murica_bl_impl\Dao\OracleUserDao;
 use murica_bl_impl\Services\ConfigService\OracleDataSourceConfigService;
@@ -56,6 +58,7 @@ class OracleDataSource implements IDataSource {
     }
     //endregion
 
+    //region Create daos
     #[Override]
     public function createUserDao(): IUserDao {
         return new OracleUserDao($this, $this->configService);
@@ -80,6 +83,12 @@ class OracleDataSource implements IDataSource {
     public function createProgrammeDao(): IProgrammeDao {
         return new OracleProgrammeDao($this, $this->configService);
     }
+
+    #[Override]
+    public function createSubjectDao(): ISubjectDao {
+        return new OracleSubjectDao($this, $this->configService);
+    }
+    //endregion
 
     public function getConnection() {
         return $this->connection;
