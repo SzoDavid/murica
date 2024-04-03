@@ -2,6 +2,8 @@
 
 namespace murica_bl_impl\Dto;
 
+use DateTime;
+use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\IUser;
 use murica_bl_impl\Models\Entity;
 use Override;
@@ -24,12 +26,11 @@ class User extends Entity implements IUser {
      * @param string $birthDate
      */
     public function __construct(string $id, string $name, string $email, string $password, string $birthDate) {
-        //TODO: validation
-        $this->id = $id;
-        $this->name = $name;
-        $this->email = $email;
-        $this->password = $password;
-        $this->birthDate = $birthDate;
+        $this->id = strtoupper(trim($id));
+        $this->name = trim($name);
+        $this->email = trim($email);
+        $this->password = trim($password);
+        $this->birthDate = trim($birthDate);
     }
     //endregion
 
@@ -57,6 +58,23 @@ class User extends Entity implements IUser {
     #[Override]
     public function getBirthDate(): string {
         return $this->birthDate;
+    }
+
+    #[Override]
+    public function validate(): bool {
+        $errors = "";
+        if (!preg_match('/^[A-Z0-9]{6}$/', $this->id)) $errors .= '\nID must contain letters and numbers only and must be 6 characters long!';
+        if (strlen($this->name) > 50) $errors .= '\nName cannot be longer than 50 characters';
+        if (filter_var($this->email, FILTER_VALIDATE_EMAIL)) $errors .= '\nEmail is invalid';
+        if (empty($this->password)) $errors .= '\nPassword is empty';
+
+        $dateTime = DateTime::createFromFormat('Y-m-d', $this->birthDate);
+
+        if (!$dateTime || $dateTime->format('Y-m-d') !== $this->birthDate) $errors .= '\nBirth date is invalid';
+
+        if (!empty($errors)) throw new ValidationException(ltrim($errors, '\n'));
+
+        return true;
     }
     //endregion
 

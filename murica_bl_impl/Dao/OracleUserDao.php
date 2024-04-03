@@ -5,6 +5,7 @@ namespace murica_bl_impl\Dao;
 use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IUserDao;
+use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\IUser;
 use murica_bl\Exceptions\NotImplementedException;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
@@ -114,6 +115,8 @@ class OracleUserDao implements IUserDao {
     #[Override]
     public function insert(IUser $model): User {
         //TODO: error handling
+        $model->validate();
+
         $sql = sprintf("INSERT INTO %s.%s (%s, %s, %s, %s, %s) VALUES (:id, :name, :email, :password, TO_DATE(:birth_date, 'YYYY-MM-DD'))",
                        $this->configService->getTableOwner(),
                        TableDefinition::USER_TABLE,
@@ -146,7 +149,7 @@ class OracleUserDao implements IUserDao {
         }
 
         // TODO: fix this
-        return $this->findByCrit(new QueryUser($model->getId(), null, null, null, null))[0];
+        return $this->findByCrit(new User($model->getId(), null, null, null, null))[0];
     }
 
     /**
