@@ -11,8 +11,7 @@ use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Subject;
 use Override;
 
-class OracleSubjectDao implements ISubjectDao
-{
+class OracleSubjectDao implements ISubjectDao {
 
     //region Properties
     private OracleDataSource $dataSource;
@@ -75,67 +74,6 @@ class OracleSubjectDao implements ISubjectDao
      */
     #[Override]
     public function update(ISubject $model): ISubject {
-        $model->validate();
-
-        $sql = sprintf("UPDATE %s.%s SET %s = :name, %s = :approval, %s = :credit, %s = :type WHERE %s = :id",
-            $this->configService->getTableOwner(),
-            TableDefinition::SUBJECT_TABLE,
-            TableDefinition::SUBJECT_TABLE_FIELD_NAME,
-            TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,
-            TableDefinition::SUBJECT_TABLE_FIELD_CREDIT,
-            TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-            TableDefinition::SUBJECT_TABLE_FIELD_ID);
-
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        $id = $model->getId();
-        $name = $model->getName();
-        $approval = $model->getApproval();
-        $credit = $model->getCredit();
-        $type = $model->getType();
-
-        if (!oci_bind_by_name($stmt, ':id', $id, -1) ||
-            !oci_bind_by_name($stmt, ':name', $name, -1) ||
-            !oci_bind_by_name($stmt, ':approval', $approval, -1) ||
-            !oci_bind_by_name($stmt, ':credit', $credit, -1) ||
-            !oci_bind_by_name($stmt, ':type', $type, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        return $this->findByCrit(new Subject($model->getId()))[0];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function delete(ISubject $model): void {
-        $sql = sprintf("DELETE FROM %s.%s WHERE %s = :id",
-            $this->configService->getTableOwner(),
-            TableDefinition::SUBJECT_TABLE,
-            TableDefinition::SUBJECT_TABLE_FIELD_ID);
-
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        $id = $model->getId();
-
-        if (!oci_bind_by_name($stmt, ':id', $id, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function update(ISubject $model): ISubject
-    {
         $model->validate();
 
         $sql = sprintf("UPDATE %s.%s SET %s = :name, %s = :approval, %s = :credit, %s = :type WHERE %s = :id",

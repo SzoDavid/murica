@@ -2,7 +2,7 @@
 
 namespace murica_bl\Dao;
 
-use Cassandra\Exception\ValidationException;
+use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dto\ISubject;
 
