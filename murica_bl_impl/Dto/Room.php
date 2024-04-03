@@ -1,0 +1,75 @@
+<?php
+
+namespace murica_bl_impl\Dto;
+
+use murica_bl\Dto\Exceptions\ValidationException;
+use murica_bl\Dto\IRoom;
+use murica_bl_impl\Models\Entity;
+use Override;
+
+class Room extends Entity implements IRoom {
+    //region Properties
+    private string $id;
+    private int $capacity;
+    //endregion
+    //region Ctor
+    /**
+     * @param string $id
+     * @param int $capacity
+     */
+    public function __construct(string $id, int $capacity)
+    {
+        $this->id = $id;
+        $this->capacity = $capacity;
+    }
+    //endregion
+    //region Getters
+    #[Override]
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    #[Override]
+    public function getCapacity(): int
+    {
+        return $this->capacity;
+    }
+    //endregion
+    //region Setters
+    #[Override]
+    public function setId(string $id): IRoom {
+        $this->id = $id;
+        return $this;
+    }
+    #[Override]
+    public function setCapacity(int $capacity): IRoom {
+        $this->capacity = $capacity;
+        return $this;
+    }
+    //endregion
+    //iroom members
+    #[Override]
+    public function validate(): bool
+    {
+        $errors = "";
+        if (empty($this->id) || strlen($this->id) > 20) $errors .= '\nID cannot be empty or longer than 20 characters!';
+        if (empty($this->capacity) || strlen($this->capacity) > 999) $errors .= '\nCapacity cannot be empty or longer than 999 number!';
+        if (!empty($errors)) throw new ValidationException(ltrim($errors, '\n'));
+        return true;
+    }
+    //endregion
+    //region JsonSerializable members
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'capacity' => $this->capacity,
+        ];
+    }
+    //endregion
+}
