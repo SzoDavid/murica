@@ -10,24 +10,16 @@ use murica_bl_impl\Dto\User;
 interface IUserDao {
     /**
      * @throws DataAccessException
-     * @throws ValidationException
-     */
-    public function create(IUser $model): IUser;
-    /**
-     * @throws DataAccessException
-     * @throws ValidationException
-     */
-    public function update(IUser $model): IUser;
-    /**
-     * @throws DataAccessException
-     */
-    public function delete(IUser $model): void;
-    /**
-     * @throws DataAccessException
      */
     public function findAll(): array;
     /**
      * @throws DataAccessException
      */
     public function findByCrit(IUser $model): array;
+    /**
+     * @throws DataAccessException
+     * @throws ValidationException
+     */
+    public function insert(IUser $model): User;
+    public function remove(IUser $model): void;
 }
