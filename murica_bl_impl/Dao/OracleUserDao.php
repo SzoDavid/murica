@@ -182,9 +182,9 @@ class OracleUserDao implements IUserDao {
         $name = $model->getName();
         $email = $model->getEmail();
 
-        if (isset($id)) $crits[] = "ID LIKE :id";
-        if (isset($name)) $crits[] = "Name LIKE :name";
-        if (isset($email)) $crits[] = "EMAIL LIKE :email";
+        if (isset($id)) $crits[] = TableDefinition::USER_TABLE_FIELD_ID . " LIKE :id";
+        if (isset($name)) $crits[] = TableDefinition::USER_TABLE_FIELD_NAME . " LIKE :name";
+        if (isset($email)) $crits[] = TableDefinition::USER_TABLE_FIELD_EMAIL . " LIKE :email";
         // NOTE: I did not implement searching by password hash or birth date because it seems useless
 
         if (!empty($crits))
