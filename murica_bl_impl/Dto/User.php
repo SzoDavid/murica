@@ -10,11 +10,11 @@ use Override;
 
 class User extends Entity implements IUser {
     //region Properties
-    private string $id;
-    private string $name;
-    private string $email;
-    private string $password;
-    private string $birthDate;
+    private ?string $id;
+    private ?string $name;
+    private ?string $email;
+    private ?string $password;
+    private ?string $birthDate;
     //endregion
 
     //region constructor
@@ -26,37 +26,37 @@ class User extends Entity implements IUser {
      * @param string|null $birthDate
      */
     public function __construct(string $id=null, string $name=null, string $email=null, string $password=null, string $birthDate=null) {
-        if (isset($id)) $this->id = strtoupper(trim($id));
-        if (isset($name)) $this->name = trim($name);
-        if (isset($email)) $this->email = trim($email);
-        if (isset($password)) $this->password = trim($password);
-        if (isset($birthDate)) $this->birthDate = trim($birthDate);
+        $this->id = isset($id) ? strtoupper(trim($id)) : null;
+        $this->name = isset($name) ? trim($name) : null;
+        $this->email = isset($email) ? trim($email) : null;
+        $this->password = isset($password) ? trim($password) : null;
+        $this->birthDate = isset($birthDate) ? trim($birthDate) : null;
     }
     //endregion
 
     //region getters
     #[Override]
-    public function getId(): string {
+    public function getId(): ?string {
         return $this->id;
     }
 
     #[Override]
-    public function getName(): string {
+    public function getName(): ?string {
         return $this->name;
     }
 
     #[Override]
-    public function getEmail(): string {
+    public function getEmail(): ?string {
         return $this->email;
     }
 
     #[Override]
-    public function getPassword(): string {
+    public function getPassword(): ?string {
         return $this->password;
     }
 
     #[Override]
-    public function getBirthDate(): string {
+    public function getBirthDate(): ?string {
         return $this->birthDate;
     }
     // endregion
