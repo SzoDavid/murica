@@ -177,7 +177,7 @@ class OracleUserDao implements IUserDao {
             TableDefinition::USER_TABLE_FIELD_PASSWORD,
             TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
             $this->configService->getTableOwner(),
-            TableDefinition::USER_TABLE,
+            TableDefinition::USER_TABLE
         );
 
         $id = $model->getId();
