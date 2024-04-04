@@ -4,10 +4,10 @@ namespace murica_api\Controllers;
 
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IUserDao;
+use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
 use murica_bl\Router\IRouter;
-use murica_bl_impl\Dto\QueryDto\QueryUser;
 use murica_bl_impl\Dto\User;
 use murica_bl_impl\Models\CollectionModel;
 use murica_bl_impl\Models\EntityModel;
@@ -88,7 +88,7 @@ class UserController extends Controller {
         }
 
         try {
-            $users = $this->userDao->findByCrit(new QueryUser($uri, null, null, null, null));
+            $users = $this->userDao->findByCrit(new User($uri));
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router,
                                   500,
@@ -131,12 +131,12 @@ class UserController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to create user', 'Parameter "birth_date" is not provided in uri');
 
         try {
-            $user = $this->userDao->insert(new User($requestData['id'],
+            $user = $this->userDao->create(new User($requestData['id'],
                                                     $requestData['name'],
                                                     $requestData['email'],
                                                     password_hash($requestData['password'], PASSWORD_DEFAULT),
                                                     $requestData['birth_date']));
-        } catch (DataAccessException $e) {
+        } catch (DataAccessException|ValidationException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
         }
 

@@ -10,7 +10,7 @@ use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
 use murica_bl\Router\IRouter;
 use murica_bl\Services\TokenService\ITokenService;
-use murica_bl_impl\Dto\QueryDto\QueryUser;
+use murica_bl_impl\Dto\User;
 use murica_bl_impl\Models\EntityModel;
 use murica_bl_impl\Models\ErrorModel;
 use murica_bl_impl\Models\MessageModel;
@@ -46,7 +46,7 @@ class AuthController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to authenticate', 'Parameter "password" is not provided in request');
 
         try {
-            $users = $this->userDao->findByCrit(new QueryUser($requestData['id'], null, null, null, null));
+            $users = $this->userDao->findByCrit(new User($requestData['id']));
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router,
                                   500,

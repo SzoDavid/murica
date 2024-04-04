@@ -20,6 +20,6 @@ interface IUserDao {
      * @throws DataAccessException
      * @throws ValidationException
      */
-    public function insert(IUser $model): User;
+    public function create(IUser $model): User;
     public function remove(IUser $model): void;
 }
