@@ -5,12 +5,10 @@ namespace murica_bl_impl\Dao;
 use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IUserDao;
-use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\IUser;
 use murica_bl\Exceptions\NotImplementedException;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use murica_bl_impl\DataSource\OracleDataSource;
-use murica_bl_impl\Dto\QueryDto\QueryUser;
 use murica_bl_impl\Dto\User;
 use Override;
 
@@ -113,8 +111,7 @@ class OracleUserDao implements IUserDao {
      * @inheritDoc
      */
     #[Override]
-    public function insert(IUser $model): User {
-        //TODO: error handling
+    public function create(IUser $model): User {
         $model->validate();
 
         $sql = sprintf("INSERT INTO %s.%s (%s, %s, %s, %s, %s) VALUES (:id, :name, :email, :password, TO_DATE(:birth_date, 'YYYY-MM-DD'))",
@@ -143,13 +140,11 @@ class OracleUserDao implements IUserDao {
             !oci_bind_by_name($stmt, ':birth_date', $birth_date, -1))
             throw new DataAccessException(oci_error($stmt));
 
-
         if (!oci_execute($stmt, OCI_COMMIT_ON_SUCCESS)) {
             throw new DataAccessException(json_encode(oci_error($stmt)));
         }
 
-        // TODO: fix this
-        return $this->findByCrit(new User($model->getId(), null, null, null, null))[0];
+        return $this->findByCrit(new User($model->getId()))[0];
     }
 
     /**
