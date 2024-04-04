@@ -74,7 +74,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
         break;
     default:
-        //TODO: implement here any other type of request method that may arise.
+        //NOTE: implement here any other type of request method that may arise.
         break;
 }
 
