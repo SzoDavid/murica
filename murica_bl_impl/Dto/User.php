@@ -10,11 +10,11 @@ use Override;
 
 class User extends Entity implements IUser {
     //region Properties
-    private string $id;
-    private string $name;
-    private string $email;
-    private string $password;
-    private string $birthDate;
+    private ?string $id;
+    private ?string $name;
+    private ?string $email;
+    private ?string $password;
+    private ?string $birthDate;
     //endregion
 
     //region constructor
@@ -36,27 +36,27 @@ class User extends Entity implements IUser {
 
     //region getters
     #[Override]
-    public function getId(): string {
+    public function getId(): ?string {
         return $this->id;
     }
 
     #[Override]
-    public function getName(): string {
+    public function getName(): ?string {
         return $this->name;
     }
 
     #[Override]
-    public function getEmail(): string {
+    public function getEmail(): ?string {
         return $this->email;
     }
 
     #[Override]
-    public function getPassword(): string {
+    public function getPassword(): ?string {
         return $this->password;
     }
 
     #[Override]
-    public function getBirthDate(): string {
+    public function getBirthDate(): ?string {
         return $this->birthDate;
     }
 
