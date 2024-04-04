@@ -18,4 +18,9 @@ class TableDefinition {
     const TOKEN_TABLE_FIELD_USER_ID = 'USER_ID';
     const TOKEN_TABLE_FIELD_EXPIRES_AT = 'EXPIRES_AT';
     //endregion
+
+    //region Admin table
+    const ADMIN_TABLE = 'MURICA_ADMIN';
+    const ADMIN_TABLE_FIELD_USER_ID = 'USER_ID';
+    //endregion
 }
