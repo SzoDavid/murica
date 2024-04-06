@@ -31,4 +31,11 @@ class TableDefinition {
     const MESSAGE_TABLE_FIELD_CONTENT = 'CONTENT';
     const MESSAGE_TABLE_FIELD_DATE = 'MESSAGE_DATE';
     //endregion
+
+    //region Programme table
+    const PROGRAMME_TABLE = 'MURICA_PROGRAMME';
+    const PROGRAMME_TABLE_FIELD_NAME = 'NAME';
+    const PROGRAMME_TABLE_FIELD_TYPE = 'TYPE';
+    const PROGRAMME_TABLE_FIELD_NO_TERMS = 'NO_TERMS';
+    //endregion
 }

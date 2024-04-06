@@ -2,7 +2,6 @@
 
 namespace murica_bl_impl\Dto;
 
-use DateTime;
 use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\IMessage;
 use murica_bl\Dto\IUser;
