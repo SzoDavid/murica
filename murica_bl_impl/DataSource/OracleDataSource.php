@@ -4,12 +4,14 @@ namespace murica_bl_impl\DataSource;
 
 use Exception;
 use murica_bl\Dao\IAdminDao;
+use murica_bl\Dao\IMessageDao;
 use murica_bl\Dao\ITokenDao;
 use murica_bl\Dao\IUserDao;
 use murica_bl\DataSource\Exceptions\DataSourceException;
 use murica_bl\DataSource\IDataSource;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use murica_bl_impl\Dao\OracleAdminDao;
+use murica_bl_impl\Dao\OracleMessageDao;
 use murica_bl_impl\Dao\OracleTokenDao;
 use murica_bl_impl\Dao\OracleUserDao;
 use murica_bl_impl\Services\ConfigService\OracleDataSourceConfigService;
@@ -67,6 +69,10 @@ class OracleDataSource implements IDataSource {
         return new OracleAdminDao($this, $this->configService);
     }
 
+    #[Override]
+    public function createMessageDao(): IMessageDao {
+        return new OracleMessageDao($this, $this->configService);
+    }
 
     public function getConnection() {
         return $this->connection;
