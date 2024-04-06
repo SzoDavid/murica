@@ -23,4 +23,12 @@ class TableDefinition {
     const ADMIN_TABLE = 'MURICA_ADMIN';
     const ADMIN_TABLE_FIELD_USER_ID = 'USER_ID';
     //endregion
+
+    //region Message table
+    const MESSAGE_TABLE = 'MURICA_MESSAGE';
+    const MESSAGE_TABLE_FIELD_USER_ID = 'USER_ID';
+    const MESSAGE_TABLE_FIELD_SUBJECT = 'SUBJECT';
+    const MESSAGE_TABLE_FIELD_CONTENT = 'CONTENT';
+    const MESSAGE_TABLE_FIELD_DATE = 'MESSAGE_DATE';
+    //endregion
 }

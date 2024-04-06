@@ -7,22 +7,21 @@ use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IAdminDao;
 use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\IAdmin;
-use murica_bl\Dto\IUser;
-use murica_bl\Exceptions\NotImplementedException;
-use murica_bl\Services\ConfigService\IDataSourceConfigService;
+use murica_bl_impl\Dao\Utils\OracleCheckers;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Admin;
 use murica_bl_impl\Dto\User;
+use murica_bl_impl\Services\ConfigService\OracleDataSourceConfigService;
 use Override;
 
 class OracleAdminDao implements IAdminDao {
 //region Properties
     private OracleDataSource $dataSource;
-    private IDataSourceConfigService $configService;
+    private OracleDataSourceConfigService $configService;
     //endregion
 
     //region Ctor
-    public function __construct(OracleDataSource $dataSource, IDataSourceConfigService $configService) {
+    public function __construct(OracleDataSource $dataSource, OracleDataSourceConfigService $configService) {
         $this->dataSource = $dataSource;
         $this->configService = $configService;
     }
@@ -31,7 +30,7 @@ class OracleAdminDao implements IAdminDao {
     //region IAdminDao members
     #[Override]
     public function create(IAdmin $model): IAdmin {
-        if (!$this->checkIfUserExists($model->getUser()))
+        if (!OracleCheckers::checkIfUserExists($model->getUser(), $this->configService, $this->dataSource))
             throw new ValidationException('User with id ' . $model->getUser()->getId() . ' does not exist in datasource');
 
         $sql = sprintf("INSERT INTO %s.%s (%s) VALUES (:id)",
@@ -160,31 +159,6 @@ class OracleAdminDao implements IAdminDao {
         }
 
         return $res;
-    }
-    //endregion
-
-    //region Private members
-    /**
-     * @throws DataAccessException
-     */
-    public function checkIfUserExists(IUser $user): bool {
-        $sql = sprintf("SELECT * FROM %s.%s WHERE %s = :id",
-                       $this->configService->getTableOwner(),
-                       TableDefinition::USER_TABLE,
-                       TableDefinition::USER_TABLE_FIELD_ID);
-
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException('parse ' . json_encode(oci_error($stmt)));
-
-        $id = $user->getId();
-
-        if (!oci_bind_by_name($stmt, ':id', $id, -1))
-            throw new DataAccessException('bind id ' . json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException('exec ' . json_encode(oci_error($stmt)));
-
-        return oci_fetch($stmt);
     }
     //endregion
 }
