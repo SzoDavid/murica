@@ -9,7 +9,6 @@ use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\IUser;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use murica_bl_impl\DataSource\OracleDataSource;
-use murica_bl_impl\Dto\QueryDto\QueryUser;
 use murica_bl_impl\Dto\User;
 use Override;
 

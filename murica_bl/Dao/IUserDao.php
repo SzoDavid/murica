@@ -3,6 +3,7 @@
 namespace murica_bl\Dao;
 
 use murica_bl\Dao\Exceptions\DataAccessException;
+use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\IUser;
 use murica_bl_impl\Dto\User;
 
