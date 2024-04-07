@@ -16,5 +16,8 @@ interface ITokenDao {
      * @throws DataAccessException
      */
     public function register(string $token, string $userId, int $expirationDate): Token;
+    /**
+     * @throws DataAccessException
+     */
     public function remove(string $token): void;
 }

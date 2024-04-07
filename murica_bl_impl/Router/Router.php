@@ -27,7 +27,7 @@ class Router implements IRouter {
 
     #[Override]
     public function registerController(IController $controller, $route): IControllerRoute {
-        $controllerRoute = new ControllerRoute($this, $controller);
+        $controllerRoute = new ControllerRoute($this, $controller, $this->tokenService);
         $this->controllerRoutes[$route] = $controllerRoute;
         return $controllerRoute;
     }
@@ -62,15 +62,5 @@ class Router implements IRouter {
         }
 
         throw new UriAssemblingException("Could not find controller with type <$class>");
-    }
-
-    #[Override]
-    public function getConfigService(): IConfigService {
-        return $this->configService;
-    }
-
-    #[Override]
-    public function getTokenService(): ITokenService {
-        return $this->tokenService;
     }
 }

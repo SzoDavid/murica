@@ -15,6 +15,4 @@ interface IRouter {
      * @throws UriAssemblingException
      */
     public function assembleUri(string $class, string $method, array $uriParameters, array $parameters): string;
-    public function getConfigService(): IConfigService;
-    public function getTokenService(): ITokenService;
 }
