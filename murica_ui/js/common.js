@@ -1,144 +1,144 @@
-const apiUrl = 'https://localhost/murica_api/'
-
 const bindClickListener = (observer, event, unbindOtherListeners = true) => {
     if (unbindOtherListeners) {
-        $(observer).off()
+        $(observer).off();
     }
     $(observer).on('click', (e) => {
-        e.stopPropagation()
-        event(observer, e)
-    })
+        e.stopPropagation();
+        event(observer, e);
+    });
 }
 
-const tableBuilder = {
+class Table {
     /**
-     * Creates a table
      * @param {Object} headers The headers where the keys define the keys used in the records array and the values are what should appear
      * @param {Array.<Object>} records An array of objects containing the records
-     * @returns {JQuery<HTMLElement>}
      */
-    createTable: (headers, records) => {
-        const tableContainerElement = $('<table></table>')
-
-        tableContainerElement.append(tableBuilder.createHeaders(headers))
-
-        $.each(records, (index, record) => {
-            tableContainerElement.append(tableBuilder.createRow(headers, record))
-        })
-
-        return tableContainerElement
-    },
+    constructor(headers, records) {
+        this.headers = headers;
+        this.records = records;
+    }
 
     /**
-     * Creates a table with dropdown rows
+     * @returns {JQuery<HTMLElement>}
+     */
+    build() {
+        const tableContainerElement = $('<table></table>');
+
+        tableContainerElement.append(this.createHeaders());
+
+        $.each(this.records, (index, record) => {
+            tableContainerElement.append(this.createRow(record));
+        });
+
+        return tableContainerElement;
+    }
+
+    /**
+     * @returns {JQuery<HTMLElement>}
+     */
+    createHeaders() {
+        const headerRowElement = $('<tr></tr>');
+
+        $.each(this.headers, (key, value) => {
+            const headerElement = $(`<th></th>`).text(value);
+
+            headerRowElement.append(headerElement);
+        });
+
+        return headerRowElement;
+    }
+
+    /**
+     * @param {Object} record
+     * @returns {JQuery<HTMLElement>}
+     */
+    createRow(record) {
+        const rowElement = $('<tr></tr>');
+
+        $.each(this.headers, (key) => {
+            const tableValueElement = $('<td></td>').text(record[key]);
+
+            rowElement.append(tableValueElement);
+        })
+
+        return rowElement;
+    }
+}
+
+class DropDownTable extends Table {
+    /**
      * @param {Object} headers The headers where the keys define the keys used in the records array and the values are what should appear
      * @param {Array.<Object>} records An array of objects containing the records
      * @param {Function} dropDownEvent The event that should return a html element which will populate the dropdown menu
-     * @returns {JQuery<HTMLElement>}
      */
-    createDropDownTable: (headers, records, dropDownEvent) => {
-        const tableContainerElement = $('<table></table>')
-
-        tableContainerElement.append(tableBuilder.createHeaders(headers))
-
-        $.each(records, (index, record) => {
-            tableContainerElement.append(tableBuilder.createDropDownRow(headers, record, dropDownEvent))
-        })
-
-        return tableContainerElement
-    },
+    constructor(headers, records, dropDownEvent) {
+        super(headers, records);
+        this.dropDownEvent = dropDownEvent;
+    }
 
     /**
-     * Creates header row for table
-     * @param {Object} headers
      * @returns {JQuery<HTMLElement>}
      */
-    createHeaders: (headers) => {
-        const headerRowElement = $('<tr></tr>')
+    build() {
+        const tableContainerElement = $('<table></table>');
 
-        $.each(headers, (key, value) => {
-            const headerElement = $(`<th></th>`).text(value)
+        tableContainerElement.append(this.createHeaders());
 
-            headerRowElement.append(headerElement)
-        })
+        $.each(this.records, (index, record) => {
+            tableContainerElement.append(this.createRow(record));
+        });
 
-        return headerRowElement
-    },
+        return tableContainerElement;
+    }
 
     /**
-     * Creates row for table
-     * @param {Object} headers
      * @param {Object} record
      * @returns {JQuery<HTMLElement>}
      */
-    createRow: (headers, record) => {
-        const rowElement = $('<tr></tr>')
-
-        $.each(headers, (key) => {
-            const tableValueElement = $('<td></td>').text(record[key])
-
-            rowElement.append(tableValueElement)
-        })
-
-        return rowElement
-    },
-
-    /**
-     * Creates drop down row for table
-     * @param {Object} headers
-     * @param {Object} record
-     * @param {Function} dropDownEvent
-     * @returns {JQuery<HTMLElement>}
-     */
-    createDropDownRow: (headers, record, dropDownEvent) => {
-        const rowElement = tableBuilder.createRow(headers, record).addClass('dropDownRow')
+    createRow(record) {
+        const rowElement = super.createRow(record);
 
         bindClickListener(rowElement, (obj, event) => {
             if (rowElement.hasClass(`open`)) {
-                rowElement.removeClass('open')
-                rowElement.next().remove()
-                return
+                rowElement.removeClass('open');
+                rowElement.next().remove();
+                return;
             }
 
-            const openSiblings = rowElement.siblings('.open')
-            openSiblings.next().remove()
-            openSiblings.removeClass('open')
-            rowElement.addClass('open')
+            const openSiblings = rowElement.siblings('.open');
+            openSiblings.next().remove();
+            openSiblings.removeClass('open');
+            rowElement.addClass('open');
 
             rowElement.after($('<tr></tr>').append($('<td></td>')
                 .addClass('dropDownContainer')
                 .attr('colspan', rowElement.children().length)
-                .append(dropDownEvent())))
-        })
+                .append(this.dropDownEvent())));
+        });
 
-        return rowElement
+        return rowElement;
     }
 }
 
-const requestInvoker = {
-    executeQuery: async (url, args) => {
-        return requestInvoker.sendRequest(url, 'GET', args)
-    },
-    executeCommand: async (url, args) => {
-        return requestInvoker.sendRequest(url, 'POST', args)
-    },
-    executeUpdate: async (url, args) => {
-        return requestInvoker.sendRequest(url, 'PUT', args)
-    },
-    executeDelete: async (url, args) => {
-        return requestInvoker.sendRequest(url, 'DELETE', args)
-    },
+class RequestInvoker {
+    constructor(apiUrl) {
+        this.apiUrl = apiUrl;
+    }
 
-    sendRequest: (url, requestType, args) => {
-        let callback = () => {}
+    async executePost(url, args) {
+        return this.sendRequest(url, 'POST', args);
+    }
+
+    sendRequest(url, requestType, args) {
+        let callback = () => {};
         let result = {
             then: (responseHandler) => {
-                callback = responseHandler
-            }
-        }
+                callback = responseHandler;
+            },
+        };
 
         if (!url.startsWith('http')) {
-            url = apiUrl + url
+            url = this.apiUrl + url;
         }
 
         $.ajax({
@@ -146,13 +146,13 @@ const requestInvoker = {
             type: requestType,
             data: args,
             success: (response) => {
-                callback(response)
+                callback(response);
             },
             error: (xhr, status, error) => {
-                console.error(error)
+                console.error(error);
             },
-        })
+        });
 
-        return result
+        return result;
     }
 }
