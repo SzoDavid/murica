@@ -49,7 +49,7 @@ class OracleSubjectDao implements ISubjectDao {
 
         $id = $model->getId();
         $name = $model->getName();
-        $approval = $model->getApproval();
+        $approval = $model->isApproved() ? 1 : 0;
         $credit = $model->getCredit();
         $type = $model->getType();
 
@@ -58,14 +58,13 @@ class OracleSubjectDao implements ISubjectDao {
             !oci_bind_by_name($stmt, ':approval', $approval, -1) ||
             !oci_bind_by_name($stmt, ':credit', $credit, -1) ||
             !oci_bind_by_name($stmt, ':type', $type, -1))
-            throw new DataAccessException(oci_error($stmt));
+                throw new DataAccessException(oci_error($stmt));
 
 
         if (!oci_execute($stmt, OCI_COMMIT_ON_SUCCESS)) {
             throw new DataAccessException(json_encode(oci_error($stmt)));
         }
 
-        // TODO: fix this
         return $this->findByCrit(new Subject($model->getId()))[0];
     }
 
@@ -99,7 +98,7 @@ class OracleSubjectDao implements ISubjectDao {
             !oci_bind_by_name($stmt, ':approval', $approval, -1) ||
             !oci_bind_by_name($stmt, ':credit', $credit, -1) ||
             !oci_bind_by_name($stmt, ':type', $type, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+                throw new DataAccessException(json_encode(oci_error($stmt)));
 
         if (!oci_execute($stmt))
             throw new DataAccessException(json_encode(oci_error($stmt)));
