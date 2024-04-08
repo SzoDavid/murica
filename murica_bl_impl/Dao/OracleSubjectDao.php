@@ -49,7 +49,7 @@ class OracleSubjectDao implements ISubjectDao {
 
         $id = $model->getId();
         $name = $model->getName();
-        $approval = $model->isApproved() ? 1 : 0;
+        $approval = $model->isApprovalNeeded() ? 1 : 0;
         $credit = $model->getCredit();
         $type = $model->getType();
 
@@ -89,7 +89,7 @@ class OracleSubjectDao implements ISubjectDao {
 
         $id = $model->getId();
         $name = $model->getName();
-        $approval = $model->isApproved() ? 1 : 0;
+        $approval = $model->isApprovalNeeded() ? 1 : 0;
         $credit = $model->getCredit();
         $type = $model->getType();
 
