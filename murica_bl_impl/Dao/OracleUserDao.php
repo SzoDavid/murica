@@ -6,19 +6,19 @@ use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\IUser;
-use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\User;
+use murica_bl_impl\Services\ConfigService\OracleDataSourceConfigService;
 use Override;
 
 class OracleUserDao implements IUserDao {
     //region Properties
     private OracleDataSource $dataSource;
-    private IDataSourceConfigService $configService;
+    private OracleDataSourceConfigService $configService;
     //endregion
 
     //region Ctor
-    public function __construct(OracleDataSource $dataSource, IDataSourceConfigService $configService) {
+    public function __construct(OracleDataSource $dataSource, OracleDataSourceConfigService $configService) {
         $this->dataSource = $dataSource;
         $this->configService = $configService;
     }
@@ -175,16 +175,16 @@ class OracleUserDao implements IUserDao {
             TableDefinition::USER_TABLE_FIELD_PASSWORD,
             TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
             $this->configService->getTableOwner(),
-            TableDefinition::USER_TABLE,
+            TableDefinition::USER_TABLE
         );
 
         $id = $model->getId();
         $name = $model->getName();
         $email = $model->getEmail();
 
-        if (isset($id)) $crits[] = "ID LIKE :id";
-        if (isset($name)) $crits[] = "Name LIKE :name";
-        if (isset($email)) $crits[] = "EMAIL LIKE :email";
+        if (isset($id)) $crits[] = TableDefinition::USER_TABLE_FIELD_ID . " LIKE :id";
+        if (isset($name)) $crits[] = TableDefinition::USER_TABLE_FIELD_NAME . " LIKE :name";
+        if (isset($email)) $crits[] = TableDefinition::USER_TABLE_FIELD_EMAIL . " LIKE :email";
         // NOTE: I did not implement searching by password hash or birth date because it seems useless
 
         if (!empty($crits))

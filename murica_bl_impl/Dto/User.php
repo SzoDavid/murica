@@ -17,7 +17,7 @@ class User extends Entity implements IUser {
     private ?string $birthDate;
     //endregion
 
-    //region constructor
+    //region Ctor
     /**
      * @param string|null $id
      * @param string|null $name
@@ -34,7 +34,7 @@ class User extends Entity implements IUser {
     }
     //endregion
 
-    //region getters
+    //region Getters
     #[Override]
     public function getId(): ?string {
         return $this->id;
@@ -61,7 +61,7 @@ class User extends Entity implements IUser {
     }
     // endregion
 
-    //setters
+    //region Setters
     #[Override]
     public function setId(string $id): IUser {
         $this->id = $id;

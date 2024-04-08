@@ -4,23 +4,23 @@ namespace murica_bl\Dao;
 
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dto\Exceptions\ValidationException;
-use murica_bl\Dto\IUser;
+use murica_bl\Dto\IProgramme;
 
-interface IUserDao {
+interface IProgrammeDao {
     /**
      * @throws DataAccessException
      * @throws ValidationException
      */
-    public function create(IUser $model): IUser;
+    public function create(IProgramme $model): IProgramme;
     /**
      * @throws DataAccessException
      * @throws ValidationException
      */
-    public function update(IUser $model): IUser;
+    public function update(IProgramme $model): IProgramme;
     /**
      * @throws DataAccessException
      */
-    public function delete(IUser $model): void;
+    public function delete(IProgramme $model): void;
     /**
      * @throws DataAccessException
      */
@@ -28,5 +28,5 @@ interface IUserDao {
     /**
      * @throws DataAccessException
      */
-    public function findByCrit(IUser $model): array;
+    public function findByCrit(IProgramme $model): array;
 }
