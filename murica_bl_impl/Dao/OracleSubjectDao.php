@@ -135,7 +135,6 @@ class OracleSubjectDao implements ISubjectDao {
     #[Override]
     public function findAll(): array
     {
-        //TODO: error handling
         $res = array();
 
         $sql = sprintf("SELECT %s AS ID, %s AS NAME, %s AS APPROVAL, %s AS CREDIT, %s AS TYPE FROM %s.%s",

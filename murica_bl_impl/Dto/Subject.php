@@ -51,31 +51,31 @@ class Subject extends Entity implements ISubject {
     //endregion
 
     //region Setters
-    #[\Override]
+    #[Override]
     public function setId(string $id): ISubject {
         $this->id = $id;
         return $this;
     }
 
-    #[\Override]
+    #[Override]
     public function setName(string $name): ISubject {
         $this->name = $name;
         return $this;
     }
 
-    #[\Override]
+    #[Override]
     public function setApproval(int $approval): ISubject {
         $this->approval = $approval;
         return $this;
     }
 
-    #[\Override]
+    #[Override]
     public function setCredit(int $credit): ISubject {
         $this->credit = $credit;
         return $this;
     }
 
-    #[\Override]
+    #[Override]
     public function setType(string $type): ISubject {
         $this->type = $type;
         return $this;
@@ -91,7 +91,7 @@ class Subject extends Entity implements ISubject {
         if (empty($this->name) || strlen($this->name) > 50) $errors .= '\nName cannot be empty or longer than 50 characters!';
         if (empty($this->approval) || (($this->approval != 0) && ($this->approval != 1))) $errors .= '\nApproval must be 0 or 1!';
         if (empty($this->credit) || ($this->credit < 0)) $errors .= '\nCredit is empty or negative!';
-        if (empty($this->type) || (($this->type != 'Kötelező') && ($this->type != 'Kötelezően választható') && ($this->type != 'Szabadon választható'))) $errors .= '\nType cannot be empty or the given type does not exists!';
+        if (empty($this->type) || strlen($this->type) > 50) $errors .= '\nType cannot be empty or longer than 20 characters!';
 
 
         if (!empty($errors)) throw new ValidationException(ltrim($errors, '\n'));
