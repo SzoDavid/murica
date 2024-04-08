@@ -89,7 +89,7 @@ class OracleSubjectDao implements ISubjectDao {
 
         $id = $model->getId();
         $name = $model->getName();
-        $approval = $model->getApproval();
+        $approval = $model->isApproved() ? 1 : 0;
         $credit = $model->getCredit();
         $type = $model->getType();
 
@@ -156,7 +156,7 @@ class OracleSubjectDao implements ISubjectDao {
             $res[] = new Subject(
                 oci_result($stmt, 'ID'),
                 oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'APPROVAL'),
+                oci_result($stmt, 'APPROVAL' == 1),
                 oci_result($stmt, 'CREDIT'),
                 oci_result($stmt, 'TYPE')
             );
@@ -212,7 +212,7 @@ class OracleSubjectDao implements ISubjectDao {
             $res[] = new Subject(
                 oci_result($stmt, 'ID'),
                 oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'APPROVAL'),
+                oci_result($stmt, 'APPROVAL' == 1),
                 oci_result($stmt, 'CREDIT'),
                 oci_result($stmt, 'TYPE')
             );
