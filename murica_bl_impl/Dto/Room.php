@@ -9,17 +9,17 @@ use Override;
 
 class Room extends Entity implements IRoom {
     //region Properties
-    private string $id;
-    private int $capacity;
+    private ?string $id;
+    private ?int $capacity;
     //endregion
     //region Ctor
     /**
      * @param string $id
      * @param int $capacity
      */
-    public function __construct(string $id, int $capacity)
+    public function __construct(string $id = null, int $capacity = null)
     {
-        $this->id = $id;
+        $this->id = isset($id) ? strtoupper(trim($id)) : null;
         $this->capacity = $capacity;
     }
     //endregion
@@ -53,11 +53,18 @@ class Room extends Entity implements IRoom {
     public function validate(): bool
     {
         $errors = "";
-        if (empty($this->id) || strlen($this->id) > 20) $errors .= '\nID cannot be empty or longer than 20 characters!';
-        if (empty($this->capacity) || strlen($this->capacity) > 999) $errors .= '\nCapacity cannot be empty or longer than 999 number!';
-        if (!empty($errors)) throw new ValidationException(ltrim($errors, '\n'));
+        if (empty($this->id) || !preg_match('/^[A-Z]{2}-\d{3}$/', $this->id)) {
+            $errors .= "\nID must consist of two capital letters followed by a hyphen and three digits!";
+        }
+        if (empty($this->capacity) || strlen($this->capacity) > 999) {
+            $errors .= "\nCapacity cannot be empty or longer than 999 number!";
+        }
+        if (!empty($errors)) {
+            throw new ValidationException(ltrim($errors, "\n"));
+        }
         return true;
     }
+
     //endregion
     //region JsonSerializable members
     /**

@@ -9,10 +9,10 @@ use Override;
 
 class Student extends Entity implements IStudent {
     //region Properties
-    private string $id;
-    private string $programmename;
-    private string $programmetype;
-    private string $startterm;
+    private ?string $id;
+    private ?string $programmename;
+    private ?string $programmetype;
+    private ?string $startterm;
     //endregion
     //region Ctor
     /**
@@ -21,11 +21,11 @@ class Student extends Entity implements IStudent {
      * @param string $programmetype
      * @param string $startterm
      */
-    public function __construct(string $id, string $programmename, string $programmetype, string $startterm)
+    public function __construct(string $id = null, string $programmename= null, string $programmetype= null, string $startterm= null)
     {
-        $this->id = $id;
-        $this->programmename = $programmename;
-        $this->programmetype = $programmetype;
+        $this->id = isset($id) ? strtoupper(trim($id)) : null;
+        $this->programmename = isset($programmename) ? trim($programmename) : null;
+        $this->programmetype = isset($programmetype) ? trim($programmetype) : null;
         $this->startterm = $startterm;
     }
     //endregion
@@ -79,13 +79,24 @@ class Student extends Entity implements IStudent {
     public function validate(): bool
     {
         $errors = "";
-        if (empty($this->id) || strlen($this->id) > 6) $errors .= '\nID cannot be empty or longer than 6 characters!';
-        if (empty($this->programmetype) || strlen($this->programmetype) > 10) $errors .= '\nProgramm-type cannot be empty or longer than 10 characters!';
-        if (empty($this->programmename) || strlen($this->programmename) > 50) $errors .= '\nProgramm-name cannot be empty or longer than 50 characters!';
-        if (empty($this->startterm) || strlen($this->startterm) > 9) $errors .= '\nStart-term cannot be empty or longer than 9 characters!';
-        if (!empty($errors)) throw new ValidationException(ltrim($errors, '\n'));
+        if (empty($this->id) || strlen($this->id) > 6) {
+            $errors .= "\nID cannot be empty or longer than 6 characters!";
+        }
+        if (empty($this->programmetype) || strlen($this->programmetype) > 10) {
+            $errors .= "\nProgramm-type cannot be empty or longer than 10 characters!";
+        }
+        if (empty($this->programmename) || strlen($this->programmename) > 50) {
+            $errors .= "\nProgramm-name cannot be empty or longer than 50 characters!";
+        }
+        if (empty($this->startterm) || !preg_match('/^\d{4}\/\d{2}\/\d{2}$/', $this->startterm)) {
+            $errors .= "\nStart-term must be in the format 'YYYY/MM/DD'!";
+        }
+        if (!empty($errors)) {
+            throw new ValidationException(ltrim($errors, "\n"));
+        }
         return true;
     }
+
     //endregion
     //region JsonSerializable members
     /**
