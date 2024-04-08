@@ -43,7 +43,7 @@ class TableDefinition {
     const ROOM_TABLE = 'MURICA_ROOM';
     const ROOM_TABLE_FIELD_ID = 'ID';
     const ROOM_TABLE_FIELD_CAPACITY = 'CAPACITY';
-     //endregion
+    //endregion
 
     //region Student table
     const STUDENT_TABLE = 'MURICA_STUDENT';

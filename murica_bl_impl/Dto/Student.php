@@ -4,16 +4,18 @@ namespace murica_bl_impl\Dto;
 
 use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\IStudent;
+use murica_bl\Dto\IUser;
 use murica_bl_impl\Models\Entity;
 use Override;
 
 class Student extends Entity implements IStudent {
     //region Properties
-    private ?string $id;
+    private ?IUser $user;
     private ?string $programmename;
     private ?string $programmetype;
     private ?string $startterm;
     //endregion
+
     //region Ctor
     /**
      * @param string $id
@@ -21,38 +23,34 @@ class Student extends Entity implements IStudent {
      * @param string $programmetype
      * @param string $startterm
      */
-    public function __construct(string $id = null, string $programmename= null, string $programmetype= null, string $startterm= null)
-    {
-        $this->id = isset($id) ? strtoupper(trim($id)) : null;
+    public function __construct(IUser $id = null, string $programmename= null, string $programmetype= null, string $startterm= null) {
+        $this->user = isset($id) ? strtoupper(trim($id)) : null;
         $this->programmename = isset($programmename) ? trim($programmename) : null;
         $this->programmetype = isset($programmetype) ? trim($programmetype) : null;
         $this->startterm = $startterm;
     }
     //endregion
+
     //region Getters and Setters
     #[Override]
-    public function getUserId(): string
-    {
-        return $this->id;
+    public function getUser(): ?IUser {
+        return $this->user;
     }
     #[Override]
-    public function getProgrammename(): string
-    {
+    public function getProgrammename(): ?string {
         return $this->programmename;
     }
     #[Override]
-    public function getProgrammetype(): string
-    {
+    public function getProgrammetype(): ?string {
         return $this->programmetype;
     }
     #[Override]
-    public function getStartterm(): string
-    {
+    public function getStartterm(): ?string {
         return $this->startterm;
     }
     #[Override]
-    public function setUserId(string $userid): IStudent {
-        $this->id = $userid;
+    public function setUser(IUser $user): IStudent {
+        $this->user = $user;
         return $this;
     }
 
@@ -74,42 +72,41 @@ class Student extends Entity implements IStudent {
         return $this;
      }
     //endregion
-    //iStudent members
+
+    //region IStudent members
     #[Override]
-    public function validate(): bool
-    {
+    public function validate(): bool {
         $errors = "";
-        if (empty($this->id) || strlen($this->id) > 6) {
+        if (empty($this->user) || strlen($this->user) > 6) {
             $errors .= "\nID cannot be empty or longer than 6 characters!";
         }
         if (empty($this->programmetype) || strlen($this->programmetype) > 10) {
             $errors .= "\nProgramm-type cannot be empty or longer than 10 characters!";
         }
         if (empty($this->programmename) || strlen($this->programmename) > 50) {
-            $errors .= "\nProgramm-name cannot be empty or longer than 50 characters!";
+            $errors .= "\nProgramme-name cannot be empty or longer than 50 characters!";
         }
-        if (empty($this->startterm) || !preg_match('/^\d{4}\/\d{2}\/\d{2}$/', $this->startterm)) {
-            $errors .= "\nStart-term must be in the format 'YYYY/MM/DD'!";
+        if (empty($this->startterm) || !preg_match('/^\d{4}\/\d{2}\/\d{1}$/', $this->startterm)) {
+            $errors .= "\nStart-term must be in the format 'YYYY/MM/D'!";
         }
         if (!empty($errors)) {
             throw new ValidationException(ltrim($errors, "\n"));
         }
         return true;
     }
-
     //endregion
+
     //region JsonSerializable members
     /**
      * @inheritDoc
      */
     #[Override]
-    public function jsonSerialize(): array
-    {
+    public function jsonSerialize(): array {
         return [
-            'id' => $this->id,
-            'programmename' => $this->programmename,
-            'programmetype' => $this->programmetype,
-            'startterm' => $this->startterm,
+            'id' => $this->user,
+            'programName' => $this->programmename,
+            'programType' => $this->programmetype,
+            'startTerm' => $this->startterm
             ];
     }
     //endregion

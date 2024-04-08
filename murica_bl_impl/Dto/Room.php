@@ -12,30 +12,30 @@ class Room extends Entity implements IRoom {
     private ?string $id;
     private ?int $capacity;
     //endregion
+
     //region Ctor
     /**
      * @param string $id
      * @param int $capacity
      */
-    public function __construct(string $id = null, int $capacity = null)
-    {
+    public function __construct(string $id = null, int $capacity = null) {
         $this->id = isset($id) ? strtoupper(trim($id)) : null;
         $this->capacity = $capacity;
     }
     //endregion
+
     //region Getters
     #[Override]
-    public function getId(): string
-    {
+    public function getId(): ?string {
         return $this->id;
     }
 
     #[Override]
-    public function getCapacity(): int
-    {
+    public function getCapacity(): ?int {
         return $this->capacity;
     }
     //endregion
+
     //region Setters
     #[Override]
     public function setId(string $id): IRoom {
@@ -48,10 +48,10 @@ class Room extends Entity implements IRoom {
         return $this;
     }
     //endregion
-    //iroom members
+
+    //region IRoom members
     #[Override]
-    public function validate(): bool
-    {
+    public function validate(): bool {
         $errors = "";
         if (empty($this->id) || !preg_match('/^[A-Z]{2}-\d{3}$/', $this->id)) {
             $errors .= "\nID must consist of two capital letters followed by a hyphen and three digits!";
@@ -66,16 +66,16 @@ class Room extends Entity implements IRoom {
     }
 
     //endregion
+
     //region JsonSerializable members
     /**
      * @inheritDoc
      */
     #[Override]
-    public function jsonSerialize(): array
-    {
+    public function jsonSerialize(): array {
         return [
             'id' => $this->id,
-            'capacity' => $this->capacity,
+            'capacity' => $this->capacity
         ];
     }
     //endregion

@@ -23,6 +23,7 @@ class OracleStudentDao implements IStudentDao {
         $this->configService = $configService;
     }
     //endregion
+
     //region IStudentDao members
     /**
      * @inheritDoc
@@ -54,6 +55,7 @@ class OracleStudentDao implements IStudentDao {
         }
         return $res;
     }
+
     /**
      * @inheritDoc
      */
@@ -68,10 +70,9 @@ class OracleStudentDao implements IStudentDao {
                        TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
                        TableDefinition::STUDENT_TABLE_FIELD_START_TERM,
                        $this->configService->getTableOwner(),
-
                        TableDefinition::STUDENT_TABLE);
 
-        $userId = $model->getUserId();
+        $userId = $model->getUser();
         $programmeName = $model->getProgrammeName();
         $programmeType = $model->getProgrammeType();
         $startTerm = $model->getStartTerm();
@@ -79,7 +80,7 @@ class OracleStudentDao implements IStudentDao {
         if (isset($userId)) $crits[] = TableDefinition::STUDENT_TABLE_FIELD_USER_ID . " LIKE :userId";
         if (isset($programmeName)) $crits[] = TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME . " LIKE :programmeName";
         if (isset($programmeType)) $crits[] = TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE . " LIKE :programmeType";
-        if (isset($startTerm)) $crits[] = TableDefinition::STUDENT_TABLE_FIELD_START_TERM . " = :startTerm";
+        if (isset($startTerm)) $crits[] = TableDefinition::STUDENT_TABLE_FIELD_START_TERM . " LIKE :startTerm";
 
         if (!empty($crits))
             $sql .= " WHERE " . implode(" AND ", $crits);
@@ -109,6 +110,7 @@ class OracleStudentDao implements IStudentDao {
         }
         return $res;
     }
+
     /**
      * @inheritDoc
      */
@@ -125,7 +127,7 @@ class OracleStudentDao implements IStudentDao {
         );
 
         $stmt = oci_parse($this->dataSource->getConnection(), $sql);
-        $userId = $model->getUserId();
+        $userId = $model->getUser();
         oci_bind_by_name($stmt, ":userId", $userId);
         $programmeName = $model->getProgrammeName();
         oci_bind_by_name($stmt, ":programmeName", $programmeName);
@@ -140,6 +142,7 @@ class OracleStudentDao implements IStudentDao {
         }
         return $model;
     }
+
     /**
      * @inheritDoc
      */
@@ -162,7 +165,7 @@ class OracleStudentDao implements IStudentDao {
         oci_bind_by_name($stmt, ":programmeType", $programmeType);
         $startTerm = $model->getStartTerm();
         oci_bind_by_name($stmt, ":startTerm", $startTerm);
-        $userId= $model->getUserId();
+        $userId= $model->getUser();
         oci_bind_by_name($stmt, ":userId", $userId);
         oci_execute($stmt);
 
@@ -184,7 +187,7 @@ class OracleStudentDao implements IStudentDao {
         );
 
         $stmt = oci_parse($this->dataSource->getConnection(), $sql);
-        $userId = $model->getUserId();
+        $userId = $model->getUser();
         oci_bind_by_name($stmt, ":userId", $userId);
         oci_execute($stmt);
 
