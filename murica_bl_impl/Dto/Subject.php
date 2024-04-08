@@ -36,7 +36,7 @@ class Subject extends Entity implements ISubject {
         return $this->name;
     }
 
-    public function getApproval(): ?string {
+    public function isApproved(): ?bool {
         return $this->approval;
     }
 
@@ -63,7 +63,7 @@ class Subject extends Entity implements ISubject {
     }
 
     #[Override]
-    public function setApproved(int $approval): ISubject {
+    public function setApproved(bool $approval): ISubject {
         $this->approval = $approval;
         return $this;
     }

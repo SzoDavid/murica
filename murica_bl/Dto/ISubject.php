@@ -12,7 +12,7 @@ interface ISubject {
     public function getType(): ?string;
     public function setId(string $id): ISubject;
     public function setName(string $name): ISubject;
-    public function setApproved(int $approval): ISubject;
+    public function setApproved(bool $approval): ISubject;
     public function setCredit(int $credit): ISubject;
     public function setType(string $type): ISubject;
     /**
