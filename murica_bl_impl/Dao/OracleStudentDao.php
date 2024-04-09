@@ -57,10 +57,10 @@ class OracleStudentDao implements IStudentDao {
 
         $success = oci_execute($stmt);
 
-        if (!oci_bind_by_name($stmt, ':user_id', $IUser, -1) ||
-            !oci_bind_by_name($stmt, ':programme_name', $programmeName, -1) ||
-            !oci_bind_by_name($stmt, ':programme_type', $programmeType, -1) ||
-            !oci_bind_by_name($stmt, ':start_term', $startTerm, -1))
+        if (!oci_bind_by_name($stmt, ':userId', $IUser, -1) ||
+            !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1) ||
+            !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1) ||
+            !oci_bind_by_name($stmt, ':startTerm', $startTerm, -1))
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
         if (!$stmt) {
@@ -106,10 +106,10 @@ class OracleStudentDao implements IStudentDao {
 
         $success = oci_execute($stmt);
 
-        if (!oci_bind_by_name($stmt, ':user_id', $IUser, -1) ||
-            !oci_bind_by_name($stmt, ':programme_name', $programmeName, -1) ||
-            !oci_bind_by_name($stmt, ':programme_type', $programmeType, -1) ||
-            !oci_bind_by_name($stmt, ':start_term', $startTerm, -1))
+        if (!oci_bind_by_name($stmt, ':userId', $IUser, -1) ||
+            !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1) ||
+            !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1) ||
+            !oci_bind_by_name($stmt, ':startTerm', $startTerm, -1))
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
         if (!$stmt) {
@@ -238,7 +238,7 @@ class OracleStudentDao implements IStudentDao {
             throw new DataAccessException('bind programmeType' . json_encode(oci_error($stmt)));
         if (isset($email) && !oci_bind_by_name($stmt, ':programmeName', $email, -1))
             throw new DataAccessException('bind programmeName ' . json_encode(oci_error($stmt)));
-        if (isset($email) && !oci_bind_by_name($stmt, ':startterm', $email, -1))
+        if (isset($email) && !oci_bind_by_name($stmt, ':startTerm', $email, -1))
             throw new DataAccessException('bind startTerm ' . json_encode(oci_error($stmt)));
 
         if (!oci_execute($stmt, OCI_DEFAULT))
