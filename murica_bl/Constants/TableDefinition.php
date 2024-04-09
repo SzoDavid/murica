@@ -38,4 +38,13 @@ class TableDefinition {
     const PROGRAMME_TABLE_FIELD_TYPE = 'TYPE';
     const PROGRAMME_TABLE_FIELD_NO_TERMS = 'NO_TERMS';
     //endregion
+
+    //region Subject table
+    const SUBJECT_TABLE = 'MURICA_SUBJECT';
+    const SUBJECT_TABLE_FIELD_ID = 'ID';
+    const SUBJECT_TABLE_FIELD_NAME = 'NAME';
+    const SUBJECT_TABLE_FIELD_APPROVAL = 'APPROVAL';
+    const SUBJECT_TABLE_FIELD_CREDIT = 'CREDIT';
+    const SUBJECT_TABLE_FIELD_TYPE = 'TYPE';
+    //endregion
 }
