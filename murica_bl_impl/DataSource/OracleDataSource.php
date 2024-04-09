@@ -6,6 +6,8 @@ use Exception;
 use murica_bl\Dao\IAdminDao;
 use murica_bl\Dao\IMessageDao;
 use murica_bl\Dao\IProgrammeDao;
+use murica_bl\Dao\IRoomDao;
+use murica_bl\Dao\IStudentDao;
 use murica_bl\Dao\ISubjectDao;
 use murica_bl\Dao\ITokenDao;
 use murica_bl\Dao\IUserDao;
@@ -15,6 +17,8 @@ use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use murica_bl_impl\Dao\OracleAdminDao;
 use murica_bl_impl\Dao\OracleMessageDao;
 use murica_bl_impl\Dao\OracleProgrammeDao;
+use murica_bl_impl\Dao\OracleRoomDao;
+use murica_bl_impl\Dao\OracleStudentDao;
 use murica_bl_impl\Dao\OracleSubjectDao;
 use murica_bl_impl\Dao\OracleTokenDao;
 use murica_bl_impl\Dao\OracleUserDao;
@@ -56,6 +60,7 @@ class OracleDataSource implements IDataSource {
     public function __destruct() {
         oci_close($this->connection);
     }
+
     //endregion
 
     //region Create daos
@@ -82,6 +87,16 @@ class OracleDataSource implements IDataSource {
     #[Override]
     public function createProgrammeDao(): IProgrammeDao {
         return new OracleProgrammeDao($this, $this->configService);
+    }
+
+    #[Override]
+    public function createRoomDao(): IRoomDao {
+        return new OracleRoomDao($this, $this->configService);
+    }
+
+    #[Override]
+    public function createStudentDao(): IStudentDao {
+        return new OracleStudentDao($this, $this->configService);
     }
 
     #[Override]

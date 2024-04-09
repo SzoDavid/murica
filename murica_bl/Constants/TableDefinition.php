@@ -39,6 +39,20 @@ class TableDefinition {
     const PROGRAMME_TABLE_FIELD_NO_TERMS = 'NO_TERMS';
     //endregion
 
+    //region Room table
+    const ROOM_TABLE = 'MURICA_ROOM';
+    const ROOM_TABLE_FIELD_ID = 'ID';
+    const ROOM_TABLE_FIELD_CAPACITY = 'CAPACITY';
+    //endregion
+
+    //region Student table
+    const STUDENT_TABLE = 'MURICA_STUDENT';
+    const STUDENT_TABLE_FIELD_USER_ID = 'USER_ID';
+    const STUDENT_TABLE_FIELD_PROGRAMME_NAME = 'PROGRAMME_NAME';
+    const STUDENT_TABLE_FIELD_PROGRAMME_TYPE = 'PROGRAMME_TYPE';
+    const STUDENT_TABLE_FIELD_START_TERM = 'START_TERM';
+    //endregion
+    
     //region Subject table
     const SUBJECT_TABLE = 'MURICA_SUBJECT';
     const SUBJECT_TABLE_FIELD_ID = 'ID';
