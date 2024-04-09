@@ -39,18 +39,20 @@ class OracleRoomDao implements IRoomDao {
                        TableDefinition::ROOM_TABLE_FIELD_CAPACITY
         );
 
-        $stmt = oci_parse($this->dataSource->getConnection(), $sql);
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
         $id = $model->getId();
         $capacity = $model->getCapacity();
 
-        oci_bind_by_name($stmt, ":id", $id);
-        oci_bind_by_name($stmt, ":capacity", $capacity);
-
-        if (!oci_execute($stmt)) {
+        if (!oci_bind_by_name($stmt, ':id', $id, -1) ||
+            !oci_bind_by_name($stmt, ':capacity', $capacity, -1))
             throw new DataAccessException(json_encode(oci_error($stmt)));
-        }
 
-        return $model;
+        if (!oci_execute($stmt))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        return $this->findByCrit(new Room($model->getId()))[0];
     }
 
     /**
@@ -67,19 +69,22 @@ class OracleRoomDao implements IRoomDao {
             TableDefinition::ROOM_TABLE_FIELD_ID
         );
 
-        $stmt = oci_parse($this->dataSource->getConnection(), $sql);
-        $capacity = $model->getCapacity();
-        oci_bind_by_name($stmt, ":capacity", $capacity);
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
         $id = $model->getId();
-        oci_bind_by_name($stmt, ":id", $id);
-        oci_execute($stmt);
+        $capacity = $model->getCapacity();
 
-        if (!$stmt) {
-            throw new DataAccessException(oci_error($stmt));
-        }
+        if (!oci_bind_by_name($stmt, ':id', $id, -1) ||
+            !oci_bind_by_name($stmt, ':capacity', $capacity, -1))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
 
-        return $model;
+        if (!oci_execute($stmt))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        return $this->findByCrit(new Room($model->getId()))[0];
     }
+
 
     /**
      * @inheritDoc
@@ -92,16 +97,16 @@ class OracleRoomDao implements IRoomDao {
             TableDefinition::ROOM_TABLE_FIELD_ID
         );
 
-        $stmt = oci_parse($this->dataSource->getConnection(), $sql);
-        $capacity = $model->getCapacity();
-        oci_bind_by_name($stmt, ":capacity", $capacity);
-        $id = $model->getId();
-        oci_bind_by_name($stmt, ":id", $id);
-        oci_execute($stmt);
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
 
-        if (!$stmt) {
-            throw new DataAccessException(oci_error($stmt));
-        }
+        $id = $model->getId();
+
+        if (!oci_bind_by_name($stmt, ':id', $id, -1))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (!oci_execute($stmt))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
     }
 
     /**
@@ -120,6 +125,10 @@ class OracleRoomDao implements IRoomDao {
 
         $stmt = oci_parse($this->dataSource->getConnection(), $sql);
         oci_execute($stmt, OCI_DEFAULT);
+
+        if (!oci_bind_by_name($stmt, ':id', $id, -1) ||
+            !oci_bind_by_name($stmt, ':capacity', $capacity, -1))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
 
         if (!$stmt) {
             throw new DataAccessException(oci_error($stmt));
