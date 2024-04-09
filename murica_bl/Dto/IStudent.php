@@ -11,7 +11,7 @@ interface IStudent {
     public function getStartTerm(): ?string;
     public function setUser(IUser $user): IStudent;
     public function setProgrammeName(string $programName): IStudent;
-    public function setProgrammeType(string $type): IStudent;
+    public function setProgrammeType(string $programmeType): IStudent;
     public function setStartTerm(string $startTerm): IStudent;
     /**
      * @throws ValidationException
