@@ -31,23 +31,23 @@ class OracleRoomDao implements IRoomDao {
     #[Override]
     public function create(IRoom $model): IRoom {
         $model->validate();
-        
+
         $sql = sprintf("INSERT INTO %s.%s (%s, %s) VALUES (:id, :capacity)",
-            $this->configService->getTableOwner(),
-            TableDefinition::ROOM_TABLE,
-            TableDefinition::ROOM_TABLE_FIELD_ID,
-            TableDefinition::ROOM_TABLE_FIELD_CAPACITY
+                       $this->configService->getTableOwner(),
+                       TableDefinition::ROOM_TABLE,
+                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY
         );
 
         $stmt = oci_parse($this->dataSource->getConnection(), $sql);
         $id = $model->getId();
-        oci_bind_by_name($stmt, ":id", $id);
         $capacity = $model->getCapacity();
-        oci_bind_by_name($stmt, ":capacity", $capacity);
-        oci_execute($stmt);
 
-        if (!$stmt) {
-            throw new DataAccessException(oci_error($stmt));
+        oci_bind_by_name($stmt, ":id", $id);
+        oci_bind_by_name($stmt, ":capacity", $capacity);
+
+        if (!oci_execute($stmt)) {
+            throw new DataAccessException(json_encode(oci_error($stmt)));
         }
 
         return $model;

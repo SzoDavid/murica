@@ -12,7 +12,7 @@ interface IStudent {
     public function setUser(IUser $user): IStudent;
     public function setProgrammeName(string $programname): IStudent;
     public function setProgrammeType(string $type): IStudent;
-    public function setStartTerm(string $startterm): IStudent;
+    public function setStartTerm(string $startTerm): IStudent;
     /**
      * @throws ValidationException
      */

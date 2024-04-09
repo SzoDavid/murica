@@ -11,23 +11,17 @@ use Override;
 class Student extends Entity implements IStudent {
     //region Properties
     private ?IUser $user;
-    private ?string $programmename;
-    private ?string $programmetype;
-    private ?string $startterm;
+    private ?string $programmeName;
+    private ?string $programmeType;
+    private ?string $startTerm;
     //endregion
 
     //region Ctor
-    /**
-     * @param string $id
-     * @param string $programmename
-     * @param string $programmetype
-     * @param string $startterm
-     */
-    public function __construct(IUser $id = null, string $programmename= null, string $programmetype= null, string $startterm= null) {
-        $this->user = isset($id) ? strtoupper(trim($id)) : null;
-        $this->programmename = isset($programmename) ? trim($programmename) : null;
-        $this->programmetype = isset($programmetype) ? trim($programmetype) : null;
-        $this->startterm = $startterm;
+    public function __construct(IUser $user = null, string $programmename= null, string $programmetype= null, string $startterm= null) {
+        $this->user = $user;
+        $this->programmeName = isset($programmename) ? trim($programmename) : null;
+        $this->programmeType = isset($programmetype) ? trim($programmetype) : null;
+        $this->startTerm = $startterm;
     }
     //endregion
 
@@ -37,16 +31,16 @@ class Student extends Entity implements IStudent {
         return $this->user;
     }
     #[Override]
-    public function getProgrammename(): ?string {
-        return $this->programmename;
+    public function getProgrammeName(): ?string {
+        return $this->programmeName;
     }
     #[Override]
-    public function getProgrammetype(): ?string {
-        return $this->programmetype;
+    public function getProgrammeType(): ?string {
+        return $this->programmeType;
     }
     #[Override]
-    public function getStartterm(): ?string {
-        return $this->startterm;
+    public function getStartTerm(): ?string {
+        return $this->startTerm;
     }
     #[Override]
     public function setUser(IUser $user): IStudent {
@@ -56,19 +50,19 @@ class Student extends Entity implements IStudent {
 
     #[Override]
     public function setProgrammeName(string $programname): IStudent {
-        $this->programmename = $programname;
+        $this->programmeName = $programname;
         return $this;
     }
 
     #[Override]
     public function setProgrammeType(string $type): IStudent {
-        $this->programmetype = $type;
+        $this->programmeType = $type;
         return $this;
      }
 
     #[Override]
-    public function setStartTerm(string $startterm): IStudent {
-        $this->startterm = $startterm;
+    public function setStartTerm(string $startTerm): IStudent {
+        $this->startTerm = $startTerm;
         return $this;
      }
     //endregion
@@ -80,13 +74,13 @@ class Student extends Entity implements IStudent {
         if (empty($this->user) || strlen($this->user) > 6) {
             $errors .= "\nID cannot be empty or longer than 6 characters!";
         }
-        if (empty($this->programmetype) || strlen($this->programmetype) > 10) {
+        if (empty($this->programmeType) || strlen($this->programmeType) > 10) {
             $errors .= "\nProgramm-type cannot be empty or longer than 10 characters!";
         }
-        if (empty($this->programmename) || strlen($this->programmename) > 50) {
+        if (empty($this->programmeName) || strlen($this->programmeName) > 50) {
             $errors .= "\nProgramme-name cannot be empty or longer than 50 characters!";
         }
-        if (empty($this->startterm) || !preg_match('/^\d{4}\/\d{2}\/\d{1}$/', $this->startterm)) {
+        if (empty($this->startTerm) || !preg_match('/^\d{4}\/\d{2}\/\d{1}$/', $this->startTerm)) {
             $errors .= "\nStart-term must be in the format 'YYYY/MM/D'!";
         }
         if (!empty($errors)) {
@@ -104,9 +98,9 @@ class Student extends Entity implements IStudent {
     public function jsonSerialize(): array {
         return [
             'id' => $this->user,
-            'programName' => $this->programmename,
-            'programType' => $this->programmetype,
-            'startTerm' => $this->startterm
+            'programName' => $this->programmeName,
+            'programType' => $this->programmeType,
+            'startTerm' => $this->startTerm
             ];
     }
     //endregion

@@ -14,10 +14,6 @@ class Room extends Entity implements IRoom {
     //endregion
 
     //region Ctor
-    /**
-     * @param string $id
-     * @param int $capacity
-     */
     public function __construct(string $id = null, int $capacity = null) {
         $this->id = isset($id) ? strtoupper(trim($id)) : null;
         $this->capacity = $capacity;
@@ -57,14 +53,13 @@ class Room extends Entity implements IRoom {
             $errors .= "\nID must consist of two capital letters followed by a hyphen and three digits!";
         }
         if (empty($this->capacity) || strlen($this->capacity) > 999) {
-            $errors .= "\nCapacity cannot be empty or longer than 999 number!";
+            $errors .= "\nCapacity cannot be empty or larger than 999!";
         }
         if (!empty($errors)) {
             throw new ValidationException(ltrim($errors, "\n"));
         }
         return true;
     }
-
     //endregion
 
     //region JsonSerializable members
@@ -79,4 +74,5 @@ class Room extends Entity implements IRoom {
         ];
     }
     //endregion
+
 }

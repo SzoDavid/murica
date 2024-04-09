@@ -60,6 +60,7 @@ class OracleDataSource implements IDataSource {
     public function __destruct() {
         oci_close($this->connection);
     }
+
     //endregion
 
     //region Create daos
@@ -67,28 +68,32 @@ class OracleDataSource implements IDataSource {
     public function createUserDao(): IUserDao {
         return new OracleUserDao($this, $this->configService);
     }
+
     #[Override]
     public function createTokenDao(): ITokenDao {
         return new OracleTokenDao($this, $this->configService);
     }
+
     #[Override]
     public function createAdminDao(): IAdminDao {
         return new OracleAdminDao($this, $this->configService);
     }
+
     #[Override]
     public function createMessageDao(): IMessageDao {
         return new OracleMessageDao($this, $this->configService);
     }
+
     #[Override]
     public function createProgrammeDao(): IProgrammeDao {
         return new OracleProgrammeDao($this, $this->configService);
     }
-    
+
     #[Override]
     public function createRoomDao(): IRoomDao {
         return new OracleRoomDao($this, $this->configService);
     }
-    
+
     #[Override]
     public function createStudentDao(): IStudentDao {
         return new OracleStudentDao($this, $this->configService);
