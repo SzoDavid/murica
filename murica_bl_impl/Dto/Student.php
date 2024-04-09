@@ -17,11 +17,11 @@ class Student extends Entity implements IStudent {
     //endregion
 
     //region Ctor
-    public function __construct(IUser $user = null, string $programmename= null, string $programmetype= null, string $startterm= null) {
+    public function __construct(IUser $user = null, string $programmeName= null, string $programmeType= null, string $startTerm= null) {
         $this->user = $user;
-        $this->programmeName = isset($programmename) ? trim($programmename) : null;
-        $this->programmeType = isset($programmetype) ? trim($programmetype) : null;
-        $this->startTerm = $startterm;
+        $this->programmeName = isset($programmename) ? trim($programmeName) : null;
+        $this->programmeType = isset($programmetype) ? trim($programmeType) : null;
+        $this->startTerm = $startTerm;
     }
     //endregion
 
@@ -30,18 +30,22 @@ class Student extends Entity implements IStudent {
     public function getUser(): ?IUser {
         return $this->user;
     }
+
     #[Override]
     public function getProgrammeName(): ?string {
         return $this->programmeName;
     }
+
     #[Override]
     public function getProgrammeType(): ?string {
         return $this->programmeType;
     }
+
     #[Override]
     public function getStartTerm(): ?string {
         return $this->startTerm;
     }
+
     #[Override]
     public function setUser(IUser $user): IStudent {
         $this->user = $user;
@@ -49,22 +53,22 @@ class Student extends Entity implements IStudent {
     }
 
     #[Override]
-    public function setProgrammeName(string $programname): IStudent {
-        $this->programmeName = $programname;
+    public function setProgrammeName(string $programName): IStudent {
+        $this->programmeName = $programName;
         return $this;
     }
 
     #[Override]
-    public function setProgrammeType(string $type): IStudent {
-        $this->programmeType = $type;
+    public function setProgrammeType(string $programmeType): IStudent {
+        $this->programmeType = $programmeType;
         return $this;
-     }
+    }
 
     #[Override]
     public function setStartTerm(string $startTerm): IStudent {
         $this->startTerm = $startTerm;
         return $this;
-     }
+    }
     //endregion
 
     //region IStudent members
@@ -75,7 +79,7 @@ class Student extends Entity implements IStudent {
             $errors .= "\nID cannot be empty or longer than 6 characters!";
         }
         if (empty($this->programmeType) || strlen($this->programmeType) > 10) {
-            $errors .= "\nProgramm-type cannot be empty or longer than 10 characters!";
+            $errors .= "\nProgramme-type cannot be empty or longer than 10 characters!";
         }
         if (empty($this->programmeName) || strlen($this->programmeName) > 50) {
             $errors .= "\nProgramme-name cannot be empty or longer than 50 characters!";

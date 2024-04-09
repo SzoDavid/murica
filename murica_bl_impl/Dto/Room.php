@@ -38,6 +38,7 @@ class Room extends Entity implements IRoom {
         $this->id = $id;
         return $this;
     }
+
     #[Override]
     public function setCapacity(int $capacity): IRoom {
         $this->capacity = $capacity;
