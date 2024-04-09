@@ -19,7 +19,6 @@ interface IStudentDao {
     public function update(IStudent $model): IStudent;
     /**
      * @throws DataAccessException
-     * @throws ValidationException
      */
     public function delete(IStudent $model): void;
     /**

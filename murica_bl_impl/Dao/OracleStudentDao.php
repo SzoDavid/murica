@@ -41,21 +41,8 @@ class OracleStudentDao implements IStudentDao {
                        TableDefinition::STUDENT_TABLE_FIELD_START_TERM
         );
 
-        $stmt = oci_parse($this->dataSource->getConnection(), $sql);
-        if (!$stmt) {
-            $error = oci_error();
-            throw new DataAccessException("Error occurred during statement preparation: " . $error['message'], $error['code']);
-        }
-        $IUser = $model->getUser();
-        oci_bind_by_name($stmt, ":userId", $IUser);
-        $programmeName = $model->getProgrammeName();
-        oci_bind_by_name($stmt, ":programmeName", $programmeName);
-        $programmeType = $model->getProgrammeType();
-        oci_bind_by_name($stmt, ":programmeType", $programmeType);
-        $startTerm = $model->getStartTerm();
-        oci_bind_by_name($stmt, ":startTerm", $startTerm);
-
-        $success = oci_execute($stmt);
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
 
         if (!oci_bind_by_name($stmt, ':userId', $IUser, -1) ||
             !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1) ||
@@ -63,16 +50,10 @@ class OracleStudentDao implements IStudentDao {
             !oci_bind_by_name($stmt, ':startTerm', $startTerm, -1))
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
-        if (!$stmt) {
-            throw new DataAccessException(oci_error($stmt));
-        }
+        if (!oci_execute($stmt))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
 
-        if (!$success) {
-            $error = oci_error($stmt);
-            throw new DataAccessException("Error occurred during query execution: " . $error['message'], $error['code']);
-        }
-
-        return $model;
+        return $this->findByCrit(new Student($model->getUser()))[0];
     }
 
     /**

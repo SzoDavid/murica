@@ -10,7 +10,7 @@ interface IStudent {
     public function getProgrammeType(): ?string;
     public function getStartTerm(): ?string;
     public function setUser(IUser $user): IStudent;
-    public function setProgrammeName(string $programname): IStudent;
+    public function setProgrammeName(string $programName): IStudent;
     public function setProgrammeType(string $type): IStudent;
     public function setStartTerm(string $startTerm): IStudent;
     /**
