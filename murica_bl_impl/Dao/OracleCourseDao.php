@@ -106,7 +106,7 @@ class OracleCourseDao implements ICourseDao {
         if (!oci_execute($stmt))
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
-        return $this->findByCrit(new Course($model->getId()))[0];
+        return $this->findByCrit(new Course($model->getSubject(), $model->getId()))[0];
     }
 
     /**
@@ -141,7 +141,7 @@ class OracleCourseDao implements ICourseDao {
     public function findAll(): array {
         $res = array();
 
-        $sql = sprintf("SELECT SUB.%s AS SUBJECT_ID, SUB.%s AS NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, CRS.%s AS ID, %s AS CRS_CAPACITY, CRS.%s AS SCHEDULE, CRS.%s AS TERM, ROOM.%s AS ROOM_ID, ROOM.%s AS ROOM_CAPACITY FROM %s.%s SUB, %s.%s CRS, %s.%s ROOM WHERE CRS.%s = SUB.%s AND CRS.%s = ROOM.%s",
+        $sql = sprintf("SELECT SUB.%s AS SUBJECT_ID, SUB.%s AS NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, CRS.%s AS ID, CRS.%s AS CRS_CAPACITY, CRS.%s AS SCHEDULE, CRS.%s AS TERM, ROOM.%s AS ROOM_ID, ROOM.%s AS ROOM_CAPACITY FROM %s.%s SUB, %s.%s CRS, %s.%s ROOM WHERE CRS.%s = SUB.%s AND CRS.%s = ROOM.%s",
                        TableDefinition::SUBJECT_TABLE_FIELD_ID,
                        TableDefinition::SUBJECT_TABLE_FIELD_NAME,
                        TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,

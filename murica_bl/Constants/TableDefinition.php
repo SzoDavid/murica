@@ -71,4 +71,11 @@ class TableDefinition {
     const COURSE_TABLE_FIELD_TERM = 'TERM';
     const COURSE_TABLE_FIELD_ROOM_ID = 'ROOM_ID';
     //endregion
+
+    //region CourseTeach table
+    const COURSETEACH_TABLE = 'MURICA_COURSETEACH';
+    const COURSETEACH_TABLE_FIELD_USER_ID = 'USER_ID';
+    const COURSETEACH_TABLE_FIELD_COURSE_ID = 'COURSE_ID';
+    const COURSETEACH_TABLE_FIELD_SUBJECT_ID = 'SUBJECT_ID';
+    //endregion
 }

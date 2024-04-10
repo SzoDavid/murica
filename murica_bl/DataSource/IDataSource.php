@@ -4,6 +4,7 @@ namespace murica_bl\DataSource;
 
 use murica_bl\Dao\IAdminDao;
 use murica_bl\Dao\ICourseDao;
+use murica_bl\Dao\ICourseTeachDao;
 use murica_bl\Dao\IMessageDao;
 use murica_bl\Dao\IProgrammeDao;
 use murica_bl\Dao\IRoomDao;
@@ -22,4 +23,5 @@ interface IDataSource {
     public function createStudentDao(): IStudentDao;
     public function createSubjectDao(): ISubjectDao;
     public function createCourseDao(): ICourseDao;
+    public function createCourseTeachDao(): ICourseTeachDao;
 }
