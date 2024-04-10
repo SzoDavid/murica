@@ -61,4 +61,14 @@ class TableDefinition {
     const SUBJECT_TABLE_FIELD_CREDIT = 'CREDIT';
     const SUBJECT_TABLE_FIELD_TYPE = 'TYPE';
     //endregion
+
+    //region Course table
+    const COURSE_TABLE = 'MURICA_COURSE';
+    const COURSE_TABLE_FIELD_SUBJECT_ID = 'SUBJECT_ID';
+    const COURSE_TABLE_FIELD_ID = 'ID';
+    const COURSE_TABLE_FIELD_CAPACITY = 'CAPACITY';
+    const COURSE_TABLE_FIELD_SCHEDULE = 'SCHEDULE';
+    const COURSE_TABLE_FIELD_TERM = 'TERM';
+    const COURSE_TABLE_FIELD_ROOM_ID = 'ROOM_ID';
+    //endregion
 }
