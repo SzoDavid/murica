@@ -75,8 +75,8 @@ class Student extends Entity implements IStudent {
     #[Override]
     public function validate(): bool {
         $errors = "";
-        if (empty($this->user) || strlen($this->user) > 6) {
-            $errors .= "\nID cannot be empty or longer than 6 characters!";
+        if (empty($this->user) || $this->user->validate()) {
+            $errors .= "\nID cannot be empty or user is invalid!";
         }
         if (empty($this->programmeType) || strlen($this->programmeType) > 10) {
             $errors .= "\nProgramme-type cannot be empty or longer than 10 characters!";
@@ -85,7 +85,7 @@ class Student extends Entity implements IStudent {
             $errors .= "\nProgramme-name cannot be empty or longer than 50 characters!";
         }
         if (empty($this->startTerm) || !preg_match('/^\d{4}\/\d{2}\/\d{1}$/', $this->startTerm)) {
-            $errors .= "\nStart-term must be in the format 'YYYY/MM/D'!";
+            $errors .= "\nStart-term is invalid!";
         }
         if (!empty($errors)) {
             throw new ValidationException(ltrim($errors, "\n"));
@@ -101,7 +101,7 @@ class Student extends Entity implements IStudent {
     #[Override]
     public function jsonSerialize(): array {
         return [
-            'id' => $this->user,
+            'user' => $this->user->jsonSerialize(),
             'programName' => $this->programmeName,
             'programType' => $this->programmeType,
             'startTerm' => $this->startTerm
