@@ -7,6 +7,11 @@ use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\ITakenExamDao;
 use murica_bl\Dto\ITakenExam;
 use murica_bl_impl\DataSource\OracleDataSource;
+use murica_bl_impl\Dto\Exam;
+use murica_bl_impl\Dto\Programme;
+use murica_bl_impl\Dto\Room;
+use murica_bl_impl\Dto\Student;
+use murica_bl_impl\Dto\Subject;
 use murica_bl_impl\Dto\TakenExam;
 use murica_bl_impl\Dto\User;
 use murica_bl_impl\Services\ConfigService\OracleDataSourceConfigService;
@@ -46,8 +51,8 @@ class OracleTakenExamDao implements ITakenExamDao {
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
         $userId = $model->getStudent()->getUser()->getId();
-        $programmeName = $model->getStudent()->getProgrammeName();
-        $programmeType = $model->getStudent()->getProgrammeType();
+        $programmeName = $model->getStudent()->getProgramme()->getName();
+        $programmeType = $model->getStudent()->getProgramme()->getType();
         $examId = $model->getExam()->getId();
         $subjectId = $model->getExam()->getSubject()->getId();
 
@@ -56,7 +61,7 @@ class OracleTakenExamDao implements ITakenExamDao {
             !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1) ||
             !oci_bind_by_name($stmt, ':examId', $examId, -1) ||
             !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-                throw new DataAccessException(json_encode(oci_error($stmt)));
+            throw new DataAccessException(json_encode(oci_error($stmt)));
 
         if (!oci_execute($stmt))
             throw new DataAccessException(json_encode(oci_error($stmt)));
@@ -82,8 +87,8 @@ class OracleTakenExamDao implements ITakenExamDao {
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
         $userId = $model->getStudent()->getUser()->getId();
-        $programmeName = $model->getStudent()->getProgrammeName();
-        $programmeType = $model->getStudent()->getProgrammeType();
+        $programmeName = $model->getStudent()->getProgramme()->getName();
+        $programmeType = $model->getStudent()->getProgramme()->getType();
         $examId = $model->getExam()->getId();
         $subjectId = $model->getExam()->getSubject()->getId();
 
@@ -105,27 +110,79 @@ class OracleTakenExamDao implements ITakenExamDao {
     public function findAll(): array {
         $res = array();
 
-        $sql = sprintf("SELECT TKN.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE, 
-                               TKN.%s AS PROGRAMME_NAME, TKN.%s AS PROGRAMME_TYPE, PRG.%s AS NO_TERMS
+        $sql = sprintf("SELECT TKN.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS USER_EMAIL, USR.%s AS USER_PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS USER_BIRTH_DATE, 
+                               TKN.%s AS PROGRAMME_NAME, TKN.%s AS PROGRAMME_TYPE, PRG.%s AS NO_TERMS,
                                STD.%s AS START_TERM, TKN.%s AS EXAM_ID, TKN.%s AS SUBJECT_ID,
                                EXAM.%s AS START_TIME, EXAM.%s AS END_TIME, EXAM.%s AS TEACHER_ID,
-                                FROM %s.%s USR",
-            TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID,
-            TableDefinition::USER_TABLE_FIELD_NAME,
-            TableDefinition::USER_TABLE_FIELD_EMAIL,
-            TableDefinition::USER_TABLE_FIELD_PASSWORD,
-            TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
-            TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_NAME,
-            TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_TYPE,
-            TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS,
-            TableDefinition::STUDENT_TABLE_FIELD_START_TERM,
-            TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID,
-            TableDefinition::TAKEN_EXAM_TABLE_FIELD_SUBJECT_ID,
-            TableDefinition::EXAM_TABLE_FIELD_START_TIME,
-            TableDefinition::EXAM_TABLE_FIELD_END_TIME,
-            TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID,
-            $this->configService->getTableOwner(),
-            TableDefinition::USER_TABLE
+                               TCHR.%s AS TEACHER_NAME, TCHR.%s AS TEACHER_EMAIL, TCHR.%s AS TEACHER_PASSWORD, TO_CHAR(TCHR.%s,'YYYY-MM-DD') AS TEACHER_BIRTH_DATE,
+                               SUB.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS SUBJECT_TYPE, EXAM.%s AS ROOM_ID, ROOM.%s AS CAPACITY
+                               FROM %s.%s USR, %s.%s EXAM, %s.%s TKN, %s.%s STD,
+                               %s.%s PRG, %s.%s TCHR, %s.%s SUB, %s.%s ROOM
+                               WHERE TKN.%s = STD.%s AND TKN.%s = STD.%s AND TKN.%s = STD.%s AND TKN.%s = USR.%s AND
+                               TKN.%s = PRG.%s AND TKN.%s = PRG.%s AND TKN.%s = EXAM.%s AND TKN.%s = EXAM.%s AND EXAM.%s = SUB.%s AND EXAM.%s = TCHR.%s AND EXAM.%s = ROOM.%s;",
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID,
+                       TableDefinition::USER_TABLE_FIELD_NAME,
+                       TableDefinition::USER_TABLE_FIELD_EMAIL,
+                       TableDefinition::USER_TABLE_FIELD_PASSWORD,
+                       TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_NAME,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS,
+                       TableDefinition::STUDENT_TABLE_FIELD_START_TERM,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::EXAM_TABLE_FIELD_START_TIME,
+                       TableDefinition::EXAM_TABLE_FIELD_END_TIME,
+                       TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID,
+                       TableDefinition::USER_TABLE_FIELD_NAME,
+                       TableDefinition::USER_TABLE_FIELD_EMAIL,
+                       TableDefinition::USER_TABLE_FIELD_PASSWORD,
+                       TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
+                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_NAME,
+                       TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,
+                       TableDefinition::SUBJECT_TABLE_FIELD_CREDIT,
+                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
+                       TableDefinition::EXAM_TABLE_FIELD_ROOM_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::USER_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::EXAM_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::TAKEN_EXAM_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::STUDENT_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::PROGRAMME_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::USER_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::SUBJECT_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::ROOM_TABLE,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID,
+                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_NAME,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID,
+                       TableDefinition::USER_TABLE_FIELD_ID,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_NAME,
+                       TableDefinition::PROGRAMME_TABLE_FIELD_NAME,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::PROGRAMME_TABLE_FIELD_TYPE,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID,
+                       TableDefinition::EXAM_TABLE_FIELD_ID,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
+                       TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID,
+                       TableDefinition::USER_TABLE_FIELD_ID,
+                       TableDefinition::EXAM_TABLE_FIELD_ROOM_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_ID
         );
 
         if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
@@ -135,12 +192,39 @@ class OracleTakenExamDao implements ITakenExamDao {
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
         while (oci_fetch($stmt)) {
-            $res[] = new User(
-                oci_result($stmt, 'ID'),
-                oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'EMAIL'),
-                oci_result($stmt, 'PASSWORD'),
-                oci_result($stmt, 'BIRTH_DATE')
+            $res[] = new TakenExam(
+                new Student(
+                    new User(
+                        oci_result($stmt, 'USER_ID'),
+                        oci_result($stmt, 'USER_NAME'),
+                        oci_result($stmt, 'USER_EMAIL'),
+                        oci_result($stmt, 'USER_PASSWORD'),
+                        oci_result($stmt, 'USER_BIRTH_DATE')),
+                    new Programme(
+                        oci_result($stmt, 'PROGRAMME_NAME'),
+                        oci_result($stmt, 'PROGRAMME_TYPE'),
+                        oci_result($stmt, 'NO_TERMS')),
+                    oci_result($stmt, 'START_TERM')),
+                new Exam(
+                    new Subject(
+                        oci_result($stmt, 'SUBJECT_ID'),
+                        oci_result($stmt, 'SUBJECT_NAME'),
+                        oci_result($stmt, 'APPROVAL'),
+                        oci_result($stmt, 'CREDIT'),
+                        oci_result($stmt, 'SUBJECT_TYPE')),
+                    oci_result($stmt, 'EXAM_ID'),
+                    oci_result($stmt, 'START_TIME'),
+                    oci_result($stmt, 'END_TIME'),
+                    new User(
+                        oci_result($stmt, 'TEACHER_ID'),
+                        oci_result($stmt, 'TEACHER_NAME'),
+                        oci_result($stmt, 'TEACHER_EMAIL'),
+                        oci_result($stmt, 'TEACHER_PASSWORD'),
+                        oci_result($stmt, 'TEACHER_BIRTH_DATE')),
+                    new Room(
+                        oci_result($stmt, 'ROOM_ID'),
+                        oci_result($stmt, 'ROOM_CAPACITY'))
+                )
             );
         }
 
@@ -155,49 +239,148 @@ class OracleTakenExamDao implements ITakenExamDao {
         $res = array();
         $crits = array();
 
-        $sql = sprintf("SELECT %s AS ID, %s AS NAME, %s AS EMAIL, %s AS PASSWORD, TO_CHAR(%s,'YYYY-MM-DD') AS BIRTH_DATE 
-                              FROM %s.%s",
-            TableDefinition::USER_TABLE_FIELD_ID,
-            TableDefinition::USER_TABLE_FIELD_NAME,
-            TableDefinition::USER_TABLE_FIELD_EMAIL,
-            TableDefinition::USER_TABLE_FIELD_PASSWORD,
-            TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
-            $this->configService->getTableOwner(),
-            TableDefinition::USER_TABLE
+
+        $sql = sprintf("SELECT TKN.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS USER_EMAIL, USR.%s AS USER_PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS USER_BIRTH_DATE, 
+                               TKN.%s AS PROGRAMME_NAME, TKN.%s AS PROGRAMME_TYPE, PRG.%s AS NO_TERMS,
+                               STD.%s AS START_TERM, TKN.%s AS EXAM_ID, TKN.%s AS SUBJECT_ID,
+                               EXAM.%s AS START_TIME, EXAM.%s AS END_TIME, EXAM.%s AS TEACHER_ID,
+                               TCHR.%s AS TEACHER_NAME, TCHR.%s AS TEACHER_EMAIL, TCHR.%s AS TEACHER_PASSWORD, TO_CHAR(TCHR.%s,'YYYY-MM-DD') AS TEACHER_BIRTH_DATE,
+                               SUB.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS SUBJECT_TYPE, EXAM.%s AS ROOM_ID, ROOM.%s AS CAPACITY
+                               FROM %s.%s USR, %s.%s EXAM, %s.%s TKN, %s.%s STD,
+                               %s.%s PRG, %s.%s TCHR, %s.%s SUB, %s.%s ROOM
+                               WHERE TKN.%s = STD.%s AND TKN.%s = STD.%s AND TKN.%s = STD.%s AND TKN.%s = USR.%s AND
+                               TKN.%s = PRG.%s AND TKN.%s = PRG.%s AND TKN.%s = EXAM.%s AND TKN.%s = EXAM.%s AND EXAM.%s = SUB.%s AND EXAM.%s = TCHR.%s AND EXAM.%s = ROOM.%s;",
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID,
+                       TableDefinition::USER_TABLE_FIELD_NAME,
+                       TableDefinition::USER_TABLE_FIELD_EMAIL,
+                       TableDefinition::USER_TABLE_FIELD_PASSWORD,
+                       TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_NAME,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS,
+                       TableDefinition::STUDENT_TABLE_FIELD_START_TERM,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::EXAM_TABLE_FIELD_START_TIME,
+                       TableDefinition::EXAM_TABLE_FIELD_END_TIME,
+                       TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID,
+                       TableDefinition::USER_TABLE_FIELD_NAME,
+                       TableDefinition::USER_TABLE_FIELD_EMAIL,
+                       TableDefinition::USER_TABLE_FIELD_PASSWORD,
+                       TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
+                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_NAME,
+                       TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,
+                       TableDefinition::SUBJECT_TABLE_FIELD_CREDIT,
+                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
+                       TableDefinition::EXAM_TABLE_FIELD_ROOM_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::USER_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::EXAM_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::TAKEN_EXAM_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::STUDENT_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::PROGRAMME_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::USER_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::SUBJECT_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::ROOM_TABLE,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID,
+                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_NAME,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID,
+                       TableDefinition::USER_TABLE_FIELD_ID,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_NAME,
+                       TableDefinition::PROGRAMME_TABLE_FIELD_NAME,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::PROGRAMME_TABLE_FIELD_TYPE,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID,
+                       TableDefinition::EXAM_TABLE_FIELD_ID,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
+                       TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID,
+                       TableDefinition::USER_TABLE_FIELD_ID,
+                       TableDefinition::EXAM_TABLE_FIELD_ROOM_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_ID
         );
 
-        $id = $model->getId();
-        $name = $model->getName();
-        $email = $model->getEmail();
+        $userId = $model->getStudent()->getUser()->getId();
+        $programmeName = $model->getStudent()->getProgramme()->getName();
+        $programmeType = $model->getStudent()->getProgramme()->getType();
+        $examId = $model->getExam()->getId();
+        $subjectId = $model->getExam()->getSubject()->getId();
 
-        if (isset($id)) $crits[] = TableDefinition::USER_TABLE_FIELD_ID . " LIKE :id";
-        if (isset($name)) $crits[] = TableDefinition::USER_TABLE_FIELD_NAME . " LIKE :name";
-        if (isset($email)) $crits[] = TableDefinition::USER_TABLE_FIELD_EMAIL . " LIKE :email";
-        // NOTE: I did not implement searching by password hash or birth date because it seems useless
+        if (isset($userId)) $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID . " LIKE :userId";
+        if (isset($programmeName)) $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_NAME . " LIKE :programmeName";
+        if (isset($programmeType)) $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_TYPE . " LIKE :programmeType";
+        if (isset($examId)) $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID . " LIKE :examId";
+        if (isset($subjectId)) $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
 
         if (!empty($crits))
-            $sql .= " WHERE " . implode(" AND ", $crits);
+            $sql .= " AND " . implode(" AND ", $crits);
 
         if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
             throw new DataAccessException('parse ' . json_encode(oci_error($stmt)));
 
-        if (isset($id) && !oci_bind_by_name($stmt, ':id', $id, -1))
-            throw new DataAccessException('bind id ' . json_encode(oci_error($stmt)));
-        if (isset($name) && !oci_bind_by_name($stmt, ':name', $name, -1))
-            throw new DataAccessException('bind name ' . json_encode(oci_error($stmt)));
-        if (isset($email) && !oci_bind_by_name($stmt, ':email', $email, -1))
-            throw new DataAccessException('bind email ' . json_encode(oci_error($stmt)));
+        if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
+            throw new DataAccessException('bind userId ' . json_encode(oci_error($stmt)));
+        if (isset($programmeName) && !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1))
+            throw new DataAccessException('bind programmeName ' . json_encode(oci_error($stmt)));
+        if (isset($programmeType) && !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1))
+            throw new DataAccessException('bind programmeType ' . json_encode(oci_error($stmt)));
+        if (isset($examId) && !oci_bind_by_name($stmt, ':examId', $examId, -1))
+            throw new DataAccessException('bind examId ' . json_encode(oci_error($stmt)));
+        if (isset($subjectId) && !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
+            throw new DataAccessException('bind subjectId ' . json_encode(oci_error($stmt)));
 
         if (!oci_execute($stmt, OCI_DEFAULT))
             throw new DataAccessException('exec ' . json_encode(oci_error($stmt)));
 
         while (oci_fetch($stmt)) {
-            $res[] = new User(
-                oci_result($stmt, 'ID'),
-                oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'EMAIL'),
-                oci_result($stmt, 'PASSWORD'),
-                oci_result($stmt, 'BIRTH_DATE')
+            $res[] = new TakenExam(
+                new Student(
+                    new User(
+                        oci_result($stmt, 'USER_ID'),
+                        oci_result($stmt, 'USER_NAME'),
+                        oci_result($stmt, 'USER_EMAIL'),
+                        oci_result($stmt, 'USER_PASSWORD'),
+                        oci_result($stmt, 'USER_BIRTH_DATE')),
+                    new Programme(
+                        oci_result($stmt, 'PROGRAMME_NAME'),
+                        oci_result($stmt, 'PROGRAMME_TYPE'),
+                        oci_result($stmt, 'NO_TERMS')),
+                    oci_result($stmt, 'START_TERM')),
+                new Exam(
+                    new Subject(
+                        oci_result($stmt, 'SUBJECT_ID'),
+                        oci_result($stmt, 'SUBJECT_NAME'),
+                        oci_result($stmt, 'APPROVAL'),
+                        oci_result($stmt, 'CREDIT'),
+                        oci_result($stmt, 'SUBJECT_TYPE')),
+                    oci_result($stmt, 'EXAM_ID'),
+                    oci_result($stmt, 'START_TIME'),
+                    oci_result($stmt, 'END_TIME'),
+                    new User(
+                        oci_result($stmt, 'TEACHER_ID'),
+                        oci_result($stmt, 'TEACHER_NAME'),
+                        oci_result($stmt, 'TEACHER_EMAIL'),
+                        oci_result($stmt, 'TEACHER_PASSWORD'),
+                        oci_result($stmt, 'TEACHER_BIRTH_DATE')),
+                    new Room(
+                        oci_result($stmt, 'ROOM_ID'),
+                        oci_result($stmt, 'ROOM_CAPACITY'))
+                )
             );
         }
 

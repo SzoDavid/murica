@@ -91,7 +91,6 @@ class Subject extends Entity implements ISubject {
         if (empty($this->credit) || ($this->credit < 0)) $errors .= '\nCredit is empty or negative!';
         if (empty($this->type) || strlen($this->type) > 20) $errors .= '\nType cannot be empty or longer than 20 characters!';
 
-
         if (!empty($errors)) throw new ValidationException(ltrim($errors, '\n'));
 
         return true;

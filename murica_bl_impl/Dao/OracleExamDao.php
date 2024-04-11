@@ -5,9 +5,7 @@ namespace murica_bl_impl\Dao;
 use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IExamDao;
-use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\IExam;
-use murica_bl\Dto\IUser;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Exam;
 use murica_bl_impl\Dto\Room;
@@ -259,34 +257,53 @@ class OracleExamDao implements IExamDao {
         $teacherId = $model->getTeacher()->getId();
         $roomId = $model->getRoom()->getId();
 
-        if (isset($subjectId)) $crits[] = TableDefinition::USER_TABLE_FIELD_ID . " LIKE :id";
-        if (isset($name)) $crits[] = TableDefinition::USER_TABLE_FIELD_NAME . " LIKE :name";
-        if (isset($email)) $crits[] = TableDefinition::USER_TABLE_FIELD_EMAIL . " LIKE :email";
-        // NOTE: I did not implement searching by password hash or birth date because it seems useless
+        if (isset($subjectId)) $crits[] = "EXAM.".TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
+        if (isset($id)) $crits[] = "EXAM.".TableDefinition::EXAM_TABLE_FIELD_ID . " LIKE :id";
+        if (isset($startTime)) $crits[] = "EXAM.".TableDefinition::EXAM_TABLE_FIELD_START_TIME . " LIKE :startTime";
+        if (isset($endTime)) $crits[] = "EXAM.".TableDefinition::EXAM_TABLE_FIELD_END_TIME . " LIKE :endTime";
+        if (isset($teacherId)) $crits[] = "EXAM.".TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID . " LIKE :teacherId";
+        if (isset($roomId)) $crits[] = "EXAM.".TableDefinition::EXAM_TABLE_FIELD_ROOM_ID . " LIKE :roomId";
 
         if (!empty($crits))
-            $sql .= " WHERE " . implode(" AND ", $crits);
+            $sql .= " AND " . implode(" AND ", $crits);
 
         if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
             throw new DataAccessException('parse ' . json_encode(oci_error($stmt)));
 
+        if (isset($subjectId) && !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
+            throw new DataAccessException('bind subjectId ' . json_encode(oci_error($stmt)));
         if (isset($id) && !oci_bind_by_name($stmt, ':id', $id, -1))
             throw new DataAccessException('bind id ' . json_encode(oci_error($stmt)));
-        if (isset($name) && !oci_bind_by_name($stmt, ':name', $name, -1))
-            throw new DataAccessException('bind name ' . json_encode(oci_error($stmt)));
-        if (isset($email) && !oci_bind_by_name($stmt, ':email', $email, -1))
-            throw new DataAccessException('bind email ' . json_encode(oci_error($stmt)));
+        if (isset($startTime) && !oci_bind_by_name($stmt, ':startTime', $startTime, -1))
+            throw new DataAccessException('bind startTime ' . json_encode(oci_error($stmt)));
+        if (isset($endTime) && !oci_bind_by_name($stmt, ':endTime', $endTime, -1))
+            throw new DataAccessException('bind endTime ' . json_encode(oci_error($stmt)));
+        if (isset($teacherId) && !oci_bind_by_name($stmt, ':teacherId', $teacherId, -1))
+            throw new DataAccessException('bind teacherId ' . json_encode(oci_error($stmt)));
+        if (isset($roomId) && !oci_bind_by_name($stmt, ':roomId', $roomId, -1))
+            throw new DataAccessException('bind roomId ' . json_encode(oci_error($stmt)));
 
         if (!oci_execute($stmt, OCI_DEFAULT))
             throw new DataAccessException('exec ' . json_encode(oci_error($stmt)));
 
         while (oci_fetch($stmt)) {
-            $res[] = new User(
-                oci_result($stmt, 'ID'),
-                oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'EMAIL'),
-                oci_result($stmt, 'PASSWORD'),
-                oci_result($stmt, 'BIRTH_DATE')
+            $res[] = new Exam(
+                new Subject(
+                    oci_result($stmt, 'SUBJECT_ID'),
+                    oci_result($stmt, 'SUBJECT_NAME'),
+                    oci_result($stmt, 'SUBJECT_CREDIT'),
+                    oci_result($stmt, 'SUBJECT_TYPE')),
+                oci_result($stmt, 'EXAM_ID'),
+                oci_result($stmt, 'START_TIME'),
+                oci_result($stmt, 'END_TIME'),
+                new User(
+                    oci_result($stmt, 'TEACHER_ID'),
+                    oci_result($stmt, 'TEACHER_NAME'),
+                    oci_result($stmt, 'EMAIL'),
+                    oci_result($stmt, 'BIRTH_DATE')),
+                new Room(
+                    oci_result($stmt, 'ROOM_ID'),
+                    oci_result($stmt, 'CAPACITY'))
             );
         }
 
