@@ -142,5 +142,47 @@ class SubjectController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to create subject', $e->getTraceMessages());
         }
     }
+
+
+
+    public function updateSubject(string $uri, array $requestData): IModel {
+        // ITT ELLENŐRZÖM HOGY MINDEN PARAMETER MEG VAN E ADVA
+        if (!isset($requestData['id']))
+            return new ErrorModel($this->router, 400, 'Failed to update subject', 'Parameter "id" is not provided in request data');
+
+        try {
+            // Itt megkeresem az adott tárgyat
+            $subject = $this->subjectDao->findByCrit($requestData['id']);
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getTraceMessages());
+        }
+
+        if (!$subject) {
+            return new ErrorModel($this->router, 404, 'Subject not found', "Subject not found with id '{$requestData['id']}'");
+        }
+
+        try {
+            // Frissítem a tárgyat a DAO-n keresztül
+            $updatedSubject =  $this->subjectDao->update(new Subject(
+                                          $requestData['id'],
+                                          $requestData['name'],
+                                          (int)$requestData['approval'],
+                                          (int)$requestData['credit'],
+                                          $requestData['type']
+                                      ));
+        } catch (DataAccessException|ValidationException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getTraceMessages());
+        }
+        try {
+            // Return the updated subject as an EntityModel
+            return (new EntityModel($this->router, $updatedSubject, true))
+                ->linkTo('allSubjects', SubjectController::class, 'allSubjects')
+                ->withSelfRef(SubjectController::class, 'getSubjectById', [$updatedSubject->getId()]);
+        } catch (ModelException $e) {
+            // Sikeres ezert visszakuldom
+            return new MessageModel($this->router, ['message' => 'Subject updated successfully'], true);
+        }
+       }
+
     //endregion
 }
