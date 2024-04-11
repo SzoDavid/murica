@@ -13,7 +13,8 @@
 }
 
 .dropDownRow.open {
-    background-color: lightblue;
+    background: rgb(0,234,255);
+    background: linear-gradient(45deg, rgba(0,234,255,1) 0%, rgba(183,249,255,1) 100%);
 }
 
 .dropDownRow.open > td:first-child::before {
@@ -45,45 +46,10 @@ td, th {
     display: none;
 }
 
-.navbar {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-    background-color: lightblue;
-}
-
-.navbar img, .navbar span {
-    cursor: pointer;
-    display: block;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-    color: black;
-}
-
-.navbar img {
-    height: 30px;
-    padding: 5px;
-}
-
-.navbar li {
-    float: left;
-}
-
-.navbar li span:hover {
-    text-decoration: underline;
-}
-
-.navbar .active {
-    font-weight: bold;
-}
-
 main {
     margin: 75px 50px 50px 50px;
+}
+
+.error {
+    color: red;
 }

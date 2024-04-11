@@ -69,7 +69,7 @@ function newSubject(contentElement, saveUrl) {
     );
 
     contentElement.append(table);
-    contentElement.append($('<td>').id('new-subject-error').addClass('hidden'));
+    contentElement.append($('<div>').prop('id', 'new-subject-error').addClass('hidden error'));
     contentElement.append(new Button('Save', () => { saveNewSubject(contentElement, saveUrl) }).build());
     contentElement.append(new Button('Cancel', () => { subjects(contentElement); }).build());
 }
@@ -123,7 +123,7 @@ function newProgramme(contentElement, saveUrl) {
     );
 
     contentElement.append(table);
-    contentElement.append($('<td>').id('new-programme-error').addClass('hidden'));
+    contentElement.append($('<div>').prop('id', 'new-programme-error').addClass('hidden error'));
     contentElement.append(new Button('Save', () => { saveNewProgramme(contentElement, saveUrl) }).build());
     contentElement.append(new Button('Cancel', () => { programmes(contentElement); }).build());
 }
@@ -198,7 +198,7 @@ function newUser(contentElement, saveUrl) {
     );
 
     contentElement.append(table);
-    contentElement.append($('<td>').id('new-user-error').addClass('hidden'));
+    contentElement.append($('<div>').prop('id', 'new-user-error').addClass('hidden error'));
     contentElement.append(new Button('Save', () => { saveNewUser(contentElement, saveUrl) }).build());
     contentElement.append(new Button('Cancel', () => { users(contentElement); }).build());
 }
@@ -217,7 +217,7 @@ function saveNewUser(contentElement, saveUrl) {
     }).then((response) => {
         console.log(response);
         if (response._success) users(contentElement);
-        else $('#new-user-error').text(response.error.details).removeClass('hidden'); 
+        else $('#new-user-error').html(string2html(response.error.details)).removeClass('hidden');
     });
 }
 
@@ -287,7 +287,7 @@ function newRoom(contentElement, saveUrl) {
     );
 
     contentElement.append(table);
-    contentElement.append($('<td>').id('new-room-error').addClass('hidden'));
+    contentElement.append($('<div>').prop('id', 'new-room-error').addClass('hidden error'));
     contentElement.append(new Button('Save', () => { saveNewRoom(contentElement, saveUrl) }).build());
     contentElement.append(new Button('Cancel', () => { rooms(contentElement); }).build());
 }

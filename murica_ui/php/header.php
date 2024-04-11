@@ -16,16 +16,19 @@
             'index' => '<script src="js/index.js"></script>',
             'admin' => '<script src="js/admin.js"></script>',
             'student' => '<script src="js/student.js"></script>',
+            'teacher' => '<script src="js/teacher.js"></script>',
             default => ''
         };
     ?>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/navbar.css">
     <link rel="icon" type="image/svg" href="img/svg/murica-square-small.svg">
     <title>MURICA<?php
             echo match ($context) {
                 'login' => ' | Login',
                 'admin' => ' | Administrator',
                 'student' => ' | Student',
+                'teacher' => ' | Teacher',
                 default => ''
             };
         ?>
@@ -39,6 +42,8 @@
     <span id="username"></span>
     <button id="logoutButton">Logout</button>
     <a href="admin.php">Admin</a>
+    <a href="student.php">Student</a>
+    <a href="teacher.php">Teacher</a>
 </nav>
 <?php
         break;
@@ -56,7 +61,31 @@
 </nav>
 <?php
         break;
-        case 'student':?>
+        case 'student': ?>
+<nav>
+    <ul id="navbar" class="navbar">
+        <li><img id="navbar-logo" src="img/svg/murica-square-small.svg" alt="logo"></li>
+        <li class="navbar-dropdown">
+            <span id="navbar-courses">Courses</span>
+            <ul class="submenu">
+                <li><span id="navbar-taken-courses">Taken courses</span></li>
+                <li><span id="navbar-course-registration">Course registration</span></li>
+            </ul>
+        </li>
+        <li class="navbar-dropdown">
+            <span id="navbar-exams">Exams</span>
+            <ul class="submenu">
+                <li><span id="navbar-taken-exam">Taken exams</span></li>
+                <li><span id="navbar-exam-registration">Exam registration</span></li>
+            </ul>
+        </li>
+        <li style="float:right"><span id="navbar-username"></span></li>
+        <li style="float:right"><span id="navbar-logout">Log out</span></li>
+    </ul>
+</nav>
+<?php
+        break;
+        case 'teacher':?>
 <nav>
     <ul id="navbar" class="navbar">
         <li><img id="navbar-logo" src="img/svg/murica-square-small.svg" alt="logo"></li>
