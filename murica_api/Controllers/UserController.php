@@ -65,6 +65,7 @@ class UserController extends Controller {
 
         try {
             return (new CollectionModel($this->router, $userEntities, 'users', true))
+                ->linkTo('createUser', UserController::class, 'createUser')
                 ->withSelfRef(UserController::class, 'allUsers');
         } catch (ModelException $e) {
             return new MessageModel($this->router, ['error' => [

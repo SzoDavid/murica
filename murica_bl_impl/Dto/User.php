@@ -99,7 +99,7 @@ class User extends Entity implements IUser {
         $errors = "";
         if (empty($this->id) || !preg_match('/^[A-Z0-9]{6}$/', $this->id)) $errors .= '\nID must contain letters and numbers only and must be 6 characters long!';
         if (empty($this->name) || strlen($this->name) > 50) $errors .= '\nName cannot be empty or longer than 50 characters!';
-        if (empty($this->email) || filter_var($this->email, FILTER_VALIDATE_EMAIL)) $errors .= '\nEmail is invalid!';
+        if (empty($this->email) || !filter_var($this->email, FILTER_VALIDATE_EMAIL)) $errors .= '\nEmail is invalid!';
         if (empty($this->password)) $errors .= '\nPassword is empty!';
         if (!empty($this->birthDate)) {
             $dateTime = DateTime::createFromFormat('Y-m-d', $this->birthDate);

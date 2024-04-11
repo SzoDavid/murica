@@ -13,7 +13,7 @@ class Button {
      * @param {string} text
      * @param {Function} event
      */
-    constructor(text, event) {
+    constructor(text, event=null) {
         this.text = text;
         this.event = event;
     }
@@ -23,7 +23,9 @@ class Button {
      */
     build() {
         const button = $('<button></button>').text(this.text);
-        bindClickListener(button, this.event);
+        if (this.event) {
+            bindClickListener(button, this.event);
+        }
         return button;
     }
 }

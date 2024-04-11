@@ -12,6 +12,10 @@
     margin-right: 5px;
 }
 
+.dropDownRow.open {
+    background-color: lightblue;
+}
+
 .dropDownRow.open > td:first-child::before {
     content: '▼';
 }
