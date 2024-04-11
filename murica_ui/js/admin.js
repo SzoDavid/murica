@@ -1,0 +1,127 @@
+const apiUrl = 'https://localhost/murica_api/';
+const requestInvoker = new RequestInvoker(apiUrl);
+let tokenObj;
+
+function init() {
+    tokenObj = JSON.parse(localStorage.getItem('token'));
+
+    if (!tokenObj || new Date(tokenObj.expires_at) < new Date()) {
+        window.location.href = 'login.php';
+    }
+
+    $('#navbar-username').text(tokenObj.user.name);
+
+    bindClickListener($('#navbar-logo'), () => {
+        window.location.href = 'index.php';
+    });
+
+    bindClickListener($('#navbar-logout'), () => {
+        requestInvoker.executePost(tokenObj._links.logout.href, { token: tokenObj.token}).then(() => {
+            localStorage.removeItem('token');
+            window.location.href = 'login.php';
+        });
+    });
+}
+
+function subjects(contentElement) {
+    contentElement.empty();
+
+    localStorage.setItem('admin', 'subjects');
+
+    $('#navbar .active').removeClass('active');
+    $('#navbar-subjects').addClass('active');
+}
+
+function programmes(contentElement) {
+    contentElement.empty();
+
+    localStorage.setItem('admin', 'programmes');
+
+    $('#navbar .active').removeClass('active');
+    $('#navbar-programmes').addClass('active');
+}
+
+function users(contentElement) {
+    contentElement.empty();
+
+    localStorage.setItem('admin', 'users');
+
+    $('#navbar .active').removeClass('active');
+    $('#navbar-users').addClass('active');
+
+    contentElement.append(new Button('New user', newUser).build());
+
+    requestInvoker.executePost('user/all', { token: tokenObj.token }).then((response) => {
+        console.log(response);
+        const tableColumns = {
+            id: 'Code',
+            name: 'Name',
+            email: 'E-mail address',
+            birth_date: 'Birth date'
+        };
+
+        const usersTable= new DropDownTable(tableColumns, response._embedded.users, userDetails).build();
+        contentElement.append(usersTable);
+    });
+}
+
+function newUser() {
+    console.log('newUser');
+}
+
+function userDetails(record) {
+    let container = $('<div>');
+
+    let table = $("<table>").addClass("editTable");
+    table.append(
+        $("<tr>").append(
+            $("<th>").text("Code:"),
+            $("<td>").attr("id", "user-details-code").text(record.id)
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "user-details-name").text("Name:")),
+            $("<td>").append($("<input>").attr({ id: "user-details-name", name: "name", type: "text", value: record.name, required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "user-details-email").text("E-mail address:")),
+            $("<td>").append($("<input>").attr({ id: "user-details-email", name: "email", type: "email", value: record.email, required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "user-details-birth").text("Birth date:")),
+            $("<td>").append($("<input>").attr({ id: "user-details-birth", name: "birth_date", type: "date", value: record.birth_date, required: true }))
+        )
+    );
+    container.append(table);
+
+    container.append(new Button('Save', () => { console.log('save'); }).build());
+
+    return container;
+
+}
+
+function rooms(contentElement) {
+    contentElement.empty();
+
+    localStorage.setItem('admin', 'rooms');
+
+    $('#navbar .active').removeClass('active');
+    $('#navbar-rooms').addClass('active');
+}
+
+$(() => {
+    init();
+    const contentElement = $('#content');
+
+    const site = localStorage.getItem('admin');
+    switch (site) {
+        case 'subjects': subjects(contentElement); break;
+        case 'programmes': programmes(contentElement); break;
+        case 'users': users(contentElement); break;
+        case 'rooms': rooms(contentElement); break;
+    }
+
+    bindClickListener($('#navbar-subjects'), () => { subjects(contentElement); });
+    bindClickListener($('#navbar-programmes'), () => { programmes(contentElement); });
+    bindClickListener($('#navbar-users'), () => { users(contentElement); });
+    bindClickListener($('#navbar-rooms'), () => { rooms(contentElement); });
+});

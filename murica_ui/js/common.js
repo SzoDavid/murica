@@ -8,6 +8,26 @@ const bindClickListener = (observer, event, unbindOtherListeners = true) => {
     });
 }
 
+class Button {
+    /**
+     * @param {string} text
+     * @param {Function} event
+     */
+    constructor(text, event) {
+        this.text = text;
+        this.event = event;
+    }
+
+    /**
+     * @returns {JQuery<HTMLElement>}
+     */
+    build() {
+        const button = $('<button></button>').text(this.text);
+        bindClickListener(button, this.event);
+        return button;
+    }
+}
+
 class Table {
     /**
      * @param {Object} headers The headers where the keys define the keys used in the records array and the values are what should appear
@@ -96,7 +116,7 @@ class DropDownTable extends Table {
      * @returns {JQuery<HTMLElement>}
      */
     createRow(record) {
-        const rowElement = super.createRow(record);
+        const rowElement = super.createRow(record).addClass('dropDownRow');
 
         bindClickListener(rowElement, (obj, event) => {
             if (rowElement.hasClass(`open`)) {
@@ -113,7 +133,7 @@ class DropDownTable extends Table {
             rowElement.after($('<tr></tr>').append($('<td></td>')
                 .addClass('dropDownContainer')
                 .attr('colspan', rowElement.children().length)
-                .append(this.dropDownEvent())));
+                .append(this.dropDownEvent(record))));
         });
 
         return rowElement;
@@ -156,3 +176,5 @@ class RequestInvoker {
         return result;
     }
 }
+
+

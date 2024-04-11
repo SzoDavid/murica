@@ -3,7 +3,7 @@ const requestInvoker = new RequestInvoker(apiUrl);
 
 $(() => {
     if (!localStorage.getItem('token'))
-        window.location.href = 'login.html';
+        window.location.href = 'login.php';
 
     let tokenObj = JSON.parse(localStorage.getItem('token'));
 
@@ -12,21 +12,7 @@ $(() => {
     bindClickListener($('#logoutButton'), () => {
         requestInvoker.executePost(tokenObj._links.logout.href, { token: tokenObj.token}).then(() => {
             localStorage.removeItem('token');
-            window.location.href = 'login.html';
+            window.location.href = 'login.php';
         });
-    });
-
-    const contentElement = $('#content');
-    requestInvoker.executePost('user/all', { token: tokenObj.token }).then((response) => {
-        console.log(response);
-        const tableColumns = {
-            id: 'Kód',
-            name: 'Név',
-            email: 'E-mail cím',
-            birth_date: 'Születési dátum'
-        };
-
-        const usersTable= new Table(tableColumns, response._embedded.users).build();
-        contentElement.append(usersTable);
     });
 });
