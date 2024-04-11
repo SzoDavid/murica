@@ -28,7 +28,7 @@ class OracleCourseTeachDao implements ICourseTeachDao {
     }
     //endregion
 
-    //region IUserDao members
+    //region ICourseTeachDao members
     /**
      * @inheritDoc
      */
@@ -48,7 +48,7 @@ class OracleCourseTeachDao implements ICourseTeachDao {
 
         $userId = $model->getUser()->getId();
         $courseId = $model->getCourse()->getId();
-        $subjectId = $model->getSubject()->getId();
+        $subjectId = $model->getCourse()->getSubject()->getId();
 
 
         if (!oci_bind_by_name($stmt, ':userId', $userId, -1) ||
@@ -59,7 +59,7 @@ class OracleCourseTeachDao implements ICourseTeachDao {
         if (!oci_execute($stmt))
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
-        return $this->findByCrit(new CourseTeach($model->getUser(), $model->getCourse(), $model->getSubject()))[0];
+        return $this->findByCrit(new CourseTeach($model->getUser(), $model->getCourse()))[0];
     }
 
     /**
@@ -79,7 +79,7 @@ class OracleCourseTeachDao implements ICourseTeachDao {
 
         $userId = $model->getUser()->getId();
         $courseId = $model->getCourse()->getId();
-        $subjectId = $model->getSubject()->getId();
+        $subjectId = $model->getCourse()->getSubject()->getId();
 
         if (!oci_bind_by_name($stmt, ':userId', $userId, -1) ||
             !oci_bind_by_name($stmt, ':courseId', $courseId, -1) ||
@@ -156,7 +156,7 @@ class OracleCourseTeachDao implements ICourseTeachDao {
                         oci_result($stmt, 'APPROVAL'),
                         oci_result($stmt, 'CREDIT'),
                         oci_result($stmt, 'TYPE')),
-                    oci_result($stmt, 'ID'),
+                    oci_result($stmt, 'CRS_ID'),
                     oci_result($stmt, 'CRS_CAPACITY'),
                     oci_result($stmt, 'SCHEDULE'),
                     oci_result($stmt, 'TERM'),
@@ -218,7 +218,7 @@ class OracleCourseTeachDao implements ICourseTeachDao {
 
         $userId = $model->getUser()->getId();
         $courseId = $model->getCourse()->getId();
-        $subjectId = $model->getSubject()->getId();
+        $subjectId = $model->getCourse()->getSubject()->getId();
 
         if (isset($userId)) $crits[] = TableDefinition::COURSETEACH_TABLE_FIELD_USER_ID . " LIKE :userId";
         if (isset($courseId)) $crits[] = TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID . " LIKE :courseId";

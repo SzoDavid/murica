@@ -16,19 +16,16 @@ class CourseTeach extends Entity implements ICourseTeach {
     //region Properties
     private ?IUser $user;
     private ?ICourse $course;
-    private ?ISubject $subject;
     //endregion
 
     //region Ctor
     /**
      * @param string|null $user
      * @param string|null $course
-     * @param string|null $subject
      */
-    public function __construct(IUser $user=null, ICourse $course=null, ISubject $subject=null) {
+    public function __construct(IUser $user=null, ICourse $course=null) {
         $this->user = $user;
         $this->course = $course;
-        $this->subject = $subject;
     }
     //endregion
 
@@ -41,11 +38,6 @@ class CourseTeach extends Entity implements ICourseTeach {
     #[Override]
     public function getCourse(): ?ICourse {
         return $this->course;
-    }
-
-    #[Override]
-    public function getSubject(): ?ISubject {
-        return $this->subject;
     }
     // endregion
 
@@ -61,12 +53,6 @@ class CourseTeach extends Entity implements ICourseTeach {
         $this->course = $course;
         return $this;
     }
-
-    #[Override]
-    public function setSubject(ISubject $subject): ICourseTeach {
-        $this->subject = $subject;
-        return $this;
-    }
     //endregion
 
     //region Public methods
@@ -75,7 +61,6 @@ class CourseTeach extends Entity implements ICourseTeach {
         $errors = "";
         if (empty($this->user) || $this->user->validate()) $errors .= '\nUser is invalid!';
         if (empty($this->course) || $this->course->validate()) $errors .= '\nCourse is invalid!';
-        if (empty($this->subject) || $this->subject->validate()) $errors .= '\nSubject is invalid!';
         if (!empty($errors)) throw new ValidationException(ltrim($errors, '\n'));
 
         return true;
@@ -88,7 +73,6 @@ class CourseTeach extends Entity implements ICourseTeach {
         return [
             'user' => $this->user->jsonSerialize(),
             'course' => $this->course->jsonSerialize(),
-            'subject' => $this->subject->jsonSerialize()
         ];
     }
     //endregion

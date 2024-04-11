@@ -26,7 +26,7 @@ class OracleCourseDao implements ICourseDao {
     }
     //endregion
 
-    //region IUserDao members
+    //region ICourseDao members
     /**
      * @inheritDoc
      */
