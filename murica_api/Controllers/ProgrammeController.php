@@ -2,6 +2,7 @@
 
 namespace murica_api\Controllers;
 
+use Cassandra\Exception\ValidationException;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IProgrammeDao;
 use murica_bl\Models\Exceptions\ModelException;
@@ -68,7 +69,7 @@ class ProgrammeController extends Controller {
      * Returns the programme with the given name from the datasource.
      * Name must be part of the uri.
      */
-    public function getProgrammeById(string $uri, array $requestData): IModel {
+    public function getProgrammeByName(string $uri, array $requestData): IModel {
         if (empty($uri)) {
             return new ErrorModel($this->router,
                                   400,
@@ -100,5 +101,45 @@ class ProgrammeController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to query programme', $e->getTraceMessages());
         }
     }
+
+    /**
+     * Returns with the user created with the given values.
+     * Parameters are expected as part of request data.
+     * User must have admin role, to access.
+     */
+    public function createProgramme(string $uri, array $requestData): IModel {
+        if (!isset($requestData['name']))
+            return new ErrorModel($this->router, 400, 'Failed to create Programme', 'Parameter "name" is not provided in uri');
+        if (!isset($requestData['type']))
+            return new ErrorModel($this->router, 400, 'Failed to create Programme', 'Parameter "type" is not provided in uri');
+        if (!isset($requestData['noTerms']))
+            return new ErrorModel($this->router, 400, 'Failed to create Programme', 'Parameter "noTerm" is not provided in uri');
+
+        try {
+            $programme = $this->programmeDao->create(new Programme($requestData['name'],
+                                                    $requestData['type'],
+                                                    $requestData['noTerms']));
+
+        } catch (DataAccessException|ValidationException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to create programme', $e->getTraceMessages());
+        }
+
+        try {
+            return (new EntityModel($this->router, $programme, true))
+                ->linkTo('allProgrammes', UserController::class, 'allProgrammes')
+                ->withSelfRef(ProgrammeController::class, 'getProgrammeByName', [$programme->getName()]);
+        } catch (ModelException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
+        }
+    }
+
+    /**
+     * Returns the role of the user with the given id.
+     *
+     * @param string $userId The id of the user
+     * @return string|null The role of the user (Admin, Student, KurzustTanit), or null if the user does not exist or has no role
+     */
+
     //endregion
+
 }
