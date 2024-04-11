@@ -15,6 +15,7 @@
             'login' => '<script src="js/login.js"></script>',
             'index' => '<script src="js/index.js"></script>',
             'admin' => '<script src="js/admin.js"></script>',
+            'student' => '<script src="js/student.js"></script>',
             default => ''
         };
     ?>
@@ -24,6 +25,7 @@
             echo match ($context) {
                 'login' => ' | Login',
                 'admin' => ' | Administrator',
+                'student' => ' | Student',
                 default => ''
             };
         ?>
@@ -48,6 +50,18 @@
         <li><span id="navbar-programmes">Programmes</span></li>
         <li><span id="navbar-users">Users</span></li>
         <li><span id="navbar-rooms">Rooms</span></li>
+        <li style="float:right"><span id="navbar-username"></span></li>
+        <li style="float:right"><span id="navbar-logout">Log out</span></li>
+    </ul>
+</nav>
+<?php
+        break;
+        case 'student':?>
+<nav>
+    <ul id="navbar" class="navbar">
+        <li><img id="navbar-logo" src="img/svg/murica-square-small.svg" alt="logo"></li>
+        <li><span id="navbar-courses">Courses</span></li>
+        <li><span id="navbar-exams">Exams</span></li>
         <li style="float:right"><span id="navbar-username"></span></li>
         <li style="float:right"><span id="navbar-logout">Log out</span></li>
     </ul>
