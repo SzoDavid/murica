@@ -23,6 +23,8 @@ function init() {
     });
 }
 
+//region Subjects
+
 function subjects(contentElement) {
     contentElement.empty();
 
@@ -30,7 +32,60 @@ function subjects(contentElement) {
 
     $('#navbar .active').removeClass('active');
     $('#navbar-subjects').addClass('active');
+
+    let newSubjectButton = new Button('New subject').build();
+    contentElement.append(newSubjectButton);
+
+    //TODO: request
 }
+
+function newSubject(contentElement, saveUrl) {
+    contentElement.empty();
+
+    contentElement.append($('<h1>').text('New subject'));
+
+    let table = $("<table>").addClass("editTable");
+    table.append(
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "subject-details-id").text("Id:")),
+            $("<td>").append($("<input>").attr({id: 'subject-details-id', type: 'text', maxlength: 6, required: true}))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "subject-details-name").text("Name:")),
+            $("<td>").append($("<input>").attr({ id: "subject-details-name", type: "text", required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "subject-details-approval").text("Approval needed:")),
+            $("<td>").append($("<input>").attr({ id: "subject-details-approval", type: "checkbox", required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "subject-details-credit").text("Credit:")),
+            $("<td>").append($("<input>").attr({ id: "subject-details-credit", type: "number", min: 0, required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "subject-details-type").text("Type:")),
+            $("<td>").append($("<input>").attr({ id: "subject-details-type", type: "text", required: true }))
+        )
+    );
+
+    contentElement.append(table);
+    contentElement.append($('<td>').id('new-subject-error').addClass('hidden'));
+    contentElement.append(new Button('Save', () => { saveNewSubject(contentElement, saveUrl) }).build());
+    contentElement.append(new Button('Cancel', () => { subjects(contentElement); }).build());
+}
+
+function saveNewSubject(contentElement, saveUrl) {
+    $('#new-subject-error').addClass('hidden');
+    //TODO: request
+}
+
+function subjectDetails(record) {
+
+}
+
+//endregion
+
+//region Programmes
 
 function programmes(contentElement) {
     contentElement.empty();
@@ -39,7 +94,50 @@ function programmes(contentElement) {
 
     $('#navbar .active').removeClass('active');
     $('#navbar-programmes').addClass('active');
+
+    let newProgrammeButton = new Button('New programme').build();
+    contentElement.append(newProgrammeButton);
+
+    //TODO: request
 }
+
+function newProgramme(contentElement, saveUrl) {
+    contentElement.empty();
+
+    contentElement.append($('<h1>').text('New programme'));
+
+    let table = $("<table>").addClass("editTable");
+    table.append(
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "programme-details-name").text("Name:")),
+            $("<td>").append($("<input>").attr({id: 'programme-details-name', type: 'text', maxlength: 50, required: true}))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "programme-details-type").text("Type:")),
+            $("<td>").append($("<input>").attr({ id: "programme-details-type", type: "text", maxlength: 20, required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "programme-details-noTerms").text("Number of terms:")),
+            $("<td>").append($("<input>").attr({ id: "programme-details-noTerms", type: "number", min: 1, required: true }))
+        )
+    );
+
+    contentElement.append(table);
+    contentElement.append($('<td>').id('new-programme-error').addClass('hidden'));
+    contentElement.append(new Button('Save', () => { saveNewProgramme(contentElement, saveUrl) }).build());
+    contentElement.append(new Button('Cancel', () => { programmes(contentElement); }).build());
+}
+
+function saveNewProgramme(contentElement, saveUrl) {
+    $('#new-programme-error').addClass('hidden');
+    //TODO: request
+}
+
+function programmeDetails(record) {
+
+}
+
+//endregion
 
 //region Users
 
@@ -51,8 +149,7 @@ function users(contentElement) {
     $('#navbar .active').removeClass('active');
     $('#navbar-users').addClass('active');
 
-
-    let newUserButton = new Button('New user').build()
+    let newUserButton = new Button('New user').build();
     contentElement.append(newUserButton);
 
     requestInvoker.executePost('user/all', { token: tokenObj.token }).then((response) => {
@@ -100,12 +197,15 @@ function newUser(contentElement, saveUrl) {
         )
     );
 
-    contentElement.append(table)
+    contentElement.append(table);
+    contentElement.append($('<td>').id('new-user-error').addClass('hidden'));
     contentElement.append(new Button('Save', () => { saveNewUser(contentElement, saveUrl) }).build());
     contentElement.append(new Button('Cancel', () => { users(contentElement); }).build());
 }
 
 function saveNewUser(contentElement, saveUrl) {
+    $('#new-user-error').addClass('hidden');
+
     //TODO: validate values
     requestInvoker.executePost(saveUrl, {
         token: tokenObj.token,
@@ -117,6 +217,7 @@ function saveNewUser(contentElement, saveUrl) {
     }).then((response) => {
         console.log(response);
         if (response._success) users(contentElement);
+        else $('#new-user-error').text(response.error.details).removeClass('hidden'); 
     });
 }
 
@@ -152,6 +253,8 @@ function userDetails(record) {
 
 //endregion
 
+//region Rooms
+
 function rooms(contentElement) {
     contentElement.empty();
 
@@ -159,7 +262,46 @@ function rooms(contentElement) {
 
     $('#navbar .active').removeClass('active');
     $('#navbar-rooms').addClass('active');
+
+    let newRoomButton = new Button('New room').build();
+    contentElement.append(newRoomButton);
+
+    //TODO: request
 }
+
+function newRoom(contentElement, saveUrl) {
+    contentElement.empty();
+
+    contentElement.append($('<h1>').text('New room'));
+
+    let table = $("<table>").addClass("editTable");
+    table.append(
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "room-details-id").text("Id:")),
+            $("<td>").append($("<input>").attr({id: 'room-details-id', type: 'text', maxlength: 6, required: true}))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "room-details-capacity").text("Capacity:")),
+            $("<td>").append($("<input>").attr({ id: "room-details-capacity", type: "number", min: 1, required: true }))
+        )
+    );
+
+    contentElement.append(table);
+    contentElement.append($('<td>').id('new-room-error').addClass('hidden'));
+    contentElement.append(new Button('Save', () => { saveNewRoom(contentElement, saveUrl) }).build());
+    contentElement.append(new Button('Cancel', () => { rooms(contentElement); }).build());
+}
+
+function saveNewRoom(contentElement, saveUrl) {
+    $('#new-room-error').addClass('hidden');
+    //TODO: request
+}
+
+function roomDetails(record) {
+    
+}
+
+//endregion
 
 $(() => {
     init();

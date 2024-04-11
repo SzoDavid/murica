@@ -53,7 +53,7 @@ class Room extends Entity implements IRoom {
         if (empty($this->id) || !preg_match('/^[A-Z]{2}-\d{3}$/', $this->id)) {
             $errors .= "\nID must consist of two capital letters followed by a hyphen and three digits!";
         }
-        if (empty($this->capacity) || strlen($this->capacity) > 999) {
+        if (empty($this->capacity) || strlen($this->capacity) > 999) { // TODO: noot noot
             $errors .= "\nCapacity cannot be empty or larger than 999!";
         }
         if (!empty($errors)) {
