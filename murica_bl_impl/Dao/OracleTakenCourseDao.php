@@ -366,12 +366,36 @@ class OracleTakenCourseDao implements ITakenCourseDao {
             throw new DataAccessException('exec ' . json_encode(oci_error($stmt)));
 
         while (oci_fetch($stmt)) {
-            $res[] = new User(
-                oci_result($stmt, 'ID'),
-                oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'EMAIL'),
-                oci_result($stmt, 'PASSWORD'),
-                oci_result($stmt, 'BIRTH_DATE')
+            $res[] = new TakenCourse(
+                new Student(
+                    new User(
+                        oci_result($stmt, 'USER_ID'),
+                        oci_result($stmt, 'USER_NAME'),
+                        oci_result($stmt, 'EMAIL'),
+                        oci_result($stmt, 'PASSWORD'),
+                        oci_result($stmt, 'BIRTH_DATE')),
+                    new Programme(
+                        oci_result($stmt, 'PROGRAMME_NAME'),
+                        oci_result($stmt, 'PROGRAMME_TYPE'),
+                        oci_result($stmt, 'NO_TERMS')),
+                    oci_result($stmt, 'START_TERM')),
+                new Course(
+                    new Subject(
+                        oci_result($stmt, 'SUBJECT_ID'),
+                        oci_result($stmt, 'SUBJECT_NAME'),
+                        oci_result($stmt, 'APPROVAL'),
+                        oci_result($stmt, 'CREDIT'),
+                        oci_result($stmt, 'TYPE')),
+                    oci_result($stmt, 'CRS_ID'),
+                    oci_result($stmt, 'CRS_CAPACITY'),
+                    oci_result($stmt, 'SCHEDULE'),
+                    oci_result($stmt, 'TERM'),
+                    new Room(
+                        oci_result($stmt, 'ROOM_ID'),
+                        oci_result($stmt, 'ROOM_CAPACITY')
+                    )),
+                oci_result($stmt, 'GRADE'),
+                oci_result($stmt, 'APPROVED')
             );
         }
 
