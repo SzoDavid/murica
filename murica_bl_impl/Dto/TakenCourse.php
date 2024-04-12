@@ -84,6 +84,7 @@ class TakenCourse extends Entity implements ITakenCourse {
     #[Override]
     public function validate(): bool {
         $errors = "";
+        // TODO refactor validation to return false if no issues was found or a string with all the issues
         if (empty($this->student) || $this->student->validate()) $errors .= '\nStudent is invalid!';
         if (empty($this->course) || $this->course->validate()) $errors .= '\nCourse is invalid!';
         if (empty($this->grade) || ($this->grade > 5) || ($this->grade < 0)) $errors .= '\nGrade is invalid!';

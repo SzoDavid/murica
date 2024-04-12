@@ -6,9 +6,7 @@ use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\ITakenCourseDao;
 use murica_bl\Dto\ITakenCourse;
-use murica_bl\Dto\IUser;
 use murica_bl_impl\DataSource\OracleDataSource;
-use murica_bl_impl\Dto\Student;
 use murica_bl_impl\Dto\TakenCourse;
 use murica_bl_impl\Dto\User;
 use murica_bl_impl\Services\ConfigService\OracleDataSourceConfigService;
@@ -35,7 +33,7 @@ class OracleTakenCourseDao implements ITakenCourseDao {
     public function create(ITakenCourse $model): ITakenCourse {
         $model->validate();
 
-        $sql = sprintf("INSERT INTO %s.%s (%s, %s, %s, %s, %s, %s, %s) VALUES (:userId, :programmeName, :programmeType, :courseId, :subjectId, :grade, :approved))",
+        $sql = sprintf("INSERT INTO %s.%s (%s, %s, %s, %s, %s, %s, %s) VALUES (:userId, :programmeName, :programmeType, :courseId, :subjectId, :grade, :approved)",
                        $this->configService->getTableOwner(),
                        TableDefinition::TAKENCOURSE_TABLE,
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_USER_ID,
@@ -50,8 +48,8 @@ class OracleTakenCourseDao implements ITakenCourseDao {
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
         $userId = $model->getStudent()->getUser()->getId();
-        $programmeName = $model->getStudent()->getProgrammeName();
-        $programmeType = $model->getStudent()->getProgrammeType();
+        $programmeName = $model->getStudent()->getProgramme()->getName();
+        $programmeType = $model->getStudent()->getProgramme()->getType();
         $courseId = $model->getCourse()->getId();
         $subjectId = $model->getCourse()->getSubject()->getId();
         $grade = $model->getGrade();
@@ -94,8 +92,8 @@ class OracleTakenCourseDao implements ITakenCourseDao {
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
         $userId = $model->getStudent()->getUser()->getId();
-        $programmeName = $model->getStudent()->getProgrammeName();
-        $programmeType = $model->getStudent()->getProgrammeType();
+        $programmeName = $model->getStudent()->getProgramme()->getName();
+        $programmeType = $model->getStudent()->getProgramme()->getType();
         $courseId = $model->getCourse()->getId();
         $subjectId = $model->getCourse()->getSubject()->getId();
         $grade = $model->getGrade();
@@ -134,8 +132,8 @@ class OracleTakenCourseDao implements ITakenCourseDao {
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
         $userId = $model->getStudent()->getUser()->getId();
-        $programmeName = $model->getStudent()->getProgrammeName();
-        $programmeType = $model->getStudent()->getProgrammeType();
+        $programmeName = $model->getStudent()->getProgramme()->getName();
+        $programmeType = $model->getStudent()->getProgramme()->getType();
         $courseId = $model->getCourse()->getId();
         $subjectId = $model->getCourse()->getSubject()->getId();
 
@@ -161,8 +159,8 @@ class OracleTakenCourseDao implements ITakenCourseDao {
                                 TKN.%s AS PROGRAMME_NAME, TKN.%s AS PROGRAMME_TYPE, STD.%s AS START_TERM, PRG.%s AS NO_TERMS,
                                 TKN.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, 
                                 CRS.%s AS CRS_ID, CRS.%s AS CRS_CAPACITY, CRS.%s AS SCHEDULE, CRS.%s AS TERM, ROOM.%s AS ROOM_ID, ROOM.%s AS ROOM_CAPACITY,
-                                TKN.%s AS GRADE, TKN.%s AS APPROVED FROM %s.%s USR, %s.%s STD, %s.%s SUB, %s.%s CRS, %s.%s ROOM, %s.%s TKN, %s.%S PRG WHERE TKN.%s = STD.%s AND TKN.%s = CRS.%s AND TKN.%s = CRS.%s CRS.%s = SUB.%s AND CRS.%s = ROOM.%s AND STD.%s = USR.%s AND STD.%s = PRG.%s AND STD.%s = PRG.%s",
-   TableDefinition::TAKENCOURSE_TABLE_FIELD_USER_ID,
+                                TKN.%s AS GRADE, TKN.%s AS APPROVED FROM %s.%s USR, %s.%s STD, %s.%s SUB, %s.%s CRS, %s.%s ROOM, %s.%s TKN, %s.%s PRG WHERE TKN.%s = STD.%s AND TKN.%s = STD.%s AND TKN.%s = STD.%s AND TKN.%s = CRS.%s AND TKN.%s = CRS.%s AND CRS.%s = SUB.%s AND CRS.%s = ROOM.%s AND STD.%s = USR.%s AND STD.%s = PRG.%s AND STD.%s = PRG.%s",
+   TableDefinition::USER_TABLE_FIELD_ID,
            TableDefinition::USER_TABLE_FIELD_NAME,
            TableDefinition::USER_TABLE_FIELD_EMAIL,
            TableDefinition::USER_TABLE_FIELD_PASSWORD,
@@ -176,7 +174,7 @@ class OracleTakenCourseDao implements ITakenCourseDao {
            TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,
            TableDefinition::SUBJECT_TABLE_FIELD_CREDIT,
            TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-           TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID,
+           TableDefinition::COURSE_TABLE_FIELD_ID,
            TableDefinition::COURSE_TABLE_FIELD_CAPACITY,
            TableDefinition::COURSE_TABLE_FIELD_SCHEDULE,
            TableDefinition::COURSE_TABLE_FIELD_TERM,
@@ -184,8 +182,6 @@ class OracleTakenCourseDao implements ITakenCourseDao {
            TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
            TableDefinition::TAKENCOURSE_TABLE_FIELD_GRADE,
            TableDefinition::TAKENCOURSE_TABLE_FIELD_APPROVED,
-           $this->configService->getTableOwner(),
-           TableDefinition::USER_TABLE,
            $this->configService->getTableOwner(),
            TableDefinition::USER_TABLE,
            $this->configService->getTableOwner(),
@@ -202,8 +198,11 @@ class OracleTakenCourseDao implements ITakenCourseDao {
            TableDefinition::PROGRAMME_TABLE,
            TableDefinition::TAKENCOURSE_TABLE_FIELD_USER_ID,
            TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+           TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_NAME,
+           TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
+           TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_TYPE,
+           TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
            TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID,
-           TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
            TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
            TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID,
            TableDefinition::COURSE_TABLE_FIELD_ID,
@@ -218,6 +217,8 @@ class OracleTakenCourseDao implements ITakenCourseDao {
            TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
            TableDefinition::PROGRAMME_TABLE_FIELD_TYPE
         );
+
+        echo $sql;
 
         if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
             throw new DataAccessException(json_encode(oci_error($stmt)));

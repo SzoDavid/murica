@@ -114,6 +114,7 @@ class Exam extends Entity implements IExam {
     #[Override]
     public function validate(): bool {
         $errors = "";
+        // TODO refactor validation to return false if no issues was found or a string with all the issues
         if (empty($this->subject) || $this->subject->validate()) $errors .= '\nSubject is invalid!';
         if (empty($this->id) || strlen($this->id) > 6) $errors .= '\nID is empty or longer than 6 characters!';
         if (empty($this->teacher) || $this->teacher->validate()) $errors .= '\nTeacher is empty or invalid!';
