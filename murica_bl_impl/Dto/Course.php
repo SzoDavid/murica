@@ -20,7 +20,7 @@ class Course extends Entity implements ICourse {
     //endregion
 
     //region Ctor
-    public function __construct(ISubject $subject=null, string $id=null, string $capacity=null, string $schedule=null, $term=null, $room=null) {
+    public function __construct(?ISubject $subject=null, ?string $id=null, ?string $capacity=null, ?string $schedule=null, ?string $term=null, ?IRoom $room=null) {
         $this->subject = $subject;
         $this->id = isset($id) ? trim($id) : null;
         $this->capacity = $capacity;
@@ -108,7 +108,7 @@ class Course extends Entity implements ICourse {
         if (empty($this->capacity) || $this->capacity > 999 || $this->capacity < 1) $errors .= "\nCapacity cannot be empty or bigger than 999!";
         if (empty($this->schedule) || !preg_match('/^[1-7]-([01]?[0-9]|2[0-3]):([0-5]?[0-9])-([01]?[0-9]|2[0-3]):([0-5]?[0-9])$/', $this->schedule)) $errors .= "\nSchedule cannot be empty or invalid format!";
         if (empty($this->term) || !preg_match('/^\d{4}\/\d{2}\/\d{1}$/', $this->term)) $errors .= "\nTerm is invalid!";
-        if (empty($this->room) || $this->room.$this->validate()) $errors .= "\nRoom is invalid!";
+        if (empty($this->room) || $this->room->validate()) $errors .= "\nRoom is invalid!";
 
         if (!empty($errors)) throw new ValidationException(ltrim($errors, "\n"));
 
