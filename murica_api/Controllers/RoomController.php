@@ -44,7 +44,7 @@ class RoomController extends Controller {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query rooms',
-                                  $e->getTraceMessages());
+                                  $e->getMessage());
         }
 
         $roomEntities = array();
@@ -55,7 +55,7 @@ class RoomController extends Controller {
                     ->linkTo('allRooms', RoomController::class, 'allRooms')
                     ->withSelfRef(RoomController::class, 'getRoomById', [$room->getId()]);
             } catch (ModelException $e) {
-                return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getTraceMessages());
+                return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getMessage());
             }
         }
 
@@ -63,11 +63,7 @@ class RoomController extends Controller {
             return (new CollectionModel($this->router, $roomEntities, 'rooms', true))
                 ->withSelfRef(RoomController::class, 'allRooms');
         } catch (ModelException $e) {
-            return new MessageModel($this->router, ['error' => [
-                'code' => '500',
-                'message' => 'Failed to query rooms',
-                'details' => $e->getTraceMessages()
-            ]], false);
+            return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getMessage());
         }
     }
 
@@ -118,28 +114,22 @@ class RoomController extends Controller {
         if (!isset($requestData['capacity']))
             return new ErrorModel($this->router, 400, 'Failed to create Room', 'Parameter "capacity" is not provided in uri');
 
-        // Extract parameters
         $id = $requestData['id'];
         $capacity = (int)$requestData['capacity'];
 
-        // Create the room object
         $room = new Room($id, $capacity);
 
         try {
-            // Attempt to create the room in the data source
             $createdRoom = $this->roomDao->create($room);
         } catch (DataAccessException|ValidationException $e) {
-            // Handle any exceptions that occur during the creation process
             return new ErrorModel($this->router, 500, 'Failed to create room', $e->getTraceMessages());
         }
 
         try {
-            // Return the created room as an EntityModel
             return (new EntityModel($this->router, $createdRoom, true))
                 ->linkTo('allRooms', RoomController::class, 'allRooms')
                 ->withSelfRef(RoomController::class, 'getRoomById', [$createdRoom->getId()]);
         } catch (ModelException $e) {
-            // Handle any exceptions that occur while creating the EntityModel
             return new ErrorModel($this->router, 500, 'Failed to create room', $e->getTraceMessages());
         }
     }

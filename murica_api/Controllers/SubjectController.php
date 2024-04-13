@@ -44,7 +44,7 @@ class SubjectController extends Controller {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query subjects',
-                                  $e->getTraceMessages());
+                                  $e->getMessage());
         }
 
         $subjectEntities = array();
@@ -55,7 +55,7 @@ class SubjectController extends Controller {
                     ->linkTo('allSubjects', SubjectController::class, 'allSubjects')
                     ->withSelfRef(SubjectController::class, 'getSubjectById', [$subject->getId()]);
             } catch (ModelException $e) {
-                return new ErrorModel($this->router, 500, 'Failed to query subjects', $e->getTraceMessages());
+                return new ErrorModel($this->router, 500, 'Failed to query subjects', $e->getMessage());
             }
         }
 
@@ -63,11 +63,7 @@ class SubjectController extends Controller {
             return (new CollectionModel($this->router, $subjectEntities, 'subjects', true))
                 ->withSelfRef(SubjectController::class, 'allSubjects');
         } catch (ModelException $e) {
-            return new MessageModel($this->router, ['error' => [
-                'code' => '500',
-                'message' => 'Failed to query subjects',
-                'details' => $e->getTraceMessages()
-            ]], false);
+            return new ErrorModel($this->router, 500, 'Failed to query subjects', $e->getMessage());
         }
     }
 
@@ -107,6 +103,7 @@ class SubjectController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to query subject', $e->getTraceMessages());
         }
     }
+
     /**
      * Creates a new subject with the provided data.
      * Parameters are expected as part of request data.
@@ -129,60 +126,45 @@ class SubjectController extends Controller {
                                                     (int)$requestData['approval'],
                                                     (int)$requestData['credit'],
                                                     $requestData['type']));
-        }catch (DataAccessException|ValidationException $e) {
+        } catch (DataAccessException|ValidationException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create subject', $e->getTraceMessages());
         }
         try {
-            // Return the created subject as an EntityModel
             return (new EntityModel($this->router, $subject, true))
                 ->linkTo('allSubjects', SubjectController::class, 'allSubjects')
                 ->withSelfRef(SubjectController::class, 'getSubjectById', [$subject->getId()]);
         } catch (ModelException $e) {
-            // Handle any exceptions that occur while creating the EntityModel
             return new ErrorModel($this->router, 500, 'Failed to create subject', $e->getTraceMessages());
         }
     }
 
-
-
     public function updateSubject(string $uri, array $requestData): IModel {
-        // ITT ELLENŐRZÖM HOGY MINDEN PARAMETER MEG VAN E ADVA
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to update subject', 'Parameter "id" is not provided in request data');
 
         try {
-            // Itt megkeresem az adott tárgyat
             $subject = $this->subjectDao->findByCrit($requestData['id']);
         } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getTraceMessages());
+            return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getMessage());
         }
 
         if (!$subject) {
-            return new ErrorModel($this->router, 404, 'Subject not found', "Subject not found with id '{$requestData['id']}'");
+            return new ErrorModel($this->router, 404, 'Failed to update subject', "Subject not found with id '{$requestData['id']}'");
         }
 
         try {
-            // Frissítem a tárgyat a DAO-n keresztül
-            $updatedSubject =  $this->subjectDao->update(new Subject(
-                                          $requestData['id'],
-                                          $requestData['name'],
-                                          (int)$requestData['approval'],
-                                          (int)$requestData['credit'],
-                                          $requestData['type']
-                                      ));
-        } catch (DataAccessException|ValidationException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getTraceMessages());
-        }
-        try {
-            // Return the updated subject as an EntityModel
-            return (new EntityModel($this->router, $updatedSubject, true))
-                ->linkTo('allSubjects', SubjectController::class, 'allSubjects')
-                ->withSelfRef(SubjectController::class, 'getSubjectById', [$updatedSubject->getId()]);
-        } catch (ModelException $e) {
-            // Sikeres ezert visszakuldom
+            $updatedSubject = $this->subjectDao->update(new Subject(
+                                                            $requestData['id'],
+                                                            $requestData['name'],
+                                                            (int)$requestData['approval'],
+                                                            (int)$requestData['credit'],
+                                                            $requestData['type']
+                                                        ));
+
             return new MessageModel($this->router, ['message' => 'Subject updated successfully'], true);
+        } catch (DataAccessException|ValidationException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getMessage());
         }
-       }
-
+    }
     //endregion
 }

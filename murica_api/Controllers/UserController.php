@@ -148,6 +148,14 @@ class UserController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
         }
     }
+
+    /**
+     * Returns the role of the user with the given id.
+     *
+     * @param string $userId The id of the user
+     * @return string|null The role of the user (Admin, Student, KurzustTanit), or null if the user does not exist or has no role
+     */
+
     //endregion
 
 }
