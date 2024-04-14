@@ -28,7 +28,9 @@ class SubjectController extends Controller {
         $this->router->registerController($this, 'subject')
             ->registerEndpoint('allSubjects', 'all', EndpointRoute::VISIBILITY_PUBLIC)
             ->registerEndpoint('getSubjectById', '', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('createSubject', 'new', EndpointRoute::VISIBILITY_PUBLIC);
+            ->registerEndpoint('createSubject', 'new', EndpointRoute::VISIBILITY_PUBLIC)
+            ->registerEndpoint('updateSubject', '', EndpointRoute::VISIBILITY_PUBLIC)
+            ->registerEndpoint('deleteSubject', 'new', EndpointRoute::VISIBILITY_PUBLIC);
     }
     //endregion
 
@@ -166,5 +168,29 @@ class SubjectController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getMessage());
         }
     }
+
+    public function deleteSubject(string $uri, array $requestData): IModel {
+        if (!isset($requestData['id'])) {
+            return new ErrorModel($this->router, 400, 'Failed to delete subject', 'Parameter "id" is not provided in request data');
+        }
+
+        $subjectId = $requestData['id'];
+
+        try {
+            $subject = new Subject($subjectId); // Itt letrehozom a subject objektumot az idvel
+        } catch (ValidationException $e) {
+            return new ErrorModel($this->router, 400, 'Failed to delete subject', 'Invalid id format');
+        }
+
+        try {
+            $this->subjectDao->delete($subject);
+
+            return new MessageModel($this->router, ['message' => 'Subject deleted successfully'], true);
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to delete subject', $e->getMessage());
+        }
+    }
+    // Itt egy ID alapján törli a subjectet
+
     //endregion
 }
