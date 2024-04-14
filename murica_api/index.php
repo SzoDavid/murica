@@ -49,8 +49,8 @@ try {
     $authController = new AuthController($router, $userDao, $tokenService);
     $userController = new UserController($router, $userDao);
     $programmeController = new ProgrammeController($router, $programmeDao);
-    $roomDao = new RoomController($router, $roomDao);
-    $subjectDao = new SubjectController($router, $subjectDao);
+    $roomController = new RoomController($router, $roomDao);
+    $subjectController = new SubjectController($router, $subjectDao);
 
 } catch (MuricaException $ex) {
     exit(json_encode(['_success' => false,

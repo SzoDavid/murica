@@ -46,7 +46,7 @@ class SubjectController extends Controller {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query subjects',
-                                  $e->getMessage());
+                                  $e->getTraceMessages());
         }
 
         $subjectEntities = array();
@@ -57,7 +57,7 @@ class SubjectController extends Controller {
                     ->linkTo('allSubjects', SubjectController::class, 'allSubjects')
                     ->withSelfRef(SubjectController::class, 'getSubjectById', [$subject->getId()]);
             } catch (ModelException $e) {
-                return new ErrorModel($this->router, 500, 'Failed to query subjects', $e->getMessage());
+                return new ErrorModel($this->router, 500, 'Failed to query subjects', $e->getTraceMessages());
             }
         }
 
@@ -65,7 +65,7 @@ class SubjectController extends Controller {
             return (new CollectionModel($this->router, $subjectEntities, 'subjects', true))
                 ->withSelfRef(SubjectController::class, 'allSubjects');
         } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query subjects', $e->getMessage());
+            return new ErrorModel($this->router, 500, 'Failed to query subjects', $e->getTraceMessages());
         }
     }
 
@@ -147,10 +147,10 @@ class SubjectController extends Controller {
         try {
             $subject = $this->subjectDao->findByCrit($requestData['id']);
         } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getMessage());
+            return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getTraceMessages());
         }
 
-        if (!$subject) {
+        if (empty($subject)) {
             return new ErrorModel($this->router, 404, 'Failed to update subject', "Subject not found with id '{$requestData['id']}'");
         }
 
@@ -165,7 +165,7 @@ class SubjectController extends Controller {
 
             return new MessageModel($this->router, ['message' => 'Subject updated successfully'], true);
         } catch (DataAccessException|ValidationException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getMessage());
+            return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getTraceMessages());
         }
     }
 
@@ -174,23 +174,23 @@ class SubjectController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to delete subject', 'Parameter "id" is not provided in request data');
         }
 
-        $subjectId = $requestData['id'];
-
         try {
-            $subject = new Subject($subjectId); // Itt letrehozom a subject objektumot az idvel
-        } catch (ValidationException $e) {
-            return new ErrorModel($this->router, 400, 'Failed to delete subject', 'Invalid id format');
+            $subjects = $this->subjectDao->findByCrit($requestData['id']);
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to delete subject', $e->getTraceMessages());
+        }
+
+        if (empty($subject)) {
+            return new ErrorModel($this->router, 404, 'Failed to delete subject', "Subject not found with id '{$requestData['id']}'");
         }
 
         try {
             $this->subjectDao->delete($subject);
-
             return new MessageModel($this->router, ['message' => 'Subject deleted successfully'], true);
         } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to delete subject', $e->getMessage());
+            return new ErrorModel($this->router, 500, 'Failed to delete subject', $e->getTraceMessages());
         }
     }
-    // Itt egy ID alapján törli a subjectet
 
     //endregion
 }

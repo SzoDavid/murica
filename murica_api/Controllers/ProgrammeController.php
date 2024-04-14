@@ -26,8 +26,8 @@ class ProgrammeController extends Controller {
 
         $this->router->registerController($this, 'programme')
             ->registerEndpoint('allProgrammes', 'all', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('getProgrammeByName', '', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('createProgramme', 'nev', EndpointRoute::VISIBILITY_PUBLIC);
+            ->registerEndpoint('getProgrammeByNameAndType', '', EndpointRoute::VISIBILITY_PUBLIC)
+            ->registerEndpoint('createProgramme', 'new', EndpointRoute::VISIBILITY_PUBLIC);
     }
     //endregion
 
@@ -43,7 +43,7 @@ class ProgrammeController extends Controller {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query programmes',
-                                  $e->getMessage()); // Módosítás: getTraceMessages() helyett getMessage() használata
+                                  $e->getTraceMessages()); // Módosítás: getTraceMessages() helyett getMessage() használata
         }
 
         $programmeEntities = [];
@@ -52,9 +52,9 @@ class ProgrammeController extends Controller {
             try {
                 $programmeEntities[] = (new EntityModel($this->router, $programme, true))
                     ->linkTo('allProgrammes', ProgrammeController::class, 'getProgrammeByName') // Módosítás: linkTo() metódus hívása helyes metódusnévvel
-                    ->withSelfRef(ProgrammeController::class, 'getProgrammeByName', [$programme->getName(), $programme->getType()]); // Módosítás: withSelfRef() metódus hívása helyes metódusnévvel és a megfelelő paraméterekkel
+                    ->withSelfRef(ProgrammeController::class, 'getProgrammeByName', [], ['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]); // Módosítás: withSelfRef() metódus hívása helyes metódusnévvel és a megfelelő paraméterekkel
             } catch (ModelException $e) {
-                return new ErrorModel($this->router, 500, 'Failed to query programmes', $e->getMessage());
+                return new ErrorModel($this->router, 500, 'Failed to query programmes', $e->getTraceMessages());
             }
         }
 
@@ -62,7 +62,7 @@ class ProgrammeController extends Controller {
             return (new CollectionModel($this->router, $programmeEntities, 'programmes', true))
                 ->withSelfRef(ProgrammeController::class, 'allProgrammes');
         } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query programmes', $e->getMessage());
+            return new ErrorModel($this->router, 500, 'Failed to query programmes', $e->getTraceMessages());
         }
     }
 
@@ -71,13 +71,7 @@ class ProgrammeController extends Controller {
      * Returns the programme with the given name from the datasource.
      * Name must be part of the uri.
      */
-    public function getProgrammeByName(string $uri, array $requestData): IModel {
-        if (empty($uri)) {
-            return new ErrorModel($this->router,
-                                  400,
-                                  'Failed to query programme',
-                                  'Parameter "id" is not provided in uri');
-        }
+    public function getProgrammeByNameAndType(string $uri, array $requestData): IModel {
         $name = $requestData['name'] ?? null;
         $type = $requestData['type'] ?? null;
 
@@ -94,7 +88,7 @@ class ProgrammeController extends Controller {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query programme',
-                                  $e->getMessage());
+                                  $e->getTraceMessages());
         }
         if (empty($programmes)) {
             return new ErrorModel($this->router,
@@ -105,9 +99,9 @@ class ProgrammeController extends Controller {
         try {
             return (new EntityModel($this->router, $programmes[0], true))
                 ->linkTo('allProgrammes', ProgrammeController::class, 'allProgrammes')
-                ->withSelfRef(ProgrammeController::class, 'getProgrammeByName', [$name, $type]);
+                ->withSelfRef(ProgrammeController::class, 'getProgrammeByName', [], ['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]);
         } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query programme', $e->getMessage());
+            return new ErrorModel($this->router, 500, 'Failed to query programme', $e->getTraceMessages());
         }
     }
 
@@ -125,7 +119,7 @@ class ProgrammeController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to create Programme', 'Parameter "noTerm" is not provided in uri');
 
         try {
-            $programme = $this->programmeDao->create(new Programme($requestData['name'],
+            $programmes = $this->programmeDao->create(new Programme($requestData['name'],
                                                     $requestData['type'],
                                                     $requestData['noTerms']));
 
@@ -134,9 +128,9 @@ class ProgrammeController extends Controller {
         }
 
         try {
-            return (new EntityModel($this->router, $programme, true))
+            return (new EntityModel($this->router, $programmes[0], true))
                 ->linkTo('allProgrammes', UserController::class, 'allProgrammes')
-                ->withSelfRef(ProgrammeController::class, 'getProgrammeByName', [$programme->getName()]);
+                ->withSelfRef(ProgrammeController::class, 'getProgrammeByName',[],['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]);
         } catch (ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
         }

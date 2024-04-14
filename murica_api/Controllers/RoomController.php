@@ -12,7 +12,6 @@ use murica_bl_impl\Dto\Room;
 use murica_bl_impl\Models\CollectionModel;
 use murica_bl_impl\Models\EntityModel;
 use murica_bl_impl\Models\ErrorModel;
-use murica_bl_impl\Models\MessageModel;
 use murica_bl_impl\Router\EndpointRoute;
 
 class RoomController extends Controller {
@@ -28,7 +27,7 @@ class RoomController extends Controller {
         $this->router->registerController($this, 'room')
             ->registerEndpoint('allRooms', 'all', EndpointRoute::VISIBILITY_PUBLIC)
             ->registerEndpoint('getRoomById', '', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('createRoom', 'new', EndpointRoute::VISIBILITY_PUBLIC);
+            ->registerEndpoint('createRoom', 'create', EndpointRoute::VISIBILITY_PUBLIC);
     }
     //endregion
 
@@ -44,7 +43,7 @@ class RoomController extends Controller {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query rooms',
-                                  $e->getMessage());
+                                  $e->getTraceMessages());
         }
 
         $roomEntities = array();
@@ -55,7 +54,7 @@ class RoomController extends Controller {
                     ->linkTo('allRooms', RoomController::class, 'allRooms')
                     ->withSelfRef(RoomController::class, 'getRoomById', [$room->getId()]);
             } catch (ModelException $e) {
-                return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getMessage());
+                return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getTraceMessages());
             }
         }
 
@@ -63,7 +62,7 @@ class RoomController extends Controller {
             return (new CollectionModel($this->router, $roomEntities, 'rooms', true))
                 ->withSelfRef(RoomController::class, 'allRooms');
         } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getMessage());
+            return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getTraceMessages());
         }
     }
 
