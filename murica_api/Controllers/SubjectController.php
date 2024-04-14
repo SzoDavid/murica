@@ -29,8 +29,8 @@ class SubjectController extends Controller {
             ->registerEndpoint('allSubjects', 'all', EndpointRoute::VISIBILITY_PUBLIC)
             ->registerEndpoint('getSubjectById', '', EndpointRoute::VISIBILITY_PUBLIC)
             ->registerEndpoint('createSubject', 'new', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('updateSubject', '', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('deleteSubject', 'new', EndpointRoute::VISIBILITY_PUBLIC);
+            ->registerEndpoint('updateSubject', 'update', EndpointRoute::VISIBILITY_PUBLIC)
+            ->registerEndpoint('deleteSubject', 'delete', EndpointRoute::VISIBILITY_PUBLIC);
     }
     //endregion
 

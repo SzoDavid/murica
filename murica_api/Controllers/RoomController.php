@@ -12,6 +12,7 @@ use murica_bl_impl\Dto\Room;
 use murica_bl_impl\Models\CollectionModel;
 use murica_bl_impl\Models\EntityModel;
 use murica_bl_impl\Models\ErrorModel;
+use murica_bl_impl\Models\MessageModel;
 use murica_bl_impl\Router\EndpointRoute;
 
 class RoomController extends Controller {
@@ -27,7 +28,9 @@ class RoomController extends Controller {
         $this->router->registerController($this, 'room')
             ->registerEndpoint('allRooms', 'all', EndpointRoute::VISIBILITY_PUBLIC)
             ->registerEndpoint('getRoomById', '', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('createRoom', 'create', EndpointRoute::VISIBILITY_PUBLIC);
+            ->registerEndpoint('createRoom', 'create', EndpointRoute::VISIBILITY_PUBLIC)
+            ->registerEndpoint('updateRoom', 'update', EndpointRoute::VISIBILITY_PUBLIC)
+            ->registerEndpoint('deleteRoom', 'delete', EndpointRoute::VISIBILITY_PUBLIC);
     }
     //endregion
 
@@ -130,6 +133,54 @@ class RoomController extends Controller {
                 ->withSelfRef(RoomController::class, 'getRoomById', [$createdRoom->getId()]);
         } catch (ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create room', $e->getTraceMessages());
+        }
+    }
+
+    public function updateRoom(string $uri, array $requestData): IModel {
+        if (!isset($requestData['id']))
+            return new ErrorModel($this->router, 400, 'Failed to update room', 'Parameter "id" is not provided in request data');
+
+        try {
+            $rooms = $this->roomDao->findByCrit($requestData['id']);
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to update room', $e->getTraceMessages());
+        }
+
+        if (empty($rooms)) {
+            return new ErrorModel($this->router, 404, 'Failed to update room', "Subject not found with id '{$requestData['id']}'");
+        }
+        try {
+            $updatedSubject = $this->roomDao->update(new Room(
+                                                            $requestData['id'],
+                                                            $requestData['capacity'],
+                                                        ));
+
+            return new MessageModel($this->router, ['message' => 'Room updated successfully'], true);
+        } catch (DataAccessException|ValidationException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to update room', $e->getTraceMessages());
+        }
+    }
+
+    public function deleteRoom(string $uri, array $requestData): IModel {
+        if (!isset($requestData['id'])) {
+            return new ErrorModel($this->router, 400, 'Failed to delete room', 'Parameter "id" is not provided in request data');
+        }
+
+        try {
+            $subjects = $this->roomDao->findByCrit($requestData['id']);
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to delete room', $e->getTraceMessages());
+        }
+
+        if (empty($subject)) {
+            return new ErrorModel($this->router, 404, 'Failed to delete room', "Room not found with id '{$requestData['id']}'");
+        }
+
+        try {
+            $this->roomDao->delete($subject);
+            return new MessageModel($this->router, ['message' => 'Room deleted successfully'], true);
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to delete subject', $e->getTraceMessages());
         }
     }
     //endregion

@@ -12,6 +12,7 @@ use murica_bl_impl\Dto\Programme;
 use murica_bl_impl\Models\CollectionModel;
 use murica_bl_impl\Models\EntityModel;
 use murica_bl_impl\Models\ErrorModel;
+use murica_bl_impl\Models\MessageModel;
 use murica_bl_impl\Router\EndpointRoute;
 
 class ProgrammeController extends Controller {
@@ -66,7 +67,6 @@ class ProgrammeController extends Controller {
         }
     }
 
-
     /**
      * Returns the programme with the given name from the datasource.
      * Name must be part of the uri.
@@ -105,7 +105,6 @@ class ProgrammeController extends Controller {
         }
     }
 
-
     /**
      * Returns with the programme created with the given values.
      * Parameters are expected as part of request data.
@@ -133,6 +132,57 @@ class ProgrammeController extends Controller {
                 ->withSelfRef(ProgrammeController::class, 'getProgrammeByName',[],['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]);
         } catch (ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
+        }
+    }
+
+    public function updateProgramme(string $uri, array $requestData): IModel {
+        if (!isset($requestData['name']))
+            return new ErrorModel($this->router, 400, 'Failed to update Programme', 'Parameter "name" is not provided in uri');
+        if (!isset($requestData['type']))
+            return new ErrorModel($this->router, 400, 'Failed to update Programme', 'Parameter "type" is not provided in uri');
+
+        try {
+            $programmes = $this->programmeDao->findByCrit(new Programme($requestData['name'],
+                                                                        $requestData['type']));
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to update programme', $e->getTraceMessages());
+        }
+
+        if (empty($programmes)) {
+            return new ErrorModel($this->router, 404, 'Failed to update programme', "Programme not found with name '{$requestData['name']}' and type '{$requestData['type']}'");
+        }
+        try {
+            $updatedProgramme = $this->programmeDao->update(new Programme(
+                                                                $requestData['name'],
+                                                                $requestData['type'],
+                                                                $requestData['noTerms']));
+
+            return new MessageModel($this->router, ['message' => 'Programme updated successfully'], true);
+        } catch (DataAccessException|ValidationException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to update programme', $e->getTraceMessages());
+        }
+    }
+
+    public function deleteProgramme(string $uri, array $requestData): IModel {
+        if (!isset($requestData['name']) || !isset($requestData['type'])) {
+            return new ErrorModel($this->router, 400, 'Failed to delete programme', 'Both "name" and "type" parameters are required');
+        }
+
+        try {
+            $programmes = $this->programmeDao->findByCrit(new Programme($requestData['name'], $requestData['type']));
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to delete programme', $e->getTraceMessages());
+        }
+
+        if (empty($programmes)) {
+            return new ErrorModel($this->router, 404, 'Failed to delete programme', "Programme not found with name '{$requestData['name']}' and type '{$requestData['type']}'");
+        }
+
+        try {
+            $this->programmeDao->delete($programmes[0]);
+            return new MessageModel($this->router, ['message' => 'Programme deleted successfully'], true);
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to delete programme', $e->getTraceMessages());
         }
     }
     //endregion
