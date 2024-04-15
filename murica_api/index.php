@@ -45,6 +45,7 @@ try {
     $courseDao = $dataSource->createCourseDao();
     $takenCourseDao = $dataSource->createTakenCourseDao();
     $studentDao = $dataSource->createStudentDao();
+    $adminDao = $dataSource->createAdminDao();
 
 
     $tokenService = new DataSourceTokenService($dataSource->createTokenDao());
@@ -56,7 +57,7 @@ try {
     $programmeController = new ProgrammeController($router, $programmeDao);
     $roomController = new RoomController($router, $roomDao);
     $subjectController = new SubjectController($router, $subjectDao);
-    $courseController = new CourseController($router, $courseDao,$subjectDao,$roomDao,$takenCourseDao,$studentDao);
+    $courseController = new CourseController($router, $courseDao, $subjectDao, $roomDao, $takenCourseDao, $studentDao, $programmeDao, $adminDao);
 
 } catch (MuricaException $ex) {
     exit(json_encode(['_success' => false,
