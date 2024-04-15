@@ -407,20 +407,13 @@ function userDetails(record, contentElement) {
 function updateUser(record, contentElement) {
     $('#edit-user-error').addClass('hidden');
 
-    let args = {
+    requestInvoker.executePost(record._links.update.href, {
         token: tokenObj.token,
-        id: record.id
-    }
-
-    const nameField = $('#user-details-name');
-    const emailField = $('#user-details-email');
-    const birthDateField = $('#user-details-birth');
-
-    if (nameField.val()) args['name'] = nameField.val();
-    if (emailField.val()) args['email'] = emailField.val();
-    if (birthDateField.val()) args['birth_date'] = birthDateField.val();
-
-    requestInvoker.executePost(record._links.update.href, args).then((response) => {
+        id: record.id,
+        name: $('#user-details-name').val(),
+        email: $('#user-details-email').val(),
+        birth_date: $('#user-details-birth').val()
+    }).then((response) => {
         if (response._success) users(contentElement);
         else $('#edit-user-error').html(string2html(response.error.details)).removeClass('hidden');
     });
@@ -489,13 +482,62 @@ function newRoom(contentElement, saveUrl) {
 
 function saveNewRoom(contentElement, saveUrl) {
     $('#new-room-error').addClass('hidden');
-    //TODO: request
+
+    requestInvoker.executePost(saveUrl, {
+        token: tokenObj.token,
+        id: $('#room-details-id').val(),
+        capacity: $('#room-details-capacity').val(),
+    }).then((response) => {
+        console.log(response);
+        if (response._success) rooms(contentElement);
+        else $('#new-room-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
 }
 
 function roomDetails(record, contentElement) {
-    
+    let container = $('<div>');
+
+    let table = $("<table>").addClass("editTable");
+    table.append(
+        $("<tr>").append(
+            $("<th>").text("Id:"),
+            $("<td>").text(record.id)
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "room-details-capacity").text("Capacity:")),
+            $("<td>").append($("<input>").attr({ id: "room-details-capacity", type: "number", min: 1, value: record.capacity, required: true }))
+        )
+    );
+    container.append(table);
+
+    container.append($('<div>').prop('id', 'edit-room-error').addClass('hidden error'));
+    container.append(new Button('Save', () => { updateRoom(record, contentElement) }).build());
+    container.append(new Button('Remove', () => { removeRoom(record, contentElement) }).build());
+
+    return container;
 }
 
+function updateRoom(record, contentElement) {
+    $('#edit-room-error').addClass('hidden');
+
+    requestInvoker.executePost(record._links.update.href, {
+        token: tokenObj.token,
+        id: record.id,
+        capacity: $('#room-details-capacity').val(),
+    }).then((response) => {
+        if (response._success) rooms(contentElement);
+        else $('#edit-room-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
+
+function removeRoom(record, contentElement) {
+    $('#edit-room-error').addClass('hidden');
+
+    requestInvoker.executePost(record._links.delete.href, { token: tokenObj.token, id: record.id }).then((response) => {
+        if (response._success) rooms(contentElement);
+        else $('#edit-room-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
 //endregion
 
 $(() => {
