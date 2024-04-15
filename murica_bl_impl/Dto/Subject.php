@@ -85,7 +85,7 @@ class Subject extends Entity implements ISubject {
     #[Override]
     public function validate(): bool {
         $errors = "";
-        if (empty($this->id) || !preg_match('/^[a-zA-Z]{2}\d{3}[EGL]$/', $this->id)) $errors .= '\nInvalid ID!';
+        if (empty($this->id) || !preg_match('/^[A-Z]{2}\d{3}[EGL]$/', $this->id)) $errors .= '\nInvalid ID!';
         if (empty($this->name) || strlen($this->name) > 50) $errors .= '\nName cannot be empty or longer than 50 characters!';
         if ($this->approval === null) $errors .= '\nApproval is invalid!';
         if (empty($this->credit) || ($this->credit < 0)) $errors .= '\nCredit is empty or negative!';
