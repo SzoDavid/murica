@@ -55,7 +55,9 @@ class ProgrammeController extends Controller {
             try {
                 $programmeEntities[] = (new EntityModel($this->router, $programme, true))
                     ->linkTo('allProgrammes', ProgrammeController::class, 'allProgrammes')
-                    ->withSelfRef(ProgrammeController::class, 'getProgrammeByNameAndType', [], ['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]);
+                    ->linkTo('delete', ProgrammeController::class, 'deleteProgramme')
+                    ->linkTo('update', ProgrammeController::class, 'updateProgramme')
+                    ->withSelfRef(ProgrammeController::class, 'getProgrammeByNameAndType', [], ['name' => $programme->getName(),'type' => $programme->getType()]);
             } catch (ModelException $e) {
                 return new ErrorModel($this->router, 500, 'Failed to query programmes', $e->getTraceMessages());
             }
@@ -63,6 +65,7 @@ class ProgrammeController extends Controller {
 
         try {
             return (new CollectionModel($this->router, $programmeEntities, 'programmes', true))
+                ->linkTo('createProgramme', ProgrammeController::class, 'createProgramme')
                 ->withSelfRef(ProgrammeController::class, 'allProgrammes');
         } catch (ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to query programmes', $e->getTraceMessages());
@@ -115,25 +118,25 @@ class ProgrammeController extends Controller {
         // TODO: check if user is admin
 
         if (!isset($requestData['name']))
-            return new ErrorModel($this->router, 400, 'Failed to create Programme', 'Parameter "name" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to create Programme', 'Parameter "name" is not provided');
         if (!isset($requestData['type']))
-            return new ErrorModel($this->router, 400, 'Failed to create Programme', 'Parameter "type" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to create Programme', 'Parameter "type" is not provided');
         if (!isset($requestData['noTerms']))
-            return new ErrorModel($this->router, 400, 'Failed to create Programme', 'Parameter "noTerm" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to create Programme', 'Parameter "noTerm" is not provided');
 
         try {
-            $programmes = $this->programmeDao->create(new Programme($requestData['name'],
+            $programme = $this->programmeDao->create(new Programme($requestData['name'],
                                                     $requestData['type'],
-                                                    $requestData['noTerms']));
+                                                    (int)$requestData['noTerms']));
 
         } catch (DataAccessException|ValidationException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create programme', $e->getTraceMessages());
         }
 
         try {
-            return (new EntityModel($this->router, $programmes[0], true))
-                ->linkTo('allProgrammes', UserController::class, 'allProgrammes')
-                ->withSelfRef(ProgrammeController::class, 'getProgrammeByNameAndType',[],['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]);
+            return (new EntityModel($this->router, $programme, true))
+                ->linkTo('allProgrammes', ProgrammeController::class, 'allProgrammes')
+                ->withSelfRef(ProgrammeController::class, 'getProgrammeByNameAndType',[],['name' => $programme->getName(),'type' => $programme->getType()]);
         } catch (ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
         }
@@ -160,7 +163,7 @@ class ProgrammeController extends Controller {
         try {
             $this->programmeDao->update(new Programme($requestData['name'],
                                                       $requestData['type'],
-                                                      $requestData['noTerms']));
+                                                      (int)$requestData['noTerms']));
 
             return new MessageModel($this->router, ['message' => 'Programme updated successfully'], true);
         } catch (DataAccessException|ValidationException $e) {

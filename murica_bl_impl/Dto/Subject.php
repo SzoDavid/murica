@@ -18,7 +18,7 @@ class Subject extends Entity implements ISubject {
     //endregion
 
     //region constructor
-    public function __construct(string $id=null, string $name=null, string $approval=null, int $credit=null, string $type=null) {
+    public function __construct(string $id=null, string $name=null, bool $approval=null, int $credit=null, string $type=null) {
         $this->id = isset($id) ? strtoupper(trim($id)) : null;
         $this->name = isset($name) ? trim($name) : null;
         $this->approval = $approval;
@@ -85,9 +85,9 @@ class Subject extends Entity implements ISubject {
     #[Override]
     public function validate(): bool {
         $errors = "";
-        if (empty($this->id) || !preg_match('/^[a-zA-Z]{2}\d{3}[eg]$/', $this->id)) $errors .= '\nInvalid ID!';
+        if (empty($this->id) || !preg_match('/^[a-zA-Z]{2}\d{3}[EGL]$/', $this->id)) $errors .= '\nInvalid ID!';
         if (empty($this->name) || strlen($this->name) > 50) $errors .= '\nName cannot be empty or longer than 50 characters!';
-        if (empty($this->approval)) $errors .= '\nApproval is invalid!';
+        if ($this->approval === null) $errors .= '\nApproval is invalid!';
         if (empty($this->credit) || ($this->credit < 0)) $errors .= '\nCredit is empty or negative!';
         if (empty($this->type) || strlen($this->type) > 20) $errors .= '\nType cannot be empty or longer than 20 characters!';
 
@@ -103,7 +103,7 @@ class Subject extends Entity implements ISubject {
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'approval' => $this->approval,
+            'approval' => $this->approval ? '✓' : '',
             'credit' => $this->credit,
             'type' => $this->type
         ];

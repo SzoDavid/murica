@@ -5,6 +5,7 @@ namespace murica_api\Controllers;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\Exceptions\ValidationException;
+use murica_bl\Dto\IUser;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
 use murica_bl\Router\IRouter;
@@ -57,6 +58,8 @@ class UserController extends Controller {
             try {
                 $userEntities[] = (new EntityModel($this->router, $user, true))
                     ->linkTo('allUsers', UserController::class, 'allUsers')
+                    ->linkTo('delete', UserController::class, 'deleteUser')
+                    ->linkTo('update', UserController::class, 'updateUser')
                     ->withSelfRef(UserController::class, 'getUserById', [$user->getId()]);
             } catch (ModelException $e) {
                 return new ErrorModel($this->router, 500, 'Failed to query users', $e->getTraceMessages());
@@ -168,16 +171,20 @@ class UserController extends Controller {
             return new ErrorModel($this->router, 404, 'Failed to update user', "User not found with id '{$requestData['id']}'");
         }
 
+        /* @var $user IUser */
+        $user = $users[0];
+
+        if (isset($requestData['name'])) $user->setName($requestData['name']);
+        if (isset($requestData['email'])) $user->setEmail($requestData['email']);
+        if (isset($requestData['password'])) $user->setPassword(password_hash(trim($requestData['password']), PASSWORD_DEFAULT) );
+        if (isset($requestData['birth_date'])) $user->setBirthDate($requestData['birth_date']);
+
         try {
-            $this->userDao->update(new User($requestData['id'],
-                                            $requestData['name'],
-                                            $requestData['email'],
-                                            $requestData['password'],
-                                            $requestData['birthDate']));
+            $this->userDao->update($user);
 
             return new MessageModel($this->router, ['message' => 'User updated successfully'], true);
         } catch (DataAccessException|ValidationException $e) {
-            return new ErrorModel($this->router, 500, 'user to update subject', $e->getTraceMessages());
+            return new ErrorModel($this->router, 500, 'Failed to update user', $e->getTraceMessages());
         }
     }
 

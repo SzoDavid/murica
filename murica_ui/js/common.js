@@ -179,6 +179,7 @@ class RequestInvoker {
             },
             error: (xhr, status, error) => {
                 console.error(error);
+                alert('Something unexpected happened. Please try again later!')
             },
         });
 

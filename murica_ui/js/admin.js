@@ -36,7 +36,21 @@ function subjects(contentElement) {
     let newSubjectButton = new Button('New subject').build();
     contentElement.append(newSubjectButton);
 
-    //TODO: request
+    requestInvoker.executePost('subject/all', { token: tokenObj.token }).then((response) => {
+        bindClickListener(newSubjectButton, () => { newSubject(contentElement, response._links.createSubject.href); });
+
+        console.log(response);
+        const tableColumns = {
+            id: 'Id',
+            name: 'Name',
+            approval: 'Approval needed',
+            credit: 'Credit',
+            type: 'Type'
+        };
+
+        const subjectsTable= new DropDownTable(tableColumns, response._embedded.subjects, (record) => { return subjectDetails(record, contentElement)}).build();
+        contentElement.append(subjectsTable);
+    });
 }
 
 function newSubject(contentElement, saveUrl) {
@@ -76,13 +90,84 @@ function newSubject(contentElement, saveUrl) {
 
 function saveNewSubject(contentElement, saveUrl) {
     $('#new-subject-error').addClass('hidden');
-    //TODO: request
+
+    //TODO: validate values
+    requestInvoker.executePost(saveUrl, {
+        token: tokenObj.token,
+        id: $('#subject-details-id').val(),
+        name: $('#subject-details-name').val(),
+        approval: $('#subject-details-approval').is(":checked"),
+        credit: $('#subject-details-credit').val(),
+        type: $('#subject-details-type').val()
+    }).then((response) => {
+        console.log(response);
+        if (response._success) subjects(contentElement);
+        else $('#new-subject-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
 }
 
-function subjectDetails(record) {
+function subjectDetails(record, contentElement) {
+    let container = $('<div>');
 
+    let table = $("<table>").addClass("editTable");
+    table.append(
+        $("<tr>").append(
+            $("<th>").text("Id:"),
+            $("<td>").text(record.id)
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "subject-details-name").text("Name:")),
+            $("<td>").append($("<input>").attr({ id: "subject-details-name", name: "name", type: "text", value: record.name, required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "subject-details-approval").text("Approval needed:")),
+            $("<td>").append($("<input>").attr({ id: "subject-details-approval", type: "checkbox", checked: record.approval !== '', required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "subject-details-credit").text("Credit:")),
+            $("<td>").append($("<input>").attr({ id: "subject-details-credit", type: "number", min: 0, value: record.credit, required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "subject-details-type").text("Type:")),
+            $("<td>").append($("<input>").attr({ id: "subject-details-type", type: "text", value: record.type, required: true }))
+        )
+    );
+
+    container.append(table);
+
+    container.append($('<div>').prop('id', 'edit-subject-error').addClass('hidden error'));
+    container.append(new Button('Save', () => { updateSubject(record, contentElement) }).build());
+    container.append(new Button('Remove', () => { removeSubject(record, contentElement) }).build());
+
+    // TODO: add table for the courses
+
+    return container;
 }
 
+function updateSubject(record, contentElement) {
+    $('#edit-subject-error').addClass('hidden');
+
+    requestInvoker.executePost(record._links.update.href, {
+        token: tokenObj.token,
+        id: record.id,
+        name: $('#subject-details-name').val(),
+        approval: $('#subject-details-approval').is(":checked"),
+        credit: $('#subject-details-credit').val(),
+        type: $('#subject-details-type').val()
+    }).then((response) => {
+        if (response._success) subjects(contentElement);
+        else $('#edit-subject-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
+
+function removeSubject(record, contentElement) {
+    $('#edit-subject-error').addClass('hidden');
+
+    requestInvoker.executePost(record._links.delete.href, { token: tokenObj.token, id: record.id }).then((response) => {
+        if (response._success) subjects(contentElement);
+        else $('#edit-subject-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
 //endregion
 
 //region Programmes
@@ -98,7 +183,19 @@ function programmes(contentElement) {
     let newProgrammeButton = new Button('New programme').build();
     contentElement.append(newProgrammeButton);
 
-    //TODO: request
+    requestInvoker.executePost('programme/all', { token: tokenObj.token }).then((response) => {
+        bindClickListener(newProgrammeButton, () => { newProgramme(contentElement, response._links.createProgramme.href); });
+
+        console.log(response);
+        const tableColumns = {
+            name: 'Name',
+            type: 'Type',
+            noTerms: 'Number of terms',
+        };
+
+        const programmeTable= new DropDownTable(tableColumns, response._embedded.programmes, (record) => { return programmeDetails(record, contentElement)}).build();
+        contentElement.append(programmeTable);
+    });
 }
 
 function newProgramme(contentElement, saveUrl) {
@@ -130,13 +227,68 @@ function newProgramme(contentElement, saveUrl) {
 
 function saveNewProgramme(contentElement, saveUrl) {
     $('#new-programme-error').addClass('hidden');
-    //TODO: request
+
+    requestInvoker.executePost(saveUrl, {
+        token: tokenObj.token,
+        name: $('#programme-details-name').val(),
+        type: $('#programme-details-type').val(),
+        noTerms: $('#programme-details-noTerms').val(),
+    }).then((response) => {
+        console.log(response);
+        if (response._success) programmes(contentElement);
+        else $('#new-programme-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
 }
 
-function programmeDetails(record) {
+function programmeDetails(record, contentElement) {
+    let container = $('<div>');
 
+    let table = $("<table>").addClass("editTable");
+    table.append(
+        $("<tr>").append(
+            $("<th>").text("Name:"),
+            $("<td>").text(record.name)
+        ),
+        $("<tr>").append(
+            $("<th>").text("Type:"),
+            $("<td>").text(record.type)
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "programme-details-noTerms").text("Number of terms:")),
+            $("<td>").append($("<input>").attr({ id: "programme-details-noTerms", type: "number", min: 1, value: record.noTerms, required: true }))
+        )
+    );
+    container.append(table);
+
+    container.append($('<div>').prop('id', 'edit-programme-error').addClass('hidden error'));
+    container.append(new Button('Save', () => { updateProgramme(record, contentElement) }).build());
+    container.append(new Button('Remove', () => { removeProgramme(record, contentElement) }).build());
+
+    return container;
 }
 
+function updateProgramme(record, contentElement) {
+    $('#edit-programme-error').addClass('hidden');
+
+    requestInvoker.executePost(record._links.update.href, {
+        token: tokenObj.token,
+        name: record.name,
+        type: record.type,
+        noTerms: $('#programme-details-noTerms').val()
+    }).then((response) => {
+        if (response._success) programmes(contentElement);
+        else $('#edit-programme-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
+
+function removeProgramme(record, contentElement) {
+    $('#edit-programme-error').addClass('hidden');
+
+    requestInvoker.executePost(record._links.delete.href, { token: tokenObj.token, name: record.name, type: record.type }).then((response) => {
+        if (response._success) programmes(contentElement);
+        else $('#edit-programme-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
 //endregion
 
 //region Users
@@ -163,7 +315,7 @@ function users(contentElement) {
             birth_date: 'Birth date'
         };
 
-        const usersTable= new DropDownTable(tableColumns, response._embedded.users, userDetails).build();
+        const usersTable= new DropDownTable(tableColumns, response._embedded.users, (record) => { return userDetails(record, contentElement)} ).build();
         contentElement.append(usersTable);
     });
 }
@@ -221,7 +373,7 @@ function saveNewUser(contentElement, saveUrl) {
     });
 }
 
-function userDetails(record) {
+function userDetails(record, contentElement) {
     let container = $('<div>');
 
     let table = $("<table>").addClass("editTable");
@@ -245,10 +397,42 @@ function userDetails(record) {
     );
     container.append(table);
 
-    container.append(new Button('Save', () => { console.log('save'); }).build());
-    container.append(new Button('Remove', () => { console.log('remove'); }).build());
+    container.append($('<div>').prop('id', 'edit-user-error').addClass('hidden error'));
+    container.append(new Button('Save', () => { updateUser(record, contentElement) }).build());
+    container.append(new Button('Remove', () => { removeUser(record, contentElement) }).build());
 
     return container;
+}
+
+function updateUser(record, contentElement) {
+    $('#edit-user-error').addClass('hidden');
+
+    let args = {
+        token: tokenObj.token,
+        id: record.id
+    }
+
+    const nameField = $('#user-details-name');
+    const emailField = $('#user-details-email');
+    const birthDateField = $('#user-details-birth');
+
+    if (nameField.val()) args['name'] = nameField.val();
+    if (emailField.val()) args['email'] = emailField.val();
+    if (birthDateField.val()) args['birth_date'] = birthDateField.val();
+
+    requestInvoker.executePost(record._links.update.href, args).then((response) => {
+        if (response._success) users(contentElement);
+        else $('#edit-user-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
+
+function removeUser(record, contentElement) {
+    $('#edit-user-error').addClass('hidden');
+
+    requestInvoker.executePost(record._links.delete.href, { token: tokenObj.token, id: record.id }).then((response) => {
+        if (response._success) users(contentElement);
+        else $('#edit-user-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
 }
 
 //endregion
@@ -266,7 +450,18 @@ function rooms(contentElement) {
     let newRoomButton = new Button('New room').build();
     contentElement.append(newRoomButton);
 
-    //TODO: request
+    requestInvoker.executePost('room/all', { token: tokenObj.token }).then((response) => {
+        bindClickListener(newRoomButton, () => { newRoom(contentElement, response._links.createRoom.href); });
+
+        console.log(response);
+        const tableColumns = {
+            id: 'Id',
+            capacity: 'Capacity'
+        };
+
+        const roomTable= new DropDownTable(tableColumns, response._embedded.rooms, (record) => { return roomDetails(record, contentElement) }).build();
+        contentElement.append(roomTable);
+    });
 }
 
 function newRoom(contentElement, saveUrl) {
@@ -297,7 +492,7 @@ function saveNewRoom(contentElement, saveUrl) {
     //TODO: request
 }
 
-function roomDetails(record) {
+function roomDetails(record, contentElement) {
     
 }
 

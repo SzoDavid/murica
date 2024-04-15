@@ -56,6 +56,8 @@ class RoomController extends Controller {
             try {
                 $roomEntities[] = (new EntityModel($this->router, $room, true))
                     ->linkTo('allRooms', RoomController::class, 'allRooms')
+                    ->linkTo('delete', RoomController::class, 'deleteRoom')
+                    ->linkTo('update', RoomController::class, 'updateRoom')
                     ->withSelfRef(RoomController::class, 'getRoomById', [$room->getId()]);
             } catch (ModelException $e) {
                 return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getTraceMessages());
@@ -64,6 +66,7 @@ class RoomController extends Controller {
 
         try {
             return (new CollectionModel($this->router, $roomEntities, 'rooms', true))
+                ->linkTo('createRoom', RoomController::class, 'createRoom')
                 ->withSelfRef(RoomController::class, 'allRooms');
         } catch (ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getTraceMessages());
