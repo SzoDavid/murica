@@ -26,11 +26,11 @@ class SubjectController extends Controller {
         $this->subjectDao = $subjectDao;
 
         $this->router->registerController($this, 'subject')
-            ->registerEndpoint('allSubjects', 'all', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('getSubjectById', '', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('createSubject', 'new', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('updateSubject', 'update', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('deleteSubject', 'delete', EndpointRoute::VISIBILITY_PUBLIC);
+            ->registerEndpoint('allSubjects', 'all', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getSubjectById', '', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('createSubject', 'new', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('updateSubject', 'update', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('deleteSubject', 'delete', EndpointRoute::VISIBILITY_PRIVATE);
     }
     //endregion
 
@@ -111,16 +111,18 @@ class SubjectController extends Controller {
      * Parameters are expected as part of request data.
      */
     public function createSubject(string $uri, array $requestData): IModel {
-            if (!isset($requestData['id']))
-                return new ErrorModel($this->router, 400, 'Failed to create subject', 'Parameter "id" is not provided in request data');
-            if (!isset($requestData['name']))
-                return new ErrorModel($this->router, 400, 'Failed to create subject', 'Parameter "name" is not provided in request data');
-            if (!isset($requestData['approval']))
-                return new ErrorModel($this->router, 400, 'Failed to create subject', 'Parameter "approval" is not provided in request data');
-            if (!isset($requestData['credit']))
-                return new ErrorModel($this->router, 400, 'Failed to create subject', 'Parameter "credit" is not provided in request data');
-            if (!isset($requestData['type']))
-                return new ErrorModel($this->router, 400, 'Failed to create subject', 'Parameter "type" is not provided in request data');
+        // TODO: check if user is admin
+
+        if (!isset($requestData['id']))
+            return new ErrorModel($this->router, 400, 'Failed to create subject', 'Parameter "id" is not provided in request data');
+        if (!isset($requestData['name']))
+            return new ErrorModel($this->router, 400, 'Failed to create subject', 'Parameter "name" is not provided in request data');
+        if (!isset($requestData['approval']))
+            return new ErrorModel($this->router, 400, 'Failed to create subject', 'Parameter "approval" is not provided in request data');
+        if (!isset($requestData['credit']))
+            return new ErrorModel($this->router, 400, 'Failed to create subject', 'Parameter "credit" is not provided in request data');
+        if (!isset($requestData['type']))
+            return new ErrorModel($this->router, 400, 'Failed to create subject', 'Parameter "type" is not provided in request data');
 
         try {
             $subject = $this->subjectDao->create(new Subject($requestData['id'],
@@ -141,27 +143,27 @@ class SubjectController extends Controller {
     }
 
     public function updateSubject(string $uri, array $requestData): IModel {
+        // TODO: check if user is admin
+
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to update subject', 'Parameter "id" is not provided in request data');
 
         try {
-            $subject = $this->subjectDao->findByCrit($requestData['id']);
+            $subjects = $this->subjectDao->findByCrit(new Subject($requestData['id']));
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getTraceMessages());
         }
 
-        if (empty($subject)) {
+        if (empty($subjects)) {
             return new ErrorModel($this->router, 404, 'Failed to update subject', "Subject not found with id '{$requestData['id']}'");
         }
 
         try {
-            $updatedSubject = $this->subjectDao->update(new Subject(
-                                                            $requestData['id'],
-                                                            $requestData['name'],
-                                                            (int)$requestData['approval'],
-                                                            (int)$requestData['credit'],
-                                                            $requestData['type']
-                                                        ));
+            $this->subjectDao->update(new Subject($requestData['id'],
+                                                  $requestData['name'],
+                                                  (int)$requestData['approval'],
+                                                  (int)$requestData['credit'],
+                                                  $requestData['type']));
 
             return new MessageModel($this->router, ['message' => 'Subject updated successfully'], true);
         } catch (DataAccessException|ValidationException $e) {
@@ -170,27 +172,28 @@ class SubjectController extends Controller {
     }
 
     public function deleteSubject(string $uri, array $requestData): IModel {
+        // TODO: check if user is admin
+
         if (!isset($requestData['id'])) {
             return new ErrorModel($this->router, 400, 'Failed to delete subject', 'Parameter "id" is not provided in request data');
         }
 
         try {
-            $subjects = $this->subjectDao->findByCrit($requestData['id']);
+            $subjects = $this->subjectDao->findByCrit(new Subject($requestData['id']));
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to delete subject', $e->getTraceMessages());
         }
 
-        if (empty($subject)) {
+        if (empty($subjects)) {
             return new ErrorModel($this->router, 404, 'Failed to delete subject', "Subject not found with id '{$requestData['id']}'");
         }
 
         try {
-            $this->subjectDao->delete($subject);
+            $this->subjectDao->delete($subjects[0]);
             return new MessageModel($this->router, ['message' => 'Subject deleted successfully'], true);
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to delete subject', $e->getTraceMessages());
         }
     }
-
     //endregion
 }

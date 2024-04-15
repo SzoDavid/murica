@@ -26,11 +26,11 @@ class RoomController extends Controller {
         $this->roomDao = $roomDao;
 
         $this->router->registerController($this, 'room')
-            ->registerEndpoint('allRooms', 'all', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('getRoomById', '', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('createRoom', 'create', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('updateRoom', 'update', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('deleteRoom', 'delete', EndpointRoute::VISIBILITY_PUBLIC);
+            ->registerEndpoint('allRooms', 'all', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getRoomById', '', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('createRoom', 'new', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('updateRoom', 'update', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('deleteRoom', 'delete', EndpointRoute::VISIBILITY_PRIVATE);
     }
     //endregion
 
@@ -40,6 +40,7 @@ class RoomController extends Controller {
      * No parameters required.
      */
     public function allRooms(string $uri, array $requestData): IModel {
+        // TODO: check if user is admin
         try {
             $rooms = $this->roomDao->findAll();
         } catch (DataAccessException $e) {
@@ -74,6 +75,8 @@ class RoomController extends Controller {
      * Id must be part of the uri.
      */
     public function getRoomById(string $uri, array $requestData): IModel {
+        // TODO: check if user is admin
+
         if (empty($uri)) {
             return new ErrorModel($this->router,
                                   400,
@@ -111,6 +114,8 @@ class RoomController extends Controller {
      * Parameters are expected as part of request data.
      */
     public function createRoom(string $uri, array $requestData): IModel {
+        // TODO: check if user is admin
+
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to create Room', 'Parameter "id" is not provided in uri');
         if (!isset($requestData['capacity']))
@@ -137,11 +142,13 @@ class RoomController extends Controller {
     }
 
     public function updateRoom(string $uri, array $requestData): IModel {
+        // TODO: check if user is admin
+
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to update room', 'Parameter "id" is not provided in request data');
 
         try {
-            $rooms = $this->roomDao->findByCrit($requestData['id']);
+            $rooms = $this->roomDao->findByCrit(new Room($requestData['id']));
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to update room', $e->getTraceMessages());
         }
@@ -150,10 +157,8 @@ class RoomController extends Controller {
             return new ErrorModel($this->router, 404, 'Failed to update room', "Subject not found with id '{$requestData['id']}'");
         }
         try {
-            $updatedSubject = $this->roomDao->update(new Room(
-                                                            $requestData['id'],
-                                                            $requestData['capacity'],
-                                                        ));
+            $this->roomDao->update(new Room($requestData['id'],
+                                            $requestData['capacity']));
 
             return new MessageModel($this->router, ['message' => 'Room updated successfully'], true);
         } catch (DataAccessException|ValidationException $e) {
@@ -162,22 +167,24 @@ class RoomController extends Controller {
     }
 
     public function deleteRoom(string $uri, array $requestData): IModel {
+        // TODO: check if user is admin
+
         if (!isset($requestData['id'])) {
             return new ErrorModel($this->router, 400, 'Failed to delete room', 'Parameter "id" is not provided in request data');
         }
 
         try {
-            $subjects = $this->roomDao->findByCrit($requestData['id']);
+            $subjects = $this->roomDao->findByCrit(new Room($requestData['id']));
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to delete room', $e->getTraceMessages());
         }
 
-        if (empty($subject)) {
+        if (empty($subjects)) {
             return new ErrorModel($this->router, 404, 'Failed to delete room', "Room not found with id '{$requestData['id']}'");
         }
 
         try {
-            $this->roomDao->delete($subject);
+            $this->roomDao->delete($subjects[0]);
             return new MessageModel($this->router, ['message' => 'Room deleted successfully'], true);
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to delete subject', $e->getTraceMessages());

@@ -26,9 +26,11 @@ class ProgrammeController extends Controller {
         $this->programmeDao = $programmeDao;
 
         $this->router->registerController($this, 'programme')
-            ->registerEndpoint('allProgrammes', 'all', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('getProgrammeByNameAndType', '', EndpointRoute::VISIBILITY_PUBLIC)
-            ->registerEndpoint('createProgramme', 'new', EndpointRoute::VISIBILITY_PUBLIC);
+            ->registerEndpoint('allProgrammes', 'all', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getProgrammeByNameAndType', '', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('createProgramme', 'new', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('updateProgramme', 'update', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('deleteProgramme', 'delete', EndpointRoute::VISIBILITY_PRIVATE);
     }
     //endregion
 
@@ -44,7 +46,7 @@ class ProgrammeController extends Controller {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query programmes',
-                                  $e->getTraceMessages()); // Módosítás: getTraceMessages() helyett getMessage() használata
+                                  $e->getTraceMessages());
         }
 
         $programmeEntities = [];
@@ -52,8 +54,8 @@ class ProgrammeController extends Controller {
         foreach ($programmes as $programme) {
             try {
                 $programmeEntities[] = (new EntityModel($this->router, $programme, true))
-                    ->linkTo('allProgrammes', ProgrammeController::class, 'getProgrammeByName') // Módosítás: linkTo() metódus hívása helyes metódusnévvel
-                    ->withSelfRef(ProgrammeController::class, 'getProgrammeByName', [], ['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]); // Módosítás: withSelfRef() metódus hívása helyes metódusnévvel és a megfelelő paraméterekkel
+                    ->linkTo('allProgrammes', ProgrammeController::class, 'allProgrammes')
+                    ->withSelfRef(ProgrammeController::class, 'getProgrammeByNameAndType', [], ['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]);
             } catch (ModelException $e) {
                 return new ErrorModel($this->router, 500, 'Failed to query programmes', $e->getTraceMessages());
             }
@@ -99,7 +101,7 @@ class ProgrammeController extends Controller {
         try {
             return (new EntityModel($this->router, $programmes[0], true))
                 ->linkTo('allProgrammes', ProgrammeController::class, 'allProgrammes')
-                ->withSelfRef(ProgrammeController::class, 'getProgrammeByName', [], ['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]);
+                ->withSelfRef(ProgrammeController::class, 'getProgrammeByNameAndType', [], ['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]);
         } catch (ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to query programme', $e->getTraceMessages());
         }
@@ -110,6 +112,8 @@ class ProgrammeController extends Controller {
      * Parameters are expected as part of request data.
      */
     public function createProgramme(string $uri, array $requestData): IModel {
+        // TODO: check if user is admin
+
         if (!isset($requestData['name']))
             return new ErrorModel($this->router, 400, 'Failed to create Programme', 'Parameter "name" is not provided in uri');
         if (!isset($requestData['type']))
@@ -129,13 +133,15 @@ class ProgrammeController extends Controller {
         try {
             return (new EntityModel($this->router, $programmes[0], true))
                 ->linkTo('allProgrammes', UserController::class, 'allProgrammes')
-                ->withSelfRef(ProgrammeController::class, 'getProgrammeByName',[],['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]);
+                ->withSelfRef(ProgrammeController::class, 'getProgrammeByNameAndType',[],['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]);
         } catch (ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
         }
     }
 
     public function updateProgramme(string $uri, array $requestData): IModel {
+        // TODO: check if user is admin
+
         if (!isset($requestData['name']))
             return new ErrorModel($this->router, 400, 'Failed to update Programme', 'Parameter "name" is not provided in uri');
         if (!isset($requestData['type']))
@@ -152,10 +158,9 @@ class ProgrammeController extends Controller {
             return new ErrorModel($this->router, 404, 'Failed to update programme', "Programme not found with name '{$requestData['name']}' and type '{$requestData['type']}'");
         }
         try {
-            $updatedProgramme = $this->programmeDao->update(new Programme(
-                                                                $requestData['name'],
-                                                                $requestData['type'],
-                                                                $requestData['noTerms']));
+            $this->programmeDao->update(new Programme($requestData['name'],
+                                                      $requestData['type'],
+                                                      $requestData['noTerms']));
 
             return new MessageModel($this->router, ['message' => 'Programme updated successfully'], true);
         } catch (DataAccessException|ValidationException $e) {
@@ -164,6 +169,8 @@ class ProgrammeController extends Controller {
     }
 
     public function deleteProgramme(string $uri, array $requestData): IModel {
+        // TODO: check if user is admin
+
         if (!isset($requestData['name']) || !isset($requestData['type'])) {
             return new ErrorModel($this->router, 400, 'Failed to delete programme', 'Both "name" and "type" parameters are required');
         }
