@@ -100,6 +100,16 @@ class CourseController extends Controller {
         $id = $requestData['id'] ?? null;
         $subjectId = $requestData['subjectId'] ?? null;
 
+        try {
+            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
+        }
+
+        if (empty($subject)) {
+            return new ErrorModel($this->router, 404, 'Failed to create course', "Already not found subject with id '{$requestData['subjectId']}'");
+        }
+
         if (empty($id) || empty($subjectId)) {
             return new ErrorModel($this->router,
                                   400,
@@ -107,7 +117,7 @@ class CourseController extends Controller {
                                   'Both "id" and "subjectId" parameters are required');
         }
         try {
-            $courses = $this->courseDao->findByCrit(new Course($id, $subjectId));
+            $courses = $this->courseDao->findByCrit(new Course($subject[0], $id));
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router,
                                   500,
@@ -162,7 +172,7 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "roomId" is not provided in uri');
 
         try {
-           $subject =  $this->subjectDao->findByCrit(new Subject($requestData['id']));
+           $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
         }
@@ -222,7 +232,7 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to update Course', 'Parameter "subjectId" is not provided in uri');
 
         try {
-            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['id']));
+            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
         }
@@ -285,7 +295,7 @@ class CourseController extends Controller {
         }
 
         try {
-            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['id']));
+            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
         }
@@ -323,7 +333,7 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to register Course', 'Parameter "programmeType" is not provided in uri');
 
         try {
-            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['id']));
+            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
         }
@@ -407,7 +417,7 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to unregister Course', 'Parameter "programmeType" is not provided in uri');
 
         try {
-            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['id']));
+            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
         }
