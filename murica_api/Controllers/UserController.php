@@ -112,6 +112,7 @@ class UserController extends Controller {
         try {
             return (new EntityModel($this->router, $users[0], true))
                 ->linkTo('allUsers', UserController::class, 'allUsers')
+                ->linkTo('update', UserController::class, 'updateUser')
                 ->withSelfRef(UserController::class, 'getUserById', [$uri]);
         } catch (ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to query user', $e->getTraceMessages());
@@ -156,7 +157,7 @@ class UserController extends Controller {
     }
 
     public function updateUser(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
+        // TODO: check if user is admin or self
 
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to update user', 'Parameter "id" is not provided in request data');

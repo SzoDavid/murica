@@ -187,4 +187,98 @@ class RequestInvoker {
     }
 }
 
+class SelfPage {
+    /**
+     * @param {JQuery<HTMLElement>} contentElement
+     * @param {string} fetchUserUrl
+     * @param {string} context
+     */
+    constructor(contentElement, fetchUserUrl, context) {
+        this.contentElement = contentElement;
+        this.fetchUserUrl = fetchUserUrl;
+        this.context = context;
+    }
 
+    build() {
+        this.contentElement.empty();
+
+        localStorage.setItem(this.context, 'self');
+        $('#navbar .active').removeClass('active');
+        $('#navbar-username').addClass('active');
+
+        this.contentElement.append($('<h1>').text('My data'));
+
+        let table = $("<table>").addClass("editTable");
+        table.append(
+            $("<tr>").append(
+                $("<th>").text("Code:"),
+                $("<td>").prop('id', 'self-details-id')
+            ),
+            $("<tr>").append(
+                $("<th>").append($("<label>").attr("for", "self-details-name").text("Name:")),
+                $("<td>").append($("<input>").attr({ id: "self-details-name", name: "name", type: "text", required: true }))
+            ),
+            $("<tr>").append(
+                $("<th>").append($("<label>").attr("for", "self-details-email").text("E-mail address:")),
+                $("<td>").append($("<input>").attr({ id: "self-details-email", name: "email", type: "email", required: true }))
+            ),
+            $("<tr>").append(
+                $("<th>").append($("<label>").attr("for", "self-details-birth").text("Birth date:")),
+                $("<td>").append($("<input>").attr({ id: "self-details-birth", name: "birth_date", type: "date", required: true }))
+            ),
+            $("<tr>").append(
+                $("<th>").append($("<label>").attr("for", "self-details-password").text("Password:")),
+                $("<td>").append($("<input>").attr({ id: "self-details-password", type: "password", required: true }))
+            ),
+            $("<tr>").append(
+                $("<th>").append($("<label>").attr("for", "self-details-password2").text("Password again:")),
+                $("<td>").append($("<input>").attr({ id: "self-details-password2", type: "password", required: true }))
+            )
+        );
+
+        const updateButton = new Button('Save').build()
+
+        this.contentElement.append(table);
+        this.contentElement.append($('<div>').prop('id', 'edit-self-error').addClass('hidden error'));
+        this.contentElement.append(updateButton);
+
+        requestInvoker.executePost(this.fetchUserUrl, { token: tokenObj.token }).then((response) => {
+            $('#self-details-id').text(response.id);
+            $('#self-details-name').val(response.name);
+            $('#self-details-email').val(response.email);
+            $('#self-details-birth').val(response.birth_date);
+
+            bindClickListener(updateButton, () => { this.updateSelf(response) });
+        });
+    }
+
+    updateSelf(record) {
+        const errorContainer = $('#edit-self-error').addClass('hidden');
+
+        let args = {
+            token: tokenObj.token,
+            id: record.id,
+            name: $('#self-details-name').val(),
+            email: $('#self-details-email').val(),
+            birth_date: $('#self-details-birth').val()
+        };
+
+        const pw = $('#self-details-password').val();
+        const pw2 = $('#self-details-password2').val();
+
+        if (pw || pw2) {
+            if (pw !== pw2) {
+                errorContainer.html('The passwords do not match!').removeClass('hidden');
+                return;
+            } else {
+                args['password'] = pw;
+            }
+        }
+
+        requestInvoker.executePost(record._links.update.href, args).then((response) => {
+            if (response._success) this.build();
+            else errorContainer.html(string2html(response.error.details)).removeClass('hidden');
+        });
+    }
+
+}

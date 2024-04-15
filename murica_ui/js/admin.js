@@ -346,6 +346,10 @@ function newUser(contentElement, saveUrl) {
         $("<tr>").append(
             $("<th>").append($("<label>").attr("for", "user-details-password").text("Password:")),
             $("<td>").append($("<input>").attr({ id: "user-details-password", type: "password", required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "user-details-password2").text("Password again:")),
+            $("<td>").append($("<input>").attr({ id: "user-details-password2", type: "password", required: true }))
         )
     );
 
@@ -357,6 +361,11 @@ function newUser(contentElement, saveUrl) {
 
 function saveNewUser(contentElement, saveUrl) {
     $('#new-user-error').addClass('hidden');
+
+    if ($('#user-details-password').val() !== $('#user-details-password2').val()) {
+        $('#new-user-error').html('The passwords do not match!').removeClass('hidden');
+        return;
+    }
 
     //TODO: validate values
     requestInvoker.executePost(saveUrl, {
@@ -540,6 +549,13 @@ function removeRoom(record, contentElement) {
 }
 //endregion
 
+//region Self
+
+function self(contentElement) {
+    new SelfPage(contentElement, tokenObj._links.user.href, 'admin').build();
+}
+//endregion
+
 $(() => {
     init();
     const contentElement = $('#content');
@@ -550,10 +566,12 @@ $(() => {
         case 'programmes': programmes(contentElement); break;
         case 'users': users(contentElement); break;
         case 'rooms': rooms(contentElement); break;
+        case 'self': self(contentElement); break;
     }
 
     bindClickListener($('#navbar-subjects'), () => { subjects(contentElement); });
     bindClickListener($('#navbar-programmes'), () => { programmes(contentElement); });
     bindClickListener($('#navbar-users'), () => { users(contentElement); });
     bindClickListener($('#navbar-rooms'), () => { rooms(contentElement); });
+    bindClickListener($('#navbar-username'), () => { self(contentElement); });
 });
