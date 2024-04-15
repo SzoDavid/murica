@@ -28,7 +28,9 @@ class UserController extends Controller {
         $this->router->registerController($this, 'user')
             ->registerEndpoint('allUsers', 'all', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getUserById', '', EndpointRoute::VISIBILITY_PRIVATE)
-            ->registerEndpoint('createUser', 'new', EndpointRoute::VISIBILITY_PUBLIC); // TODO: Set to private
+            ->registerEndpoint('createUser', 'new', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('updateUser', 'update', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('deleteUser', 'delete', EndpointRoute::VISIBILITY_PRIVATE);
     }
     //endregion
 
@@ -146,6 +148,60 @@ class UserController extends Controller {
                 ->withSelfRef(UserController::class, 'getUserById', [$user->getId()]);
         } catch (ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
+        }
+    }
+
+    public function updateUser(string $uri, array $requestData): IModel {
+        // TODO: check if user is admin
+
+        if (!isset($requestData['id']))
+            return new ErrorModel($this->router, 400, 'Failed to update user', 'Parameter "id" is not provided in request data');
+
+        try {
+            $users = $this->userDao->findByCrit(new User($requestData['id']));
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to update user', $e->getTraceMessages());
+        }
+
+        if (empty($users)) {
+            return new ErrorModel($this->router, 404, 'Failed to update user', "User not found with id '{$requestData['id']}'");
+        }
+
+        try {
+            $this->userDao->update(new User($requestData['id'],
+                                            $requestData['name'],
+                                            $requestData['email'],
+                                            $requestData['password'],
+                                            $requestData['birthDate']));
+
+            return new MessageModel($this->router, ['message' => 'User updated successfully'], true);
+        } catch (DataAccessException|ValidationException $e) {
+            return new ErrorModel($this->router, 500, 'user to update subject', $e->getTraceMessages());
+        }
+    }
+
+    public function deleteUser(string $uri, array $requestData): IModel {
+        // TODO: check if user is admin
+
+        if (!isset($requestData['id'])) {
+            return new ErrorModel($this->router, 400, 'Failed to delete user', 'Parameter "id" is not provided in request data');
+        }
+
+        try {
+            $users = $this->userDao->findByCrit(new User($requestData['id']));
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to delete user', $e->getTraceMessages());
+        }
+
+        if (empty($users)) {
+            return new ErrorModel($this->router, 404, 'Failed to delete user', "User not found with id '{$requestData['id']}'");
+        }
+
+        try {
+            $this->userDao->delete($users[0]);
+            return new MessageModel($this->router, ['message' => 'User deleted successfully'], true);
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to delete user', $e->getTraceMessages());
         }
     }
     //endregion
