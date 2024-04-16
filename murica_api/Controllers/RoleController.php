@@ -118,7 +118,7 @@ class RoleController extends Controller {
             $admin = $this->adminDao->create(new Admin($users[0]));
             return (new EntityModel($this->router, $admin[0], true))
                 ->linkTo('role', RoleController::class, 'allRoles')
-                ->withSelfRef(RoleController::class, 'setAdmin',[],['id' => $admin->getUser()->getId()]);
+                ->withSelfRef(RoleController::class, 'setAdmin', [], ['id' => $admin->getUser()->getId()]);
 
         } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to give admin role', $e->getTraceMessages());
@@ -172,13 +172,13 @@ class RoleController extends Controller {
         if (!isset($requestData['startTerm']))
             return new ErrorModel($this->router, 400, 'Failed to set Student role', 'Parameter "startTerm" is not provided in uri');
         try {
-            $users =  $this->userDao->findByCrit(new User($requestData['id']));
+            $users = $this->userDao->findByCrit(new User($requestData['id']));
 
             if (empty($users)) {
                 return new ErrorModel($this->router, 404, 'Failed to set Student role', "User not found with id '{$requestData['id']}'");
             }
 
-            $programmes =  $this->programmeDao->findByCrit(new Programme($requestData['programmeName'], $requestData['programmeType']));
+            $programmes = $this->programmeDao->findByCrit(new Programme($requestData['programmeName'], $requestData['programmeType']));
 
             if (empty($programmes)) {
                 return new ErrorModel($this->router, 404, 'Failed to set Student role', "Programme not found with name '{$requestData['programmeName']}' and type '{$requestData['programmeType']}'");
@@ -186,7 +186,7 @@ class RoleController extends Controller {
             $students = $this->studentDao->create(new Student($users[0], $programmes[0], $requestData['startTerm']));
             return (new EntityModel($this->router, $students[0], true))
                 ->linkTo('role', RoleController::class, 'allRoles')
-                ->withSelfRef(RoleController::class, 'setStudent',[],['userId' => $students->getUser()->getId(), 'programmeName' => $students->getProgramme()->getName(), 'programmeType' => $students->getProgramme()->getType()]);
+                ->withSelfRef(RoleController::class, 'setStudent', [], ['userId' => $students->getUser()->getId(), 'programmeName' => $students->getProgramme()->getName(), 'programmeType' => $students->getProgramme()->getType()]);
 
         } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to set student role', $e->getTraceMessages());
