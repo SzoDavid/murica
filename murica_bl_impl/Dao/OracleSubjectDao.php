@@ -156,7 +156,7 @@ class OracleSubjectDao implements ISubjectDao {
             $res[] = new Subject(
                 oci_result($stmt, 'ID'),
                 oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'APPROVAL' == 1),
+                oci_result($stmt, 'APPROVAL')  == 1,
                 oci_result($stmt, 'CREDIT'),
                 oci_result($stmt, 'TYPE')
             );
@@ -172,7 +172,6 @@ class OracleSubjectDao implements ISubjectDao {
     public function findByCrit(ISubject $model): array {
         $res = array();
         $crits = array();
-
 
         $sql = sprintf("SELECT %s AS ID, %s AS NAME, %s AS APPROVAL, %s AS CREDIT, %s AS TYPE FROM %s.%s",
             TableDefinition::SUBJECT_TABLE_FIELD_ID,
@@ -212,7 +211,7 @@ class OracleSubjectDao implements ISubjectDao {
             $res[] = new Subject(
                 oci_result($stmt, 'ID'),
                 oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'APPROVAL' == 1),
+                oci_result($stmt, 'APPROVAL') == 1,
                 oci_result($stmt, 'CREDIT'),
                 oci_result($stmt, 'TYPE')
             );

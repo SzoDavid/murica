@@ -1,0 +1,76 @@
+.navbar {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    background: rgb(0,212,255);
+    background: linear-gradient(45deg, rgba(0,212,255,1) 0%, rgba(0,212,219,1) 100%);
+}
+
+.navbar img, .navbar span {
+    cursor: pointer;
+    display: block;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    color: black;
+}
+
+.navbar img {
+    height: 30px;
+    padding: 5px;
+}
+
+.navbar li {
+    float: left;
+    position: relative;
+}
+
+.navbar-dropdown .submenu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: rgb(0,212,255);
+    background: linear-gradient(45deg, rgba(0,212,255,1) 50%, rgba(0,212,219,1) 100%);
+    width: auto;
+    min-width: 100%;
+    z-index: 20;
+    list-style-type: none;
+    padding: 0;
+    text-align: center;
+}
+
+.submenu li {
+    border-top: aliceblue solid 1px;
+}
+
+.submenu span {
+    text-align: center;
+    padding: 5px 10px;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+.navbar-dropdown:hover .submenu {
+    display: block;
+}
+
+.navbar li span:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+.navbar .active:hover {
+    background-color: rgba(255, 255, 255, 0.75);
+}
+
+
+.navbar .active {
+    background-color: rgba(255, 255, 255, 0.5);
+    font-weight: bold;
+}

@@ -73,7 +73,7 @@ class ControllerRoute implements IControllerRoute {
         foreach ($this->endpointRoutes as $route => $endpointRoute) {
             if ($endpointRoute->getEndpoint() !== $method) continue;
 
-            $uri = implode('/', array_merge([$route], $uriParameters));
+            $uri = implode('/', empty($route) ? $uriParameters : array_merge([$route], $uriParameters));
 
             if (!empty($parameters)) {
                 $serializedParameters = array();
