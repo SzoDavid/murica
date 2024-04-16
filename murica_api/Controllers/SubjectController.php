@@ -3,6 +3,7 @@
 namespace murica_api\Controllers;
 
 use murica_bl\Dao\Exceptions\DataAccessException;
+use murica_bl\Dao\IAdminDao;
 use murica_bl\Dao\ISubjectDao;
 use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Models\Exceptions\ModelException;
@@ -18,12 +19,14 @@ use murica_bl_impl\Router\EndpointRoute;
 class SubjectController extends Controller {
     //region Properties
     private ISubjectDao $subjectDao;
+    private IAdminDao $adminDao;
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router, ISubjectDao $subjectDao) {
+    public function __construct(IRouter $router, ISubjectDao $subjectDao, IAdminDao $adminDao) {
         parent::__construct($router);
         $this->subjectDao = $subjectDao;
+        $this->adminDao = $adminDao;
 
         $this->router->registerController($this, 'subject')
             ->registerEndpoint('allSubjects', 'all', EndpointRoute::VISIBILITY_PRIVATE)
@@ -42,33 +45,25 @@ class SubjectController extends Controller {
     public function allSubjects(string $uri, array $requestData): IModel {
         try {
             $subjects = $this->subjectDao->findAll();
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router,
-                                  500,
-                                  'Failed to query subjects',
-                                  $e->getTraceMessages());
-        }
 
-        $subjectEntities = array();
+            $subjectEntities = array();
 
-        foreach ($subjects as $subject) {
-            try {
+            foreach ($subjects as $subject) {
                 $subjectEntities[] = (new EntityModel($this->router, $subject, true))
                     ->linkTo('allSubjects', SubjectController::class, 'allSubjects')
                     ->linkTo('delete', SubjectController::class, 'deleteSubject')
                     ->linkTo('update', SubjectController::class, 'updateSubject')
                     ->withSelfRef(SubjectController::class, 'getSubjectById', [$subject->getId()]);
-            } catch (ModelException $e) {
-                return new ErrorModel($this->router, 500, 'Failed to query subjects', $e->getTraceMessages());
             }
-        }
 
-        try {
             return (new CollectionModel($this->router, $subjectEntities, 'subjects', true))
                 ->linkTo('createSubject', SubjectController::class, 'createSubject')
                 ->withSelfRef(SubjectController::class, 'allSubjects');
-        } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query subjects', $e->getTraceMessages());
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router,
+                                  500,
+                                  'Failed to query subjects',
+                                  $e->getTraceMessages());
         }
     }
 
@@ -86,26 +81,22 @@ class SubjectController extends Controller {
 
         try {
             $subjects = $this->subjectDao->findByCrit(new Subject($uri));
-        } catch (DataAccessException $e) {
+
+            if (empty($subjects)) {
+                return new ErrorModel($this->router,
+                                      404,
+                                      'Subject not found',
+                                      "Subject not found with id '$uri'");
+            }
+
+            return (new EntityModel($this->router, $subjects[0], true))
+                ->linkTo('allSubjects', SubjectController::class, 'allSubjects')
+                ->withSelfRef(SubjectController::class, 'getSubjectById', [$uri]);
+        } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query subject',
                                   $e->getTraceMessages());
-        }
-
-        if (empty($subjects)) {
-            return new ErrorModel($this->router,
-                                  404,
-                                  'Subject not found',
-                                  "Subject not found with id '$uri'");
-        }
-
-        try {
-            return (new EntityModel($this->router, $subjects[0], true))
-                ->linkTo('allSubjects', SubjectController::class, 'allSubjects')
-                ->withSelfRef(SubjectController::class, 'getSubjectById', [$uri]);
-        } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query subject', $e->getTraceMessages());
         }
     }
 
@@ -114,7 +105,12 @@ class SubjectController extends Controller {
      * Parameters are expected as part of request data.
      */
     public function createSubject(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to create subject', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to create subject', $e->getTraceMessages());
+        }
 
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to create subject', 'Parameter "id" is not provided in request data');
@@ -133,35 +129,33 @@ class SubjectController extends Controller {
                                                     $requestData['approval'] === 'true',
                                                     (int)$requestData['credit'],
                                                     $requestData['type']));
-        } catch (DataAccessException|ValidationException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create subject', $e->getTraceMessages());
-        }
-        try {
+
             return (new EntityModel($this->router, $subject, true))
                 ->linkTo('allSubjects', SubjectController::class, 'allSubjects')
                 ->withSelfRef(SubjectController::class, 'getSubjectById', [$subject->getId()]);
-        } catch (ModelException $e) {
+        } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create subject', $e->getTraceMessages());
         }
     }
 
     public function updateSubject(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to update subject', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getTraceMessages());
+        }
 
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to update subject', 'Parameter "id" is not provided in request data');
 
         try {
             $subjects = $this->subjectDao->findByCrit(new Subject($requestData['id']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to update subject', $e->getTraceMessages());
-        }
 
-        if (empty($subjects)) {
-            return new ErrorModel($this->router, 404, 'Failed to update subject', "Subject not found with id '{$requestData['id']}'");
-        }
+            if (empty($subjects)) {
+                return new ErrorModel($this->router, 404, 'Failed to update subject', "Subject not found with id '{$requestData['id']}'");
+            }
 
-        try {
             $this->subjectDao->update(new Subject($requestData['id'],
                                                   $requestData['name'],
                                                   $requestData['approval'] === 'true',
@@ -175,7 +169,12 @@ class SubjectController extends Controller {
     }
 
     public function deleteSubject(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to delete subject', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to delete subject', $e->getTraceMessages());
+        }
 
         if (!isset($requestData['id'])) {
             return new ErrorModel($this->router, 400, 'Failed to delete subject', 'Parameter "id" is not provided in request data');
@@ -183,15 +182,11 @@ class SubjectController extends Controller {
 
         try {
             $subjects = $this->subjectDao->findByCrit(new Subject($requestData['id']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to delete subject', $e->getTraceMessages());
-        }
 
-        if (empty($subjects)) {
-            return new ErrorModel($this->router, 404, 'Failed to delete subject', "Subject not found with id '{$requestData['id']}'");
-        }
+            if (empty($subjects)) {
+                return new ErrorModel($this->router, 404, 'Failed to delete subject', "Subject not found with id '{$requestData['id']}'");
+            }
 
-        try {
             $this->subjectDao->delete($subjects[0]);
             return new MessageModel($this->router, ['message' => 'Subject deleted successfully'], true);
         } catch (DataAccessException $e) {

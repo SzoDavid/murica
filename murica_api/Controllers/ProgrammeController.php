@@ -3,6 +3,7 @@
 namespace murica_api\Controllers;
 
 use murica_bl\Dao\Exceptions\DataAccessException;
+use murica_bl\Dao\IAdminDao;
 use murica_bl\Dao\IProgrammeDao;
 use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Models\Exceptions\ModelException;
@@ -18,12 +19,14 @@ use murica_bl_impl\Router\EndpointRoute;
 class ProgrammeController extends Controller {
     //region Properties
     private IProgrammeDao $programmeDao;
+    private IAdminDao $adminDao;
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router, IProgrammeDao $programmeDao) {
+    public function __construct(IRouter $router, IProgrammeDao $programmeDao, $adminDao) {
         parent::__construct($router);
         $this->programmeDao = $programmeDao;
+        $this->adminDao = $adminDao;
 
         $this->router->registerController($this, 'programme')
             ->registerEndpoint('allProgrammes', 'all', EndpointRoute::VISIBILITY_PRIVATE)
@@ -42,33 +45,25 @@ class ProgrammeController extends Controller {
     public function allProgrammes(string $uri, array $requestData): IModel {
         try {
             $programmes = $this->programmeDao->findAll();
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router,
-                                  500,
-                                  'Failed to query programmes',
-                                  $e->getTraceMessages());
-        }
 
-        $programmeEntities = [];
+            $programmeEntities = [];
 
-        foreach ($programmes as $programme) {
-            try {
+            foreach ($programmes as $programme) {
                 $programmeEntities[] = (new EntityModel($this->router, $programme, true))
                     ->linkTo('allProgrammes', ProgrammeController::class, 'allProgrammes')
                     ->linkTo('delete', ProgrammeController::class, 'deleteProgramme')
                     ->linkTo('update', ProgrammeController::class, 'updateProgramme')
                     ->withSelfRef(ProgrammeController::class, 'getProgrammeByNameAndType', [], ['name' => $programme->getName(),'type' => $programme->getType()]);
-            } catch (ModelException $e) {
-                return new ErrorModel($this->router, 500, 'Failed to query programmes', $e->getTraceMessages());
             }
-        }
 
-        try {
             return (new CollectionModel($this->router, $programmeEntities, 'programmes', true))
                 ->linkTo('createProgramme', ProgrammeController::class, 'createProgramme')
                 ->withSelfRef(ProgrammeController::class, 'allProgrammes');
-        } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query programmes', $e->getTraceMessages());
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router,
+                                  500,
+                                  'Failed to query programmes',
+                                  $e->getTraceMessages());
         }
     }
 
@@ -89,24 +84,22 @@ class ProgrammeController extends Controller {
         }
         try {
             $programmes = $this->programmeDao->findByCrit(new Programme($name, $type));
-        } catch (DataAccessException $e) {
+
+            if (empty($programmes)) {
+                return new ErrorModel($this->router,
+                                      404,
+                                      'Programme not found',
+                                      "Programme not found with name '$name' and type '$type'");
+            }
+
+            return (new EntityModel($this->router, $programmes[0], true))
+                ->linkTo('allProgrammes', ProgrammeController::class, 'allProgrammes')
+                ->withSelfRef(ProgrammeController::class, 'getProgrammeByNameAndType', [], ['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]);
+        } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query programme',
                                   $e->getTraceMessages());
-        }
-        if (empty($programmes)) {
-            return new ErrorModel($this->router,
-                                  404,
-                                  'Programme not found',
-                                  "Programme not found with name '$name' and type '$type'");
-        }
-        try {
-            return (new EntityModel($this->router, $programmes[0], true))
-                ->linkTo('allProgrammes', ProgrammeController::class, 'allProgrammes')
-                ->withSelfRef(ProgrammeController::class, 'getProgrammeByNameAndType', [], ['name' => $programmes[0]->getName(),'type' => $programmes[0]->getType()]);
-        } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query programme', $e->getTraceMessages());
         }
     }
 
@@ -115,7 +108,12 @@ class ProgrammeController extends Controller {
      * Parameters are expected as part of request data.
      */
     public function createProgramme(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to create Programme', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to create Programme', $e->getTraceMessages());
+        }
 
         if (!isset($requestData['name']))
             return new ErrorModel($this->router, 400, 'Failed to create Programme', 'Parameter "name" is not provided');
@@ -129,21 +127,22 @@ class ProgrammeController extends Controller {
                                                     $requestData['type'],
                                                     (int)$requestData['noTerms']));
 
-        } catch (DataAccessException|ValidationException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create programme', $e->getTraceMessages());
-        }
-
-        try {
             return (new EntityModel($this->router, $programme, true))
                 ->linkTo('allProgrammes', ProgrammeController::class, 'allProgrammes')
                 ->withSelfRef(ProgrammeController::class, 'getProgrammeByNameAndType',[],['name' => $programme->getName(),'type' => $programme->getType()]);
-        } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
+
+        } catch (DataAccessException|ValidationException|ModelException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to create programme', $e->getTraceMessages());
         }
     }
 
     public function updateProgramme(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to update Programme', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to update Programme', $e->getTraceMessages());
+        }
 
         if (!isset($requestData['name']))
             return new ErrorModel($this->router, 400, 'Failed to update Programme', 'Parameter "name" is not provided in uri');
@@ -153,14 +152,11 @@ class ProgrammeController extends Controller {
         try {
             $programmes = $this->programmeDao->findByCrit(new Programme($requestData['name'],
                                                                         $requestData['type']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to update programme', $e->getTraceMessages());
-        }
 
-        if (empty($programmes)) {
-            return new ErrorModel($this->router, 404, 'Failed to update programme', "Programme not found with name '{$requestData['name']}' and type '{$requestData['type']}'");
-        }
-        try {
+            if (empty($programmes)) {
+                return new ErrorModel($this->router, 404, 'Failed to update programme', "Programme not found with name '{$requestData['name']}' and type '{$requestData['type']}'");
+            }
+
             $this->programmeDao->update(new Programme($requestData['name'],
                                                       $requestData['type'],
                                                       (int)$requestData['noTerms']));
@@ -172,7 +168,12 @@ class ProgrammeController extends Controller {
     }
 
     public function deleteProgramme(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to delete programme', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to delete programme', $e->getTraceMessages());
+        }
 
         if (!isset($requestData['name']) || !isset($requestData['type'])) {
             return new ErrorModel($this->router, 400, 'Failed to delete programme', 'Both "name" and "type" parameters are required');
@@ -180,15 +181,11 @@ class ProgrammeController extends Controller {
 
         try {
             $programmes = $this->programmeDao->findByCrit(new Programme($requestData['name'], $requestData['type']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to delete programme', $e->getTraceMessages());
-        }
 
-        if (empty($programmes)) {
-            return new ErrorModel($this->router, 404, 'Failed to delete programme', "Programme not found with name '{$requestData['name']}' and type '{$requestData['type']}'");
-        }
+            if (empty($programmes)) {
+                return new ErrorModel($this->router, 404, 'Failed to delete programme', "Programme not found with name '{$requestData['name']}' and type '{$requestData['type']}'");
+            }
 
-        try {
             $this->programmeDao->delete($programmes[0]);
             return new MessageModel($this->router, ['message' => 'Programme deleted successfully'], true);
         } catch (DataAccessException $e) {
