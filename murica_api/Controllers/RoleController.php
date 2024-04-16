@@ -115,7 +115,6 @@ class RoleController extends Controller {
             if (empty($users)) {
                 return new ErrorModel($this->router, 404, 'Failed to give admin role', "User not found with id '{$requestData['id']}'");
             }
-            //********************************** name, method?
             $admin = $this->adminDao->create(new Admin($users[0]));
             return (new EntityModel($this->router, $admin[0], true))
                 ->linkTo('role', RoleController::class, 'allRoles')
@@ -184,7 +183,6 @@ class RoleController extends Controller {
             if (empty($programmes)) {
                 return new ErrorModel($this->router, 404, 'Failed to set Student role', "Programme not found with name '{$requestData['programmeName']}' and type '{$requestData['programmeType']}'");
             }
-            //********************************** name, method?
             $students = $this->studentDao->create(new Student($users[0], $programmes[0], $requestData['startTerm']));
             return (new EntityModel($this->router, $students[0], true))
                 ->linkTo('role', RoleController::class, 'allRoles')

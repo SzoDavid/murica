@@ -68,11 +68,6 @@ class Role extends Entity implements IRole {
      * @inheritDoc
      */
     public function jsonSerialize(): array {
-        $studentsArray = [];
-        foreach ($this->students as $student) {
-            $studentsArray[] = $student->jsonSerialize();
-        }
-
         return [
             'isAdmin' => $this->adminRole,
             'isTeacher' => $this->teacherRole,
