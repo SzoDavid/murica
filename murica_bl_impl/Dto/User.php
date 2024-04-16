@@ -64,19 +64,19 @@ class User extends Entity implements IUser {
     //region Setters
     #[Override]
     public function setId(string $id): IUser {
-        $this->id = $id;
+        $this->id = strtoupper(trim($id));
         return $this;
     }
 
     #[Override]
     public function setName(string $name): IUser {
-        $this->name = $name;
+        $this->name = trim($name);
         return $this;
     }
 
     #[Override]
     public function setEmail(string $email): IUser {
-        $this->email = $email;
+        $this->email = trim($email);
         return $this;
     }
 
@@ -88,7 +88,7 @@ class User extends Entity implements IUser {
 
     #[Override]
     public function setBirthDate(string $birthDate): IUser {
-        $this->birthDate = $birthDate;
+        $this->birthDate = trim($birthDate);
         return $this;
     }
     //endregion
@@ -99,7 +99,7 @@ class User extends Entity implements IUser {
         $errors = "";
         if (empty($this->id) || !preg_match('/^[A-Z0-9]{6}$/', $this->id)) $errors .= '\nID must contain letters and numbers only and must be 6 characters long!';
         if (empty($this->name) || strlen($this->name) > 50) $errors .= '\nName cannot be empty or longer than 50 characters!';
-        if (empty($this->email) || filter_var($this->email, FILTER_VALIDATE_EMAIL)) $errors .= '\nEmail is invalid!';
+        if (empty($this->email) || !filter_var($this->email, FILTER_VALIDATE_EMAIL)) $errors .= '\nEmail is invalid!';
         if (empty($this->password)) $errors .= '\nPassword is empty!';
         if (!empty($this->birthDate)) {
             $dateTime = DateTime::createFromFormat('Y-m-d', $this->birthDate);

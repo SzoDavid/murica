@@ -55,6 +55,8 @@ class SubjectController extends Controller {
             try {
                 $subjectEntities[] = (new EntityModel($this->router, $subject, true))
                     ->linkTo('allSubjects', SubjectController::class, 'allSubjects')
+                    ->linkTo('delete', SubjectController::class, 'deleteSubject')
+                    ->linkTo('update', SubjectController::class, 'updateSubject')
                     ->withSelfRef(SubjectController::class, 'getSubjectById', [$subject->getId()]);
             } catch (ModelException $e) {
                 return new ErrorModel($this->router, 500, 'Failed to query subjects', $e->getTraceMessages());
@@ -63,6 +65,7 @@ class SubjectController extends Controller {
 
         try {
             return (new CollectionModel($this->router, $subjectEntities, 'subjects', true))
+                ->linkTo('createSubject', SubjectController::class, 'createSubject')
                 ->withSelfRef(SubjectController::class, 'allSubjects');
         } catch (ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to query subjects', $e->getTraceMessages());
@@ -127,7 +130,7 @@ class SubjectController extends Controller {
         try {
             $subject = $this->subjectDao->create(new Subject($requestData['id'],
                                                     $requestData['name'],
-                                                    (int)$requestData['approval'],
+                                                    $requestData['approval'] === 'true',
                                                     (int)$requestData['credit'],
                                                     $requestData['type']));
         } catch (DataAccessException|ValidationException $e) {
@@ -161,7 +164,7 @@ class SubjectController extends Controller {
         try {
             $this->subjectDao->update(new Subject($requestData['id'],
                                                   $requestData['name'],
-                                                  (int)$requestData['approval'],
+                                                  $requestData['approval'] === 'true',
                                                   (int)$requestData['credit'],
                                                   $requestData['type']));
 

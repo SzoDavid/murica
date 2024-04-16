@@ -62,7 +62,10 @@ class AuthController extends Controller {
 
         if (password_verify($requestData['password'], $user->getPassword())) {
             try {
-                return (new EntityModel($this->router, $this->tokenService->generateToken($requestData['id']), true))
+                $token = $this->tokenService->generateToken($requestData['id']);
+
+                return (new EntityModel($this->router, $token, true))
+                    ->linkTo('user', UserController::class, 'getUserById', [$token->getUser()->getId()])
                     ->linkTo('logout', AuthController::class, 'logout');
             } catch (DataAccessException|ModelException $e) {
                 return new ErrorModel($this->router, 500, 'Authentication failed', $e->getTraceMessages());

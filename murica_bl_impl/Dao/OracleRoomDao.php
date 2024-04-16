@@ -126,10 +126,6 @@ class OracleRoomDao implements IRoomDao {
         if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
-        if (!oci_bind_by_name($stmt, ':id', $id, -1) ||
-            !oci_bind_by_name($stmt, ':capacity', $capacity, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         if (!oci_execute($stmt, OCI_DEFAULT))
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
