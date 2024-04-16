@@ -315,17 +315,17 @@ class OracleTakenExamDao implements ITakenExamDao {
                        TableDefinition::ROOM_TABLE_FIELD_ID
         );
 
-        $userId = $model->getStudent()->getUser()->getId();
-        $programmeName = $model->getStudent()->getProgramme()->getName();
-        $programmeType = $model->getStudent()->getProgramme()->getType();
-        $examId = $model->getExam()->getId();
-        $subjectId = $model->getExam()->getSubject()->getId();
+        $student = $model->getStudent();
+        $exam = $model->getExam();
 
-        if (isset($userId)) $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID . " LIKE :userId";
-        if (isset($programmeName)) $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_NAME . " LIKE :programmeName";
-        if (isset($programmeType)) $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_PROGRAMME_TYPE . " LIKE :programmeType";
-        if (isset($examId)) $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID . " LIKE :examId";
-        if (isset($subjectId)) $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
+        if (isset($student) && $student->getUser() !== null && $student->getUser()->getId() !== null) {
+            $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID . " LIKE :userId";
+            $userId = $model->getStudent()->getUser()->getId();
+        }
+        if (isset($exam) && $exam->getId() !== null && $exam->getSubject() !== null) {
+            $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID . " LIKE :examId";
+            $examId = $model->getExam()->getId();
+        }
 
         if (!empty($crits))
             $sql .= " AND " . implode(" AND ", $crits);
@@ -335,14 +335,8 @@ class OracleTakenExamDao implements ITakenExamDao {
 
         if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
             throw new DataAccessException('bind userId ' . json_encode(oci_error($stmt)));
-        if (isset($programmeName) && !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1))
-            throw new DataAccessException('bind programmeName ' . json_encode(oci_error($stmt)));
-        if (isset($programmeType) && !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1))
-            throw new DataAccessException('bind programmeType ' . json_encode(oci_error($stmt)));
         if (isset($examId) && !oci_bind_by_name($stmt, ':examId', $examId, -1))
             throw new DataAccessException('bind examId ' . json_encode(oci_error($stmt)));
-        if (isset($subjectId) && !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-            throw new DataAccessException('bind subjectId ' . json_encode(oci_error($stmt)));
 
         if (!oci_execute($stmt, OCI_DEFAULT))
             throw new DataAccessException('exec ' . json_encode(oci_error($stmt)));
