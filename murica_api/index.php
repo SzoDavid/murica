@@ -57,7 +57,7 @@ try {
     $programmeController = new ProgrammeController($router, $programmeDao);
     $roomController = new RoomController($router, $roomDao);
     $subjectController = new SubjectController($router, $subjectDao);
-    $courseController = new CourseController($router, $courseDao, $subjectDao, $roomDao, $takenCourseDao, $studentDao, $programmeDao, $adminDao, $courseTeachDao, $userDao);
+    $courseController = new CourseController($router, $courseDao, $subjectDao, $roomDao, $takenCourseDao, $studentDao, $adminDao, $courseTeachDao, $userDao);
 
 } catch (MuricaException $ex) {
     exit(json_encode(['_success' => false,

@@ -17,7 +17,6 @@ use murica_bl\Dto\IUser;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
 use murica_bl\Router\IRouter;
-use murica_bl_impl\Dto\Admin;
 use murica_bl_impl\Dto\Course;
 use murica_bl_impl\Dto\CourseTeach;
 use murica_bl_impl\Dto\Programme;
@@ -39,14 +38,13 @@ class CourseController extends Controller {
     private IRoomDao $roomDao;
     private ITakenCourseDao $takenCourseDao;
     private IStudentDao $studentDao;
-    private IProgrammeDao $programmeDao;
     private IAdminDao $adminDao;
-    private ICourseTeachDao $cousreTeachDao;
+    private ICourseTeachDao $courseTeachDao;
     private IUserDao $userDao;
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router, ICourseDao $courseDao, ISubjectDao $subjectDao, IRoomDao $roomDao, ITakenCourseDao $takenCourseDao, IStudentDao $studentDao, IProgrammeDao $programmeDao,IAdminDao $adminDao, ICourseTeachDao $courseTeachDao, IUserDao $userDao) {
+    public function __construct(IRouter $router, ICourseDao $courseDao, ISubjectDao $subjectDao, IRoomDao $roomDao, ITakenCourseDao $takenCourseDao, IStudentDao $studentDao, IAdminDao $adminDao, ICourseTeachDao $courseTeachDao, IUserDao $userDao) {
         parent::__construct($router);
         $this->courseDao = $courseDao;
         $this->subjectDao = $subjectDao;
@@ -54,8 +52,7 @@ class CourseController extends Controller {
         $this->takenCourseDao = $takenCourseDao;
         $this->studentDao = $studentDao;
         $this->adminDao = $adminDao;
-        $this->programmeDao = $programmeDao;
-        $this->cousreTeachDao = $courseTeachDao;
+        $this->courseTeachDao = $courseTeachDao;
         $this->userDao = $userDao;
 
         $this->router->registerController($this, 'course')
@@ -67,7 +64,7 @@ class CourseController extends Controller {
             ->registerEndpoint('registerCourse', 'register', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('unregisterCourse', 'unregister', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('addTeacherToCourse', 'add', EndpointRoute::VISIBILITY_PRIVATE)
-            ->registerEndpoint('removeTeacherToCourse', 'remove', EndpointRoute::VISIBILITY_PRIVATE);
+            ->registerEndpoint('removeTeacherFromCourse', 'remove', EndpointRoute::VISIBILITY_PRIVATE);
 
     }
     //endregion
@@ -80,30 +77,21 @@ class CourseController extends Controller {
     public function allCourses(string $uri, array $requestData): IModel {
         try {
             $courses = $this->courseDao->findAll();
-        } catch (DataAccessException $e) {
+            $courseEntities = [];
+
+            foreach ($courses as $course) {
+                $courseEntities[] = (new EntityModel($this->router, $course, true))
+                    ->linkTo('allCourses', CourseController::class, 'allCourses')
+                    ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $course->getId(), 'subjectId' => $course->getSubjectId()]);
+            }
+
+            return (new CollectionModel($this->router, $courseEntities, 'courses', true))
+                ->withSelfRef(CourseController::class, 'allCourses');
+        } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query courses',
                                   $e->getTraceMessages());
-        }
-
-        $courseEntities = [];
-
-        foreach ($courses as $course) {
-            try {
-                $courseEntities[] = (new EntityModel($this->router, $course, true))
-                    ->linkTo('allCourses', CourseController::class, 'allCourses')
-                    ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $course->getId(),'subjectId' => $course->getSubjectId()]);
-            } catch (ModelException $e) {
-                return new ErrorModel($this->router, 500, 'Failed to query courses', $e->getTraceMessages());
-            }
-        }
-
-        try {
-            return (new CollectionModel($this->router, $courseEntities, 'courses', true))
-                ->withSelfRef(CourseController::class, 'allCourses');
-        } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query courses', $e->getTraceMessages());
         }
     }
 
@@ -111,42 +99,31 @@ class CourseController extends Controller {
         $id = $requestData['id'] ?? null;
         $subjectId = $requestData['subjectId'] ?? null;
 
-        try {
-            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
-        }
-
-        if (empty($subject)) {
-            return new ErrorModel($this->router, 404, 'Failed to create course', "Already not found subject with id '{$requestData['subjectId']}'");
-        }
-
         if (empty($id) || empty($subjectId)) {
             return new ErrorModel($this->router,
                                   400,
                                   'Failed to query course',
                                   'Both "id" and "subjectId" parameters are required');
         }
+
         try {
-            $courses = $this->courseDao->findByCrit(new Course($subject[0], $id));
-        } catch (DataAccessException $e) {
+            $courses = $this->courseDao->findByCrit(new Course(new Subject($subjectId), $id));
+
+            if (empty($courses)) {
+                return new ErrorModel($this->router,
+                                      404,
+                                      'Failed to query course',
+                                      "Course not found with id '$subjectId-$id'");
+            }
+
+            return (new EntityModel($this->router, $courses[0], true))
+                ->linkTo('allCourses', CourseController::class, 'allCourses')
+                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $courses[0]->getId(), 'subjectId' => $courses[0]->getSubjectId()]);
+        } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query course',
                                   $e->getTraceMessages());
-        }
-        if (empty($courses)) {
-            return new ErrorModel($this->router,
-                                  404,
-                                  'Course not found',
-                                  "Course not found with id '$id' and subjectId '$subjectId'");
-        }
-        try {
-            return (new EntityModel($this->router, $courses[0], true))
-                ->linkTo('allCourses', CourseController::class, 'allCourses')
-                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $courses[0]->getId(),'subjectId' => $courses[0]->getSubjectId()]);
-        } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query course', $e->getTraceMessages());
         }
     }
 
@@ -155,18 +132,11 @@ class CourseController extends Controller {
      * Parameters are expected as part of request data.
      */
     public function createCourse(string $uri, array $requestData): IModel {
-
-        /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
-
         try {
-            $admin = $this->adminDao->findByCrit(new Admin($user));
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to create course', 'Access is forbidden');
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
-        }
-
-        if (empty($admin)) {
-            return new ErrorModel($this->router, 404, 'Failed to create course', "Already not found admin with id '{$user->getId()}'");
         }
 
         if (!isset($requestData['id']))
@@ -183,58 +153,39 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "roomId" is not provided in uri');
 
         try {
-           $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
-        }
+           $subjects =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
 
-        if (empty($subject)) {
-            return new ErrorModel($this->router, 404, 'Failed to create course', "Already not found subject with id '{$requestData['subjectId']}'");
-        }
+            if (empty($subjects)) {
+                return new ErrorModel($this->router, 404, 'Failed to create course', "Subject not found with id '{$requestData['subjectId']}'");
+            }
 
-        try {
-            $room = $this->roomDao -> findByCrit(new Room($requestData['roomId']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
-        }
-        if (empty($room)) {
-            return new ErrorModel($this->router, 404, 'Failed to create course', "Already not found room with id '{$requestData['roomId']}'");
-        }
+            $rooms = $this->roomDao -> findByCrit(new Room($requestData['roomId']));
 
-        try {
-            $courses = $this->courseDao->create(new Course($subject[0],
+            if (empty($rooms)) {
+                return new ErrorModel($this->router, 404, 'Failed to create course', "Room not found with id '{$requestData['roomId']}'");
+            }
+
+            $courses = $this->courseDao->create(new Course($subjects[0],
                                                            $requestData['id'],
                                                            $requestData['capacity'],
                                                            $requestData['schedule'],
                                                            $requestData['term'],
-                                                           $room[0]));
-
-        } catch (DataAccessException|ValidationException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
-        }
-
-        try {
+                                                           $rooms[0]));
             return (new EntityModel($this->router, $courses[0], true))
                 ->linkTo('allCourses', CourseController::class, 'allCourses')
-                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId',[],['id' => $courses[0]->getId(),'subjectId' => $courses[0]->getSubjectId()]);
-        } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
+                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId',[],['id' => $courses[0]->getId(), 'subjectId' => $courses[0]->getSubjectId()]);
+
+        } catch (DataAccessException|ValidationException|ModelException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
         }
     }
 
     public function updateCourse(string $uri, array $requestData): IModel {
-
-        /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
-
         try {
-            $admin = $this->adminDao->findByCrit(new Admin($user));
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to update course', 'Access is forbidden');
         } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
-        }
-
-        if (empty($admin)) {
-            return new ErrorModel($this->router, 404, 'Failed to create course', "Already not found admin with id '{$user->getId()}'");
+            return new ErrorModel($this->router, 500, 'Failed to update course', $e->getTraceMessages());
         }
 
         if (!isset($requestData['id']))
@@ -243,42 +194,24 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to update Course', 'Parameter "subjectId" is not provided in uri');
 
         try {
-            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
-        }
+            $courses = $this->courseDao->findByCrit(new Course(new Subject($requestData['subjectId']), $requestData['id']));
 
-        if (empty($subject)) {
-            return new ErrorModel($this->router, 404, 'Failed to create course', "Already not found subject with id '{$requestData['subjectId']}'");
-        }
+            if (empty($courses)) {
+                return new ErrorModel($this->router, 404, 'Failed to update course', "Course not found with id '{$requestData['subjectId']}-{$requestData['id']}'");
+            }
 
-        try {
-            $courses = $this->courseDao->findByCrit(new Course($subject[0],$requestData['id']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to update course', $e->getTraceMessages());
-        }
+            $rooms = $this->roomDao->findByCrit(new Room($requestData['roomId']));
 
-        if (empty($courses)) {
-            return new ErrorModel($this->router, 404, 'Failed to update course', "Course not found with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
-        }
+            if (empty($rooms)) {
+                return new ErrorModel($this->router, 404, 'Failed to update course', "Room not found with id '{$requestData['roomId']}'");
+            }
 
-        try {
-            $room = $this->roomDao->findByCrit(new Room($requestData['roomId']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to update course', $e->getTraceMessages());
-        }
-
-        if (empty($room)) {
-            return new ErrorModel($this->router, 404, 'Failed to update course', "Room not found with id '{$requestData['roomId']}'");
-        }
-
-        try {
-            $this->courseDao->update(new Course($subject[0],
+            $this->courseDao->update(new Course($courses[0]->getSubject(),
                                                 $requestData['id'],
                                                 $requestData['capacity'],
                                                 $requestData['schedule'],
                                                 $requestData['term'],
-                                                $room[0]));
+                                                $rooms[0]));
 
             return new MessageModel($this->router, ['message' => 'Course updated successfully'], true);
         } catch (DataAccessException|ValidationException $e) {
@@ -287,18 +220,11 @@ class CourseController extends Controller {
     }
 
     public function deleteCourse(string $uri, array $requestData): IModel {
-
-        /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
-
         try {
-            $admin = $this->adminDao->findByCrit(new Admin($user));
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to delete course', 'Access is forbidden');
         } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
-        }
-
-        if (empty($admin)) {
-            return new ErrorModel($this->router, 404, 'Failed to create course', "Already not found admin with id '{$user->getId()}'");
+            return new ErrorModel($this->router, 500, 'Failed to delete course', $e->getTraceMessages());
         }
 
         if (!isset($requestData['id']) || !isset($requestData['subjectId'])) {
@@ -306,26 +232,12 @@ class CourseController extends Controller {
         }
 
         try {
-            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
-        }
+            $courses = $this->courseDao->findByCrit(new Course(new Subject($requestData['subjectId']), $requestData['id']));
 
-        if (empty($subject)) {
-            return new ErrorModel($this->router, 404, 'Failed to create course', "Already not found subject with id '{$requestData['subjectId']}'");
-        }
+            if (empty($courses)) {
+                return new ErrorModel($this->router, 404, 'Failed to delete course', "Course not found with id '{$requestData['subjectId']}-{$requestData['id']}'");
+            }
 
-        try {
-            $courses = $this->courseDao->findByCrit(new Course($subject[0],$requestData['id']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to delete course', $e->getTraceMessages());
-        }
-
-        if (empty($courses)) {
-            return new ErrorModel($this->router, 404, 'Failed to delete course', "Course not found with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
-        }
-
-        try {
             $this->courseDao->delete($courses[0]);
             return new MessageModel($this->router, ['message' => 'Course deleted successfully'], true);
         } catch (DataAccessException $e) {
@@ -343,81 +255,42 @@ class CourseController extends Controller {
         if (!isset($requestData['programmeTame']))
             return new ErrorModel($this->router, 400, 'Failed to register Course', 'Parameter "programmeType" is not provided in uri');
 
-        try {
-            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
-        }
-
-        if (empty($subject)) {
-            return new ErrorModel($this->router, 404, 'Failed to create course', "Already not found subject with id '{$requestData['subjectId']}'");
-        }
-
-        try {
-            $courses = $this->courseDao->findByCrit(new Course($subject[0],$requestData['id']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to register course', $e->getTraceMessages());
-        }
-
-        if (empty($courses)) {
-            return new ErrorModel($this->router, 404, 'Failed to register course', "Course not found with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
-        }
-
-        try {
-            $programmes = $this->programmeDao->findByCrit(new Programme($requestData['programmeName'],$requestData['programmeType']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to register course', $e->getTraceMessages());
-        }
-
-        if (empty($programmes)) {
-            return new ErrorModel($this->router, 404, 'Failed to register course', "Programme not found with name '{$requestData['programmeName']}' and type '{$requestData['programmeType']}'");
-        }
-
         /* @var $user IUser */
         $user = $this->$requestData['token']->getUser();
 
         try {
-            $student = $this->studentDao->findByCrit(new Student($user,$programmes[0]));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to register course', $e->getTraceMessages());
-        }
+            $students = $this->studentDao->findByCrit(new Student($user, new Programme($requestData['programmeName'], $requestData['programmeType'])));
 
-        if (empty($student)) {
-            return new ErrorModel($this->router, 404, 'Failed to register course', "Already not found student with id '{$user->getId()}'");
-        }
+            if (empty($students)) {
+                return new ErrorModel($this->router, 403, 'Failed to register course', 'Access is forbidden');
+            }
 
-        try {
-            $takeCourses = $this->takenCourseDao->findByCrit(new TakenCourse($student[0],$courses[0]));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to register course', $e->getTraceMessages());
-        }
+            $courses = $this->courseDao->findByCrit(new Course(new Subject($requestData['subjectId']), $requestData['id']));
 
-        if (!empty($takeCourses)) {
-            return new ErrorModel($this->router, 404, 'Failed to register course', "Found registered with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
-        }
+            if (empty($courses)) {
+                return new ErrorModel($this->router, 404, 'Failed to register course', "Course not found with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
+            }
 
-        try {
-            $takeCourses = $this->takenCourseDao->create(new TakenCourse($student[0],
+            $takeCourses = $this->takenCourseDao->findByCrit(new TakenCourse($students[0], $courses[0]));
+
+            if (!empty($takeCourses)) {
+                return new ErrorModel($this->router, 404, 'Failed to register course', "Found registered with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
+            }
+
+            $takeCourses = $this->takenCourseDao->create(new TakenCourse($students[0],
                                                                          $courses[0],
-                                                                         null,
-                                                                         0
-                                                         ));
+                                                                         0,
+                                                                         false));
 
-        } catch (DataAccessException|ValidationException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to register course', $e->getTraceMessages());
-        }
-
-        try {
             return (new EntityModel($this->router, $takeCourses[0], true))
                 ->linkTo('allCourses', CourseController::class, 'allCourses')
-                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId',[],['id' => $courses[0]->getId(),'subjectId' => $courses[0]->getSubjectId()]);
-        } catch (ModelException $e) {
+                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $courses[0]->getId(),'subjectId' => $courses[0]->getSubjectId()]);
+        } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to register course', $e->getTraceMessages());
         }
     }
 
     public function unregisterCourse(string $uri, array $requestData): IModel {
-
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to unregister Course', 'Parameter "id" is not provided in uri');
         if (!isset($requestData['subjectId']))
@@ -427,60 +300,24 @@ class CourseController extends Controller {
         if (!isset($requestData['programmeTame']))
             return new ErrorModel($this->router, 400, 'Failed to unregister Course', 'Parameter "programmeType" is not provided in uri');
 
-        try {
-            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
-        }
-
-        if (empty($subject)) {
-            return new ErrorModel($this->router, 404, 'Failed to create course', "Already not found subject with id '{$requestData['subjectId']}'");
-        }
-
-        try {
-            $courses = $this->courseDao->findByCrit(new Course($subject[0],$requestData['id']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to unregister course', $e->getTraceMessages());
-        }
-
-        if (empty($courses)) {
-            return new ErrorModel($this->router, 404, 'Failed to unregister course', "Course not found with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
-        }
-
-        try {
-            $programmes = $this->programmeDao->findByCrit(new Programme($requestData['programmeName'],$requestData['programmeType']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to register course', $e->getTraceMessages());
-        }
-
-        if (empty($programmes)) {
-            return new ErrorModel($this->router, 404, 'Failed to register course', "Programme not found with name '{$requestData['programmeName']}' and type '{$requestData['programmeType']}'");
-        }
-
         /* @var $user IUser */
         $user = $this->$requestData['token']->getUser();
 
         try {
-            $student = $this->studentDao->findByCrit(new Student($user,$programmes[0]));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to unregister course', $e->getTraceMessages());
-        }
+            $students = $this->studentDao->findByCrit(new Student($user, new Programme($requestData['programmeName'], $requestData['programmeType'])));
 
-        if (empty($student)) {
-            return new ErrorModel($this->router, 404, 'Failed to unregister course', "Already not found student with id '{$user->getId()}'");
-        }
+            if (empty($students)) {
+                return new ErrorModel($this->router, 403, 'Failed to unregister course', "Access is forbidden");
+            }
 
-        try {
-            $takeCourses = $this->takenCourseDao->findByCrit(new TakenCourse($student[0],$courses[0]));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to unregister course', $e->getTraceMessages());
-        }
+            $takeCourses = $this->takenCourseDao->findByCrit(new TakenCourse($students[0],
+                                                                             new Course(new Subject($requestData['subjectId']),
+                                                                                        $requestData['id'])));
 
-        if (empty($takeCourses)) {
-            return new ErrorModel($this->router, 404, 'Failed to unregister course', "Taken course not registered with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
-        }
+            if (empty($takeCourses)) {
+                return new ErrorModel($this->router, 404, 'Failed to unregister course', "Course not registered with id '{$requestData['subjectId']}-{$requestData['id']}' for user '{$user->getId()}'");
+            }
 
-        try {
             $this->courseDao->delete($takeCourses[0]);
             return new MessageModel($this->router, ['message' => 'Course unregister successfully'], true);
         } catch (DataAccessException $e) {
@@ -489,117 +326,71 @@ class CourseController extends Controller {
     }
 
     public function addTeacherToCourse(string $uri, array $requestData): IModel {
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to add teacher to Course', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to add teacher to Course', $e->getTraceMessages());
+        }
+
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to add teacher to Course', 'Parameter "id" is not provided in uri');
         if (!isset($requestData['subjectId']))
-            return new ErrorModel($this->router, 400, 'Failed to add teacher to  Course', 'Parameter "subjectId" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to add teacher to Course', 'Parameter "subjectId" is not provided in uri');
         if (!isset($requestData['teacherId']))
-            return new ErrorModel($this->router, 400, 'Failed to add teacher to  Course', 'Parameter "teacherId" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to add teacher to Course', 'Parameter "teacherId" is not provided in uri');
 
         try {
-            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to add teacher to  course', $e->getTraceMessages());
-        }
+            $courses = $this->courseDao->findByCrit(new Course(new Subject($requestData['subjectId']), $requestData['id']));
 
-        if (empty($subject)) {
-            return new ErrorModel($this->router, 404, 'Failed to add teacher to  course', "Already not found subject with id '{$requestData['subjectId']}'");
-        }
+            if (empty($courses)) {
+                return new ErrorModel($this->router, 404, 'Failed to add teacher to course', "Course not found with id '{$requestData['subjectId']}-{$requestData['id']}'");
+            }
 
-        try {
-            $courses = $this->courseDao->findByCrit(new Course($subject[0],$requestData['id']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to add teacher to course', $e->getTraceMessages());
-        }
-
-        if (empty($courses)) {
-            return new ErrorModel($this->router, 404, 'Failed to add teacher to course', "Course not found with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
-        }
-
-        try {
             $users = $this->userDao->findByCrit(new User($requestData['teacherId']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to add teacher to course', $e->getTraceMessages());
-        }
 
-        if (empty($users)) {
-            return new ErrorModel($this->router, 404, 'Failed to add teacher to course', "Course not found user with id '{$requestData['teacherId']}' and subjectId");
-        }
+            if (empty($users)) {
+                return new ErrorModel($this->router, 404, 'Failed to add teacher to course', "User not found with id '{$requestData['teacherId']}'");
+            }
 
-        try {
-            $teachCourse = $this->cousreTeachDao->create(new CourseTeach($users[0],
-                                                                         $courses[0],
-                                                         ));
+            $teachCourse = $this->courseTeachDao->create(new CourseTeach($users[0],
+                                                                         $courses[0]));
 
-        } catch (DataAccessException|ValidationException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to add teacher to course', $e->getTraceMessages());
-        }
-
-        try {
             return (new EntityModel($this->router, $teachCourse[0], true))
                 ->linkTo('allCourses', CourseController::class, 'allCourses')
                 ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId',[],['id' => $courses[0]->getId(),'subjectId' => $courses[0]->getSubjectId()]);
-        } catch (ModelException $e) {
+        } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to add teacher to course', $e->getTraceMessages());
         }
     }
 
-    public function removeTeacherToCourse(string $uri, array $requestData): IModel {
+    public function removeTeacherFromCourse(string $uri, array $requestData): IModel {
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed remove add teacher from Course', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to remove teacher from Course', $e->getTraceMessages());
+        }
 
         if (!isset($requestData['id']))
-            return new ErrorModel($this->router, 400, 'Failed to remove teacher to Course', 'Parameter "id" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to remove teacher from Course', 'Parameter "id" is not provided in uri');
         if (!isset($requestData['subjectId']))
-            return new ErrorModel($this->router, 400, 'Failed to remove teacher to  Course', 'Parameter "subjectId" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to remove teacher from  Course', 'Parameter "subjectId" is not provided in uri');
         if (!isset($requestData['teacherId']))
-            return new ErrorModel($this->router, 400, 'Failed to remove teacher to  Course', 'Parameter "teacherId" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to remove teacher from  Course', 'Parameter "teacherId" is not provided in uri');
 
         try {
-            $subject =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to remove teacher to course', $e->getTraceMessages());
-        }
+            $teachCourses = $this->courseTeachDao->findByCrit(new CourseTeach(new User($requestData['teacherId']), new Course(new Subject($requestData['subjectId'], $requestData['id']))));
 
-        if (empty($subject)) {
-            return new ErrorModel($this->router, 404, 'Failed to remove teacher to course', "Already not found subject with id '{$requestData['subjectId']}'");
-        }
+            if (empty($users)) {
+                return new ErrorModel($this->router, 404, 'Failed to remove teacher from course', "Teacher not found user with id '{$requestData['teacherId']}' for course {$requestData['subjectId']}-{$requestData['id']}");
+            }
 
-        try {
-            $courses = $this->courseDao->findByCrit(new Course($subject[0],$requestData['id']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to remove teacher to course', $e->getTraceMessages());
-        }
-
-        if (empty($courses)) {
-            return new ErrorModel($this->router, 404, 'Failed to remove teacher to course', "Course not found with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
-        }
-
-        try {
-            $users = $this->userDao->findByCrit(new User($requestData['teacherId']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to remove teacher to course', $e->getTraceMessages());
-        }
-
-        if (empty($users)) {
-            return new ErrorModel($this->router, 404, 'Failed to remove teacher to course', "Course not found user with id '{$requestData['teacherId']}' and subjectId");
-        }
-
-        try {
-            $teachCourses = $this->cousreTeachDao->findByCrit(new CourseTeach($users[0],$courses[0]));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to remove teacher to course', $e->getTraceMessages());
-        }
-
-        if (empty($teachCourses)) {
-            return new ErrorModel($this->router, 404, 'Failed to remove teacher to course', "Teach course not have with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}' and teacher '{$requestData['teacherId']}'");
-        }
-
-        try {
-            $this->cousreTeachDao->delete($teachCourses[0]);
+            $this->courseTeachDao->delete($teachCourses[0]);
             return new MessageModel($this->router, ['message' => 'Remove teacher successfully'], true);
         } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to remove teacher to course', $e->getTraceMessages());
+            return new ErrorModel($this->router, 500, 'Failed to remove teacher from course', $e->getTraceMessages());
         }
     }
     //endregion
-
 }
