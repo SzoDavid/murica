@@ -104,7 +104,7 @@ if (isset($_SERVER['HTTP_X_API_KEY'])) {
 }
 
 $parsedURI = parse_url($_SERVER['REQUEST_URI']);
-$requestURI = str_replace($configService->getBaseUri(), '', $parsedURI['path']);
+$requestURI = str_replace('/' . $configService->getBaseUri() . '/', '', $parsedURI['path']);
 
 if (empty($requestURI)) {
     $requestURI = '/';
