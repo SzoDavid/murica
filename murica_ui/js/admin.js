@@ -2,29 +2,7 @@ const apiUrl = 'https://localhost/murica_api/';
 const requestInvoker = new RequestInvoker(apiUrl);
 let tokenObj;
 
-function init() {
-    tokenObj = JSON.parse(localStorage.getItem('token'));
-
-    if (!tokenObj || new Date(tokenObj.expires_at) < new Date()) {
-        window.location.href = 'login.php';
-    }
-
-    $('#navbar-username').text(tokenObj.user.name);
-
-    bindClickListener($('#navbar-logo'), () => {
-        window.location.href = 'index.php';
-    });
-
-    bindClickListener($('#navbar-logout'), () => {
-        requestInvoker.executePost(tokenObj._links.logout.href, { token: tokenObj.token}).then(() => {
-            localStorage.removeItem('token');
-            window.location.href = 'login.php';
-        });
-    });
-}
-
 //region Subjects
-
 function subjects(contentElement) {
     contentElement.empty();
 
@@ -91,7 +69,6 @@ function newSubject(contentElement, saveUrl) {
 function saveNewSubject(contentElement, saveUrl) {
     $('#new-subject-error').addClass('hidden');
 
-    //TODO: validate values
     requestInvoker.executePost(saveUrl, {
         token: tokenObj.token,
         id: $('#subject-details-id').val(),
@@ -139,7 +116,7 @@ function subjectDetails(record, contentElement) {
     container.append(new Button('Save', () => { updateSubject(record, contentElement) }).build());
     container.append(new Button('Remove', () => { removeSubject(record, contentElement) }).build());
 
-    // TODO: add table for the courses
+    buildCourses(contentElement, container, record);
 
     return container;
 }
@@ -170,6 +147,232 @@ function removeSubject(record, contentElement) {
 }
 //endregion
 
+//region Courses
+function buildCourses(contentElement, container, record) {
+    container.append($('<h2>').text('Courses'));
+
+    let newCourseTable = $("<table>").addClass("editTable");
+    newCourseTable.append(
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "new-course-id").text("Id:")),
+            $("<td>").append($("<input>").attr({id: 'new-course-id', type: 'text', maxlength: 6, required: true}))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "new-course-capacity").text("Capacity:")),
+            $("<td>").append($("<input>").attr({ id: "new-course-capacity", type: "number", min: 1, max: 999, required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "new-course-schedule").text("Schedule:")),
+            $("<td>").append($("<input>").attr({ id: "new-course-schedule", type: "text", maxlength: 13, required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "new-course-term").text("Term:")),
+            $("<td>").append($("<input>").attr({ id: "new-course-term", type: "text", maxlength: 9, required: true }))
+        )
+    );
+
+    const roomSelector = $('<select>').attr('id', 'new-course-room');
+    newCourseTable.append($('<tr>').append(
+        $("<th>").append($("<label>").attr("for", "new-course-room").text("Room:")),
+        roomSelector
+    ));
+    container.append(newCourseTable);
+
+    requestInvoker.executePost('room/all', { token: tokenObj.token }).then((response) => {
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+        }
+
+        $.each(response._embedded.rooms, (index, room) => {
+            roomSelector.append($('<option>').prop('value', room.id).text(room.id + ' (' + room.capacity + ')'));
+        });
+    });
+
+    container.append($('<div>').prop('id', 'new-course-error').addClass('hidden error'));
+
+    const newCourseButton = new Button('Add course', ).build()
+    container.append(newCourseButton);
+
+    requestInvoker.executePost(record._links.courses.href, { token: tokenObj.token }).then((response) => {
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+            return;
+        }
+
+        bindClickListener(newCourseButton, () => { saveNewCourse(record, contentElement, response._links.add.href) })
+
+        const tableColumns = {
+            id: 'Id',
+            capacity: 'Capacity',
+            schedule: 'Schedule',
+            term: 'Term',
+        };
+
+        const subjectsTable= new DropDownTable(tableColumns, response._embedded.courses,
+            (courseRecord) => { return courseDetails(courseRecord, contentElement) }).build();
+        container.append(subjectsTable);
+    });
+}
+
+function saveNewCourse(record, contentElement, saveUrl) {
+    $('#new-course-error').addClass('hidden');
+
+    console.log(record);
+
+    requestInvoker.executePost(saveUrl, {
+        token: tokenObj.token,
+        subjectId: record.id,
+        id: $('#new-course-id').val(),
+        capacity: $('#new-course-capacity').val(),
+        schedule: $('#new-course-schedule').val(),
+        term: $('#new-course-term').val(),
+        roomId: $('#new-course-room :selected').val()
+    }).then((response) => {
+        console.log(response);
+        if (response._success) subjects(contentElement);
+        else $('#new-course-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
+
+function courseDetails(course, contentElement) {
+    let container = $('<div>');
+
+    let table = $("<table>").addClass("editTable");
+    table.append(
+        $("<tr>").append(
+            $("<th>").text("Id:"),
+            $("<td>").text(course.subject.id + '-' + course.id)
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "edit-course-capacity").text("Capacity:")),
+            $("<td>").append($("<input>")
+                .attr({id: "new-course-capacity", type: "number", min: 1, max: 999, value: course.capacity, required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "edit-course-schedule").text("Schedule:")),
+            $("<td>").append($("<input>")
+                .attr({ id: "new-course-schedule", type: "text", maxlength: 13, value: course.schedule, required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "edit-course-term").text("Term:")),
+            $("<td>").append($("<input>")
+                .attr({ id: "new-course-term", type: "text", maxlength: 9, value: course.term, required: true }))
+        )
+    );
+    const roomSelector = $('<select>').attr('id', 'edit-course-room');
+    table.append($('<tr>').append(
+        $("<th>").append($("<label>").attr("for", "edit-course-room").text("Room:")),
+        roomSelector
+    ));
+    container.append(table);
+
+    requestInvoker.executePost('room/all', { token: tokenObj.token }).then((response) => {
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+        }
+
+        $.each(response._embedded.rooms, (index, room) => {
+            roomSelector.append($('<option>').prop({value: room.id, selected: room.id === course.room.id}).text(room.id + ' (' + room.capacity + ')'));
+        });
+    });
+
+    container.append($('<div>').prop('id', 'edit-course-error').addClass('hidden error'));
+    container.append(new Button('Save', () => { updateCourse(course, contentElement) }).build());
+    container.append(new Button('Remove', () => { removeCourse(course, contentElement) }).build());
+
+    buildTeachers(contentElement, container, course);
+
+    return container;
+}
+
+function updateCourse(course, contentElement) {
+    $('#edit-course-error').addClass('hidden');
+
+    requestInvoker.executePost(course._links.update.href, {
+        token: tokenObj.token,
+        subjectId: course.subject.id,
+        id: course.id,
+        capacity: $('#edit-course-capacity').val(),
+        schedule: $('#edit-course-schedule').val(),
+        term: $('#edit-course-term').val(),
+        roomId: $('#edit-course-room :selected').val()
+    }).then((response) => {
+        if (response._success) subjects(contentElement);
+        else $('#edit-course-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
+
+function removeCourse(course, contentElement) {
+    $('#edit-course-error').addClass('hidden');
+
+    requestInvoker.executePost(course._links.delete.href, { token: tokenObj.token, id: course.id, subjectId: course.subject.id }).then((response) => {
+        if (response._success) subjects(contentElement);
+        else $('#edit-course-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
+
+//endregion
+
+//region Teachers
+
+function buildTeachers(contentElement, container, record) {
+    container.append($('<h2>').text('Teachers'));
+
+    let addTeacherTable = $("<table>").addClass("editTable");
+
+    const teacherSelector = $('<select>').attr('id', 'assign-teacher-select');
+    addTeacherTable.append($('<tr>').append(
+        $("<th>").append($("<label>").attr("for", "assign-teacher-select").text("Teacher:")),
+        teacherSelector
+    ));
+    container.append(addTeacherTable);
+
+    requestInvoker.executePost('user/all', { token: tokenObj.token }).then((response) => {
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+        }
+
+        $.each(response._embedded.users, (index, user) => {
+            teacherSelector.append($('<option>').prop('value', user.id).text(user.name + ' (' + user.id + ')'));
+        });
+    });
+
+    container.append($('<div>').prop('id', 'assign-teacher-error').addClass('hidden error'));
+
+    const assignTeacherButton = new Button('Assign teacher', ).build()
+    container.append(assignTeacherButton);
+
+    requestInvoker.executePost(record._links.teachers.href, {
+        token: tokenObj.token,
+        subjectId: record.subject.id,
+        courseId: record.id
+    }).then((response) => {
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+        }
+
+        bindClickListener(assignTeacherButton, () => { saveNewCourse(record, contentElement, response._links.add.href) })
+
+        const tableColumns = {
+            id: 'Id',
+            capacity: 'Capacity',
+            schedule: 'Schedule',
+            term: 'Term',
+        };
+
+        const subjectsTable= new DropDownTable(tableColumns, response._embedded.teachers,
+            (courseRecord) => { return courseDetails(courseRecord, contentElement) }).build();
+        container.append(subjectsTable);
+    });
+}
+
+//endregion
+
 //region Programmes
 
 function programmes(contentElement) {
@@ -193,7 +396,8 @@ function programmes(contentElement) {
             noTerms: 'Number of terms',
         };
 
-        const programmeTable= new DropDownTable(tableColumns, response._embedded.programmes, (record) => { return programmeDetails(record, contentElement)}).build();
+        const programmeTable= new DropDownTable(tableColumns, response._embedded.programmes,
+            (record) => { return programmeDetails(record, contentElement)}).build();
         contentElement.append(programmeTable);
     });
 }
@@ -292,7 +496,6 @@ function removeProgramme(record, contentElement) {
 //endregion
 
 //region Users
-
 function users(contentElement) {
     contentElement.empty();
 
@@ -367,7 +570,6 @@ function saveNewUser(contentElement, saveUrl) {
         return;
     }
 
-    //TODO: validate values
     requestInvoker.executePost(saveUrl, {
         token: tokenObj.token,
         id: $('#user-details-code').val(),
@@ -410,6 +612,8 @@ function userDetails(record, contentElement) {
     container.append(new Button('Save', () => { updateUser(record, contentElement) }).build());
     container.append(new Button('Remove', () => { removeUser(record, contentElement) }).build());
 
+    buildRoles(contentElement, container, record);
+
     return container;
 }
 
@@ -436,11 +640,123 @@ function removeUser(record, contentElement) {
         else $('#edit-user-error').html(string2html(response.error.details)).removeClass('hidden');
     });
 }
+//endregion
 
+//region Roles
+function buildRoles(contentElement, container, user) {
+    container.append($('<div>').prop('id', 'edit-roles-error').addClass('hidden error'));
+
+    requestInvoker.executePost(user._links.roles.href, { token: tokenObj.token }).then((response) => {
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+        }
+
+        console.log(response);
+
+        container.append(new Button(response.isAdmin ? 'Remove admin role' : 'Make admin',
+            () => {setAdminRole(user, !response.isAdmin, contentElement, response._links)}).build());
+
+        container.append($('<h2>').text('Programmes'));
+        //bindClickListener(newCourseButton, () => { saveNewCourse(record, contentElement, response._links.add.href) })
+
+        let assignProgrammeTable = $("<table>").addClass("editTable");
+        assignProgrammeTable.append(
+            $("<tr>").append(
+                $("<th>").append($("<label>").attr("for", "assign-programme-start-term").text("Start tem:")),
+                $("<td>").append($("<input>").attr({id: 'assign-programme-start-term', type: 'text', maxlength: 9, required: true}))
+            )
+        );
+
+        const programmeSelector = $('<select>').attr('id', 'assign-programme-selector');
+        assignProgrammeTable.append($('<tr>').append(
+            $("<th>").append($("<label>").attr("for", "assign-programme-selector").text("Programme:")),
+            programmeSelector
+        ));
+        container.append(assignProgrammeTable);
+
+        requestInvoker.executePost('programme/all', { token: tokenObj.token }).then((programmeResponse) => {
+            if (!programmeResponse._success) {
+                console.error(programmeResponse.error);
+                alert('Something unexpected happened. Please try again later!');
+            }
+
+            $.each(programmeResponse._embedded.programmes, (index, programme) => {
+                programmeSelector.append($('<option>')
+                    .prop('value', JSON.stringify(programme))
+                    .text(programme.name + '/' + programme.type));
+            });
+        });
+
+        container.append($('<div>').prop('id', 'assign-programme-error').addClass('hidden error'));
+
+        const assignProgrammeButton = new Button('Assign to programme',
+            () => { assignToProgramme(contentElement, user, response._links) }).build()
+        container.append(assignProgrammeButton);
+
+        const tableColumns = {
+            name: 'Name',
+            type: 'Type',
+            startTerm: 'Started in term',
+        };
+
+        const programmeTable= new DropDownTable(tableColumns, response.student,
+            (record) => { return assignedProgrammeDetails(contentElement, record, response._links) }).build();
+        container.append(programmeTable);
+    });
+}
+
+function setAdminRole(user, value, contentElement, links) {
+    $('#edit-user-error').addClass('hidden');
+
+    requestInvoker.executePost(value ? links.setAdmin.href : links.unsetAdmin.href, { token: tokenObj.token }).then((response) => {
+        if (response._success) rooms(contentElement);
+        else $('#edit-user-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
+
+function assignToProgramme(contentElement, user, links) {
+    $('#assign-programme-error').addClass('hidden');
+
+    const programme = JSON.parse($('#assign-programme-selector :selected').val());
+
+    requestInvoker.executePost(links.setStudent.href, {
+        token: tokenObj.token,
+        userId: user.id,
+        programmeName: programme.name,
+        programmeType: programme.type,
+        startTerm: $('#assign-programme-start-term').val()
+    }).then((response) => {
+        if (response._success) users(contentElement);
+        else $('#assign-programme-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
+
+function assignedProgrammeDetails(contentElement, record, links) {
+    let container = $('<div>');
+
+    container.append($('<div>').prop('id', 'edit-assigned-programme-error').addClass('hidden error'));
+    container.append(new Button('Remove', () => { removeAssignedProgramme(record, contentElement, links) }).build());
+
+    return container;
+}
+
+function removeAssignedProgramme(record, contentElement, links) {
+    $('#edit-assigned-programme-error').addClass('hidden');
+
+    requestInvoker.executePost(links.unsetStudent.href, {
+        token: tokenObj.token,
+        userId: record.user.id,
+        programmeName: record.programme.name,
+        programmeType: record.programme.type
+    }).then((response) => {
+        if (response._success) users(contentElement);
+        else $('#edit-assigned-programme-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
 //endregion
 
 //region Rooms
-
 function rooms(contentElement) {
     contentElement.empty();
 
@@ -557,7 +873,7 @@ function self(contentElement) {
 //endregion
 
 $(() => {
-    init();
+    tokenObj = init(requestInvoker, 'admin');
     const contentElement = $('#content');
 
     const site = localStorage.getItem('admin');

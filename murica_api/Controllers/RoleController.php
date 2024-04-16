@@ -41,7 +41,7 @@ class RoleController extends Controller {
         $this->programmeDao = $programmeDao;
         $this->courseTeachDao = $courseTeachDao;
 
-        $this->router->registerController($this, 'user')
+        $this->router->registerController($this, 'role')
             ->registerEndpoint('allRoles', '', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('setAdmin', 'setAdmin', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('unsetAdmin', 'unsetAdmin', EndpointRoute::VISIBILITY_PRIVATE)
@@ -56,10 +56,9 @@ class RoleController extends Controller {
      * Parameters are expected as part of request data.
      */
     public function allRoles(string $uri, array $requestData): IModel {
-        $id = $requestData['id'] ?? null;
         $role = new Role();
 
-        if (empty($id)) {
+        if (empty($uri)) {
             return new ErrorModel($this->router,
                                   400,
                                   'Failed to get roles',
@@ -67,25 +66,29 @@ class RoleController extends Controller {
         }
 
         try {
-            $users = $this->userDao->findByCrit(new User($id));
+            $users = $this->userDao->findByCrit(new User($uri));
 
             if (empty($users)) {
                 return new ErrorModel($this->router,
                                       404,
                                       'Failed to get roles',
-                                      "User not found with id '$id'");
+                                      "User not found with id '$uri'");
             }
 
-            $admin = $this->adminDao->findByCrit(new Admin(new User($requestData['id'])));
-            $teacher = $this->courseTeachDao->findByCrit(new CourseTeach(new User($requestData['id'])));
-            $students = $this->studentDao->findByCrit(new Student(new User($requestData['id'])));
+            $admin = $this->adminDao->findByCrit(new Admin(new User($uri)));
+            $teacher = $this->courseTeachDao->findByCrit(new CourseTeach(new User($uri)));
+            $students = $this->studentDao->findByCrit(new Student(new User($uri)));
 
             !empty($admin) ? $role->setAdminRole(true) : $role->setAdminRole(false);
             !empty($teacher) ? $role->setTeacherRole(true) : $role->setTeacherRole(false);
             $role->setStudents($students);
 
             return (new EntityModel($this->router, $role, true))
-                ->withSelfRef(RoleController::class, 'allRoles');
+                ->linkTo('setAdmin', RoleController::class, 'setAdmin', [$uri])
+                ->linkTo('unsetAdmin', RoleController::class, 'unsetAdmin', [$uri])
+                ->linkTo('setStudent', RoleController::class, 'setStudent')
+                ->linkTo('unsetStudent', RoleController::class, 'unsetStudent')
+                ->withSelfRef(RoleController::class, 'allRoles', [$uri]);
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
                                   500,
@@ -106,14 +109,14 @@ class RoleController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to give admin role', $e->getTraceMessages());
         }
 
-        if (!isset($requestData['id']))
+        if (!isset($uri))
             return new ErrorModel($this->router, 400, 'Failed to give admin role', 'Parameter "id" is not provided in uri');
 
         try {
-            $users = $this->userDao->findByCrit(new User($requestData['id']));
+            $users = $this->userDao->findByCrit(new User($uri));
 
             if (empty($users)) {
-                return new ErrorModel($this->router, 404, 'Failed to give admin role', "User not found with id '{$requestData['id']}'");
+                return new ErrorModel($this->router, 404, 'Failed to give admin role', "User not found with id '$uri'");
             }
             $admin = $this->adminDao->create(new Admin($users[0]));
             return (new EntityModel($this->router, $admin[0], true))
@@ -133,15 +136,15 @@ class RoleController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to unset admin role', $e->getTraceMessages());
         }
 
-        if (!isset($requestData['id'])) {
+        if (!isset($uri)) {
             return new ErrorModel($this->router, 400, 'Failed to unset admin role', 'Parameter "id" is not provided in uri');
         }
 
         try {
-            $admin = $this->adminDao->findByCrit(new Admin(new User($requestData['id'])));
+            $admin = $this->adminDao->findByCrit(new Admin(new User($uri)));
 
             if (empty($admin)) {
-                return new ErrorModel($this->router, 404, 'Failed to unset admin role', "Admin not found with id '{$requestData['id']}'");
+                return new ErrorModel($this->router, 404, 'Failed to unset admin role', "Admin not found with id '$uri'");
             }
 
             $this->adminDao->delete($admin[0]);
@@ -172,10 +175,10 @@ class RoleController extends Controller {
         if (!isset($requestData['startTerm']))
             return new ErrorModel($this->router, 400, 'Failed to set Student role', 'Parameter "startTerm" is not provided in uri');
         try {
-            $users = $this->userDao->findByCrit(new User($requestData['id']));
+            $users = $this->userDao->findByCrit(new User($requestData['userId']));
 
             if (empty($users)) {
-                return new ErrorModel($this->router, 404, 'Failed to set Student role', "User not found with id '{$requestData['id']}'");
+                return new ErrorModel($this->router, 404, 'Failed to set Student role', "User not found with id '{$requestData['userId']}'");
             }
 
             $programmes = $this->programmeDao->findByCrit(new Programme($requestData['programmeName'], $requestData['programmeType']));
@@ -183,10 +186,10 @@ class RoleController extends Controller {
             if (empty($programmes)) {
                 return new ErrorModel($this->router, 404, 'Failed to set Student role', "Programme not found with name '{$requestData['programmeName']}' and type '{$requestData['programmeType']}'");
             }
-            $students = $this->studentDao->create(new Student($users[0], $programmes[0], $requestData['startTerm']));
-            return (new EntityModel($this->router, $students[0], true))
+            $student = $this->studentDao->create(new Student($users[0], $programmes[0], $requestData['startTerm']));
+            return (new EntityModel($this->router, $student, true))
                 ->linkTo('role', RoleController::class, 'allRoles')
-                ->withSelfRef(RoleController::class, 'setStudent', [], ['userId' => $students->getUser()->getId(), 'programmeName' => $students->getProgramme()->getName(), 'programmeType' => $students->getProgramme()->getType()]);
+                ->withSelfRef(RoleController::class, 'setStudent', [], ['userId' => $student->getUser()->getId(), 'programmeName' => $student->getProgramme()->getName(), 'programmeType' => $student->getProgramme()->getType()]);
 
         } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to set student role', $e->getTraceMessages());

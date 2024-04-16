@@ -66,6 +66,7 @@ class AuthController extends Controller {
 
                 return (new EntityModel($this->router, $token, true))
                     ->linkTo('user', UserController::class, 'getUserById', [$token->getUser()->getId()])
+                    ->linkTo('roles', RoleController::class, 'allRoles', [$user->getId()])
                     ->linkTo('logout', AuthController::class, 'logout');
             } catch (DataAccessException|ModelException $e) {
                 return new ErrorModel($this->router, 500, 'Authentication failed', $e->getTraceMessages());
