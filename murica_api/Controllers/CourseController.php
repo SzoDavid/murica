@@ -6,7 +6,6 @@ use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IAdminDao;
 use murica_bl\Dao\ICourseDao;
 use murica_bl\Dao\ICourseTeachDao;
-use murica_bl\Dao\IProgrammeDao;
 use murica_bl\Dao\IRoomDao;
 use murica_bl\Dao\IStudentDao;
 use murica_bl\Dao\ISubjectDao;
@@ -375,9 +374,9 @@ class CourseController extends Controller {
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to remove teacher from Course', 'Parameter "id" is not provided in uri');
         if (!isset($requestData['subjectId']))
-            return new ErrorModel($this->router, 400, 'Failed to remove teacher from  Course', 'Parameter "subjectId" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to remove teacher from Course', 'Parameter "subjectId" is not provided in uri');
         if (!isset($requestData['teacherId']))
-            return new ErrorModel($this->router, 400, 'Failed to remove teacher from  Course', 'Parameter "teacherId" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to remove teacher from Course', 'Parameter "teacherId" is not provided in uri');
 
         try {
             $teachCourses = $this->courseTeachDao->findByCrit(new CourseTeach(new User($requestData['teacherId']), new Course(new Subject($requestData['subjectId'], $requestData['id']))));
