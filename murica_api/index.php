@@ -8,6 +8,7 @@ use Exception;
 use murica_api\Controllers\AuthController;
 use murica_api\Controllers\CourseController;
 use murica_api\Controllers\ProgrammeController;
+use murica_api\Controllers\RoleController;
 use murica_api\Controllers\RoomController;
 use murica_api\Controllers\SubjectController;
 use murica_api\Controllers\UserController;
@@ -57,6 +58,8 @@ try {
     $programmeController = new ProgrammeController($router, $programmeDao);
     $roomController = new RoomController($router, $roomDao);
     $subjectController = new SubjectController($router, $subjectDao);
+    $roleController = new RoleController($router, $userDao, $adminDao, $studentDao, $programmeDao, $courseTeachDao);
+    $roleController = new RoleController($router, $userDao, $adminDao, $studentDao, $programmeDao, $courseTeachDao);
     $courseController = new CourseController($router, $courseDao, $subjectDao, $roomDao, $takenCourseDao, $studentDao, $adminDao, $courseTeachDao, $userDao);
 
 } catch (MuricaException $ex) {
