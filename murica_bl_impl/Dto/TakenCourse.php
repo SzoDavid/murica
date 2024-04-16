@@ -100,7 +100,13 @@ class TakenCourse extends Entity implements ITakenCourse {
     public function jsonSerialize(): array {
         return [
             'student' => $this->student->jsonSerialize(),
-            'course' => $this->course->jsonSerialize(),
+            'subjectId' => $this->course->getSubject()->getId(),
+            'courseId' => $this->course->getId(),
+            'id' => $this->course->getSubject()->getId() . '-' . $this->course->getId(),
+            'name' => $this->course->getSubject()->getName(),
+            'schedule' => $this->course->getSchedule(),
+            'term' => $this->course->getTerm(),
+            'roomId' => $this->course->getRoom()->getId(),
             'grade' => $this->grade,
             'approved' => $this->approved
         ];

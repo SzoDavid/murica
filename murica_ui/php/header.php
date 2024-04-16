@@ -57,6 +57,7 @@
         <li><span id="navbar-rooms">Rooms</span></li>
         <li style="float:right"><span id="navbar-username"></span></li>
         <li style="float:right"><span id="navbar-logout">Log out</span></li>
+        <li style="float:right"><select id="navbar-role-select"></select></li>
     </ul>
 </nav>
 <?php
@@ -81,6 +82,7 @@
         </li>
         <li style="float:right"><span id="navbar-username"></span></li>
         <li style="float:right"><span id="navbar-logout">Log out</span></li>
+        <li style="float:right"><select id="navbar-role-select"></select></li>
     </ul>
 </nav>
 <?php
@@ -93,6 +95,7 @@
         <li><span id="navbar-exams">Exams</span></li>
         <li style="float:right"><span id="navbar-username"></span></li>
         <li style="float:right"><span id="navbar-logout">Log out</span></li>
+        <li style="float:right"><select id="navbar-role-select"></select></li>
     </ul>
 </nav>
 <?php } ?>

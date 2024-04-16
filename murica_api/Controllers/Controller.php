@@ -19,12 +19,12 @@ class Controller implements IController {
     /**
      * @throws DataAccessException
      */
-    protected function checkIfAdmin($requestData, IAdminDao $adminDao): bool {
+    protected function checkIfAdmin(array $requestData, IAdminDao $adminDao): bool {
         /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
+        $user = $requestData['token']->getUser();
 
         $admin = $adminDao->findByCrit(new Admin($user));
 
-        return empty($admin);
+        return !empty($admin);
     }
 }

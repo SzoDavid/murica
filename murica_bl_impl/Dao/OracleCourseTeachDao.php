@@ -216,13 +216,19 @@ class OracleCourseTeachDao implements ICourseTeachDao {
                        TableDefinition::ROOM_TABLE_FIELD_ID
         );
 
-        $userId = $model->getUser()->getId();
-        $courseId = $model->getCourse()->getId();
-        $subjectId = $model->getCourse()->getSubject()->getId();
+        $user = $model->getUser();
+        $course = $model->getCourse();
 
-        if (isset($userId)) $crits[] = TableDefinition::COURSETEACH_TABLE_FIELD_USER_ID . " LIKE :userId";
-        if (isset($courseId)) $crits[] = TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID . " LIKE :courseId";
-        if (isset($subjectId)) $crits[] = TableDefinition::COURSETEACH_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
+        if (isset($user) && $user->getId() !== null) {
+            $crits[] = TableDefinition::COURSETEACH_TABLE_FIELD_USER_ID . " LIKE :userId";
+            $userId = $user->getId();
+        }
+        if (isset($course) && $course->getId() !== null && $course->getSubject() !== null && $course->getSubject()->getId() !== null) {
+            $crits[] = TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID . " LIKE :courseId";
+            $crits[] = TableDefinition::COURSETEACH_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
+            $courseId = $course->getId();
+            $subjectId = $course->getSubject()->getId();
+        }
 
         if (!empty($crits))
             $sql .= " AND " . implode(" AND ", $crits);
@@ -242,19 +248,19 @@ class OracleCourseTeachDao implements ICourseTeachDao {
 
         while (oci_fetch($stmt)) {
             $res[] = new CourseTeach( new User(
-                      oci_result($stmt, 'ID'),
-                      oci_result($stmt, 'NAME'),
+                      oci_result($stmt, 'USER_ID'),
+                      oci_result($stmt, 'USER_NAME'),
                       oci_result($stmt, 'EMAIL'),
                       oci_result($stmt, 'PASSWORD'),
                       oci_result($stmt, 'BIRTH_DATE')),
                   new Course(
                       new Subject(
                           oci_result($stmt, 'SUBJECT_ID'),
-                          oci_result($stmt, 'NAME'),
+                          oci_result($stmt, 'SUBJECT_NAME'),
                           oci_result($stmt, 'APPROVAL'),
                           oci_result($stmt, 'CREDIT'),
                           oci_result($stmt, 'TYPE')),
-                      oci_result($stmt, 'ID'),
+                      oci_result($stmt, 'CRS_ID'),
                       oci_result($stmt, 'CRS_CAPACITY'),
                       oci_result($stmt, 'SCHEDULE'),
                       oci_result($stmt, 'TERM'),

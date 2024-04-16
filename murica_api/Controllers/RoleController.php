@@ -41,7 +41,7 @@ class RoleController extends Controller {
         $this->programmeDao = $programmeDao;
         $this->courseTeachDao = $courseTeachDao;
 
-        $this->router->registerController($this, 'user')
+        $this->router->registerController($this, 'role')
             ->registerEndpoint('allRoles', '', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('setAdmin', 'setAdmin', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('unsetAdmin', 'unsetAdmin', EndpointRoute::VISIBILITY_PRIVATE)
@@ -56,10 +56,9 @@ class RoleController extends Controller {
      * Parameters are expected as part of request data.
      */
     public function allRoles(string $uri, array $requestData): IModel {
-        $id = $requestData['id'] ?? null;
         $role = new Role();
 
-        if (empty($id)) {
+        if (empty($uri)) {
             return new ErrorModel($this->router,
                                   400,
                                   'Failed to get roles',
@@ -67,25 +66,25 @@ class RoleController extends Controller {
         }
 
         try {
-            $users = $this->userDao->findByCrit(new User($id));
+            $users = $this->userDao->findByCrit(new User($uri));
 
             if (empty($users)) {
                 return new ErrorModel($this->router,
                                       404,
                                       'Failed to get roles',
-                                      "User not found with id '$id'");
+                                      "User not found with id '$uri'");
             }
 
-            $admin = $this->adminDao->findByCrit(new Admin(new User($requestData['id'])));
-            $teacher = $this->courseTeachDao->findByCrit(new CourseTeach(new User($requestData['id'])));
-            $students = $this->studentDao->findByCrit(new Student(new User($requestData['id'])));
+            $admin = $this->adminDao->findByCrit(new Admin(new User($uri)));
+            $teacher = $this->courseTeachDao->findByCrit(new CourseTeach(new User($uri)));
+            $students = $this->studentDao->findByCrit(new Student(new User($uri)));
 
             !empty($admin) ? $role->setAdminRole(true) : $role->setAdminRole(false);
             !empty($teacher) ? $role->setTeacherRole(true) : $role->setTeacherRole(false);
             $role->setStudents($students);
 
             return (new EntityModel($this->router, $role, true))
-                ->withSelfRef(RoleController::class, 'allRoles');
+                ->withSelfRef(RoleController::class, 'allRoles', [$uri]);
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
                                   500,

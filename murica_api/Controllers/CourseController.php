@@ -12,6 +12,8 @@ use murica_bl\Dao\ISubjectDao;
 use murica_bl\Dao\ITakenCourseDao;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\Exceptions\ValidationException;
+use murica_bl\Dto\ICourse;
+use murica_bl\Dto\ITakenCourse;
 use murica_bl\Dto\IUser;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
@@ -57,6 +59,8 @@ class CourseController extends Controller {
         $this->router->registerController($this, 'course')
             ->registerEndpoint('allCourses', 'all', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getCourseByIdAndSubjectId', '', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getCoursesBySubject', 'subject', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getTakenCoursesByStudent', 'taken', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('createCourse', 'new', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('updateCourse', 'update', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('deleteCourse', 'delete', EndpointRoute::VISIBILITY_PRIVATE)
@@ -81,11 +85,40 @@ class CourseController extends Controller {
             foreach ($courses as $course) {
                 $courseEntities[] = (new EntityModel($this->router, $course, true))
                     ->linkTo('allCourses', CourseController::class, 'allCourses')
-                    ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $course->getId(), 'subjectId' => $course->getSubjectId()]);
+                    ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $course->getId(), 'subjectId' => $course->getSubject()->getId()]);
             }
 
             return (new CollectionModel($this->router, $courseEntities, 'courses', true))
                 ->withSelfRef(CourseController::class, 'allCourses');
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router,
+                                  500,
+                                  'Failed to query courses',
+                                  $e->getTraceMessages());
+        }
+    }
+
+    public function getCoursesBySubject(string $uri, array $requestData): IModel {
+        if (empty($uri)) {
+            return new ErrorModel($this->router,
+                                  400,
+                                  'Failed to query user',
+                                  'Parameter "id" is not provided in uri');
+        }
+
+        try {
+            $courses = $this->courseDao->findByCrit(new Course(new Subject($uri)));
+            $courseEntities = [];
+
+            /* @var $course ICourse */
+            foreach ($courses as $course) {
+                $courseEntities[] = (new EntityModel($this->router, $course, true))
+                    ->linkTo('allCourses', CourseController::class, 'allCourses')
+                    ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $course->getId(), 'subjectId' => $course->getSubject()->getId()]);
+            }
+
+            return (new CollectionModel($this->router, $courseEntities, 'courses', true))
+                ->withSelfRef(CourseController::class, 'getCoursesBySubject', [$uri]);
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
                                   500,
@@ -117,12 +150,51 @@ class CourseController extends Controller {
 
             return (new EntityModel($this->router, $courses[0], true))
                 ->linkTo('allCourses', CourseController::class, 'allCourses')
-                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $courses[0]->getId(), 'subjectId' => $courses[0]->getSubjectId()]);
+                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $courses[0]->getId(), 'subjectId' => $courses[0]->getSubject()->getId()]);
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query course',
                                   $e->getTraceMessages());
+        }
+    }
+
+    /**
+     * Returns the subject which the given student has registered to.
+     */
+    public function getTakenCoursesByStudent(string $uri, array $requestData): IModel {
+        if (!isset($requestData['programmeName']))
+            return new ErrorModel($this->router, 400, 'Failed to query taken courses', 'Parameter "programmeName" is not provided in uri');
+        if (!isset($requestData['programmeType']))
+            return new ErrorModel($this->router, 400, 'Failed to query taken courses', 'Parameter "programmeType" is not provided in uri');
+
+        /* @var $user IUser */
+        $user = $this->$requestData['token']->getUser();
+
+        try {
+            $students = $this->studentDao->findByCrit(new Student($user, new Programme($requestData['programmeName'], $requestData['programmeType'])));
+
+            if (empty($students)) {
+                return new ErrorModel($this->router, 403, 'Failed to query taken courses', "Access is forbidden");
+            }
+
+            $takenCourses = $this->takenCourseDao->findByCrit(new TakenCourse($students[0]));
+            $takenCourseEntities = [];
+
+            /* @var $takenCourse ITakenCourse */
+            foreach ($takenCourses as $takenCourse) {
+                $takenCourseEntities[] = (new EntityModel($this->router, $takenCourse, true))
+                    ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], [
+                        'id' => $takenCourse->getCourse()->getId(),
+                        'subjectId' => $takenCourse->getCourse()->getSubject()->getId()]);
+            }
+
+            return (new CollectionModel($this->router, $takenCourseEntities, 'takenCourses', true))
+                ->withSelfRef(CourseController::class, 'getTakenCoursesByStudent', [], [
+                    'programmeName' => $requestData['programmeName'],
+                    'programmeType' => $requestData['programmeType']]);
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to query taken courses', $e->getTraceMessages());
         }
     }
 
@@ -172,8 +244,8 @@ class CourseController extends Controller {
                                                            $rooms[0]));
             return (new EntityModel($this->router, $courses[0], true))
                 ->linkTo('allCourses', CourseController::class, 'allCourses')
-                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId',[],['id' => $courses[0]->getId(), 'subjectId' => $courses[0]->getSubjectId()]);
-
+                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [],
+                              ['id' => $courses[0]->getId(), 'subjectId' => $courses[0]->getSubject()->getId()]);
         } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
         }
@@ -251,7 +323,7 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to register Course', 'Parameter "subjectId" is not provided in uri');
         if (!isset($requestData['programmeName']))
             return new ErrorModel($this->router, 400, 'Failed to register Course', 'Parameter "programmeName" is not provided in uri');
-        if (!isset($requestData['programmeTame']))
+        if (!isset($requestData['programmeType']))
             return new ErrorModel($this->router, 400, 'Failed to register Course', 'Parameter "programmeType" is not provided in uri');
 
         /* @var $user IUser */
@@ -283,7 +355,7 @@ class CourseController extends Controller {
 
             return (new EntityModel($this->router, $takeCourses[0], true))
                 ->linkTo('allCourses', CourseController::class, 'allCourses')
-                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $courses[0]->getId(),'subjectId' => $courses[0]->getSubjectId()]);
+                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $courses[0]->getId(),'subjectId' => $courses[0]->getSubject()->getId()]);
         } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to register course', $e->getTraceMessages());
         }
@@ -296,7 +368,7 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to unregister Course', 'Parameter "subjectId" is not provided in uri');
         if (!isset($requestData['programmeName']))
             return new ErrorModel($this->router, 400, 'Failed to unregister Course', 'Parameter "programmeName" is not provided in uri');
-        if (!isset($requestData['programmeTame']))
+        if (!isset($requestData['programmeType']))
             return new ErrorModel($this->router, 400, 'Failed to unregister Course', 'Parameter "programmeType" is not provided in uri');
 
         /* @var $user IUser */
@@ -357,7 +429,7 @@ class CourseController extends Controller {
 
             return (new EntityModel($this->router, $teachCourse[0], true))
                 ->linkTo('allCourses', CourseController::class, 'allCourses')
-                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId',[],['id' => $courses[0]->getId(),'subjectId' => $courses[0]->getSubjectId()]);
+                ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId',[],['id' => $courses[0]->getId(),'subjectId' => $courses[0]->getSubject()->getId()]);
         } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to add teacher to course', $e->getTraceMessages());
         }

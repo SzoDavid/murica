@@ -2,29 +2,7 @@ const apiUrl = 'https://localhost/murica_api/';
 const requestInvoker = new RequestInvoker(apiUrl);
 let tokenObj;
 
-function init() {
-    tokenObj = JSON.parse(localStorage.getItem('token'));
-
-    if (!tokenObj || new Date(tokenObj.expires_at) < new Date()) {
-        window.location.href = 'login.php';
-    }
-
-    $('#navbar-username').text(tokenObj.user.name);
-
-    bindClickListener($('#navbar-logo'), () => {
-        window.location.href = 'index.php';
-    });
-
-    bindClickListener($('#navbar-logout'), () => {
-        requestInvoker.executePost(tokenObj._links.logout.href, { token: tokenObj.token}).then(() => {
-            localStorage.removeItem('token');
-            window.location.href = 'login.php';
-        });
-    });
-}
-
 //region Subjects
-
 function subjects(contentElement) {
     contentElement.empty();
 
@@ -91,7 +69,6 @@ function newSubject(contentElement, saveUrl) {
 function saveNewSubject(contentElement, saveUrl) {
     $('#new-subject-error').addClass('hidden');
 
-    //TODO: validate values
     requestInvoker.executePost(saveUrl, {
         token: tokenObj.token,
         id: $('#subject-details-id').val(),
@@ -139,7 +116,20 @@ function subjectDetails(record, contentElement) {
     container.append(new Button('Save', () => { updateSubject(record, contentElement) }).build());
     container.append(new Button('Remove', () => { removeSubject(record, contentElement) }).build());
 
-    // TODO: add table for the courses
+    container.append($('<h2>').text('Kurzusok'));
+
+    requestInvoker.executePost(record._links.courses.href, { token: tokenObj.token }).then((response) => {
+        console.log(response);
+        const tableColumns = {
+            id: 'Id',
+            capacity: 'Capacity',
+            schedule: 'Schedule',
+            term: 'Term',
+        };
+
+        const subjectsTable= new Table(tableColumns, response._embedded.courses).build();
+        container.append(subjectsTable);
+    });
 
     return container;
 }
@@ -367,7 +357,6 @@ function saveNewUser(contentElement, saveUrl) {
         return;
     }
 
-    //TODO: validate values
     requestInvoker.executePost(saveUrl, {
         token: tokenObj.token,
         id: $('#user-details-code').val(),
@@ -557,7 +546,7 @@ function self(contentElement) {
 //endregion
 
 $(() => {
-    init();
+    tokenObj = init(requestInvoker, 'admin');
     const contentElement = $('#content');
 
     const site = localStorage.getItem('admin');
