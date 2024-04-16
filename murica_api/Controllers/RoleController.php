@@ -110,7 +110,7 @@ class RoleController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to give admin role', 'Parameter "id" is not provided in uri');
 
         try {
-            $users =  $this->userDao->findByCrit(new User($requestData['id']));
+            $users = $this->userDao->findByCrit(new User($requestData['id']));
 
             if (empty($users)) {
                 return new ErrorModel($this->router, 404, 'Failed to give admin role', "User not found with id '{$requestData['id']}'");
