@@ -3,6 +3,7 @@
 namespace murica_api\Controllers;
 
 use murica_bl\Dao\Exceptions\DataAccessException;
+use murica_bl\Dao\IAdminDao;
 use murica_bl\Dao\IRoomDao;
 use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Models\Exceptions\ModelException;
@@ -18,12 +19,14 @@ use murica_bl_impl\Router\EndpointRoute;
 class RoomController extends Controller {
     //region Properties
     private IRoomDao $roomDao;
+    private IAdminDao $adminDao;
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router, IRoomDao $roomDao) {
+    public function __construct(IRouter $router, IRoomDao $roomDao, IAdminDao $adminDao) {
         parent::__construct($router);
         $this->roomDao = $roomDao;
+        $this->adminDao = $adminDao;
 
         $this->router->registerController($this, 'room')
             ->registerEndpoint('allRooms', 'all', EndpointRoute::VISIBILITY_PRIVATE)
@@ -40,36 +43,35 @@ class RoomController extends Controller {
      * No parameters required.
      */
     public function allRooms(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
         try {
-            $rooms = $this->roomDao->findAll();
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to query rooms', 'Access is forbidden');
         } catch (DataAccessException $e) {
-            return new ErrorModel($this->router,
-                                  500,
-                                  'Failed to query rooms',
-                                  $e->getTraceMessages());
+            return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getTraceMessages());
         }
 
-        $roomEntities = array();
+        try {
+            $rooms = $this->roomDao->findAll();
 
-        foreach ($rooms as $room) {
-            try {
+            $roomEntities = array();
+
+            foreach ($rooms as $room) {
                 $roomEntities[] = (new EntityModel($this->router, $room, true))
                     ->linkTo('allRooms', RoomController::class, 'allRooms')
                     ->linkTo('delete', RoomController::class, 'deleteRoom')
                     ->linkTo('update', RoomController::class, 'updateRoom')
                     ->withSelfRef(RoomController::class, 'getRoomById', [$room->getId()]);
-            } catch (ModelException $e) {
-                return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getTraceMessages());
-            }
-        }
 
-        try {
+            }
+
             return (new CollectionModel($this->router, $roomEntities, 'rooms', true))
                 ->linkTo('createRoom', RoomController::class, 'createRoom')
                 ->withSelfRef(RoomController::class, 'allRooms');
-        } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getTraceMessages());
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router,
+                                  500,
+                                  'Failed to query rooms',
+                                  $e->getTraceMessages());
         }
     }
 
@@ -78,7 +80,12 @@ class RoomController extends Controller {
      * Id must be part of the uri.
      */
     public function getRoomById(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to query room', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to query room', $e->getTraceMessages());
+        }
 
         if (empty($uri)) {
             return new ErrorModel($this->router,
@@ -89,26 +96,22 @@ class RoomController extends Controller {
 
         try {
             $rooms = $this->roomDao->findByCrit(new Room($uri));
-        } catch (DataAccessException $e) {
+
+            if (empty($rooms)) {
+                return new ErrorModel($this->router,
+                                      404,
+                                      'Room not found',
+                                      "Room not found with id '$uri'");
+            }
+
+            return (new EntityModel($this->router, $rooms[0], true))
+                ->linkTo('allRooms', RoomController::class, 'allRooms')
+                ->withSelfRef(RoomController::class, 'getRoomById', [$uri]);
+        } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
                                   500,
                                   'Failed to query room',
                                   $e->getTraceMessages());
-        }
-
-        if (empty($rooms)) {
-            return new ErrorModel($this->router,
-                                  404,
-                                  'Room not found',
-                                  "Room not found with id '$uri'");
-        }
-
-        try {
-            return (new EntityModel($this->router, $rooms[0], true))
-                ->linkTo('allRooms', RoomController::class, 'allRooms')
-                ->withSelfRef(RoomController::class, 'getRoomById', [$uri]);
-        } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query room', $e->getTraceMessages());
         }
     }
 
@@ -117,7 +120,12 @@ class RoomController extends Controller {
      * Parameters are expected as part of request data.
      */
     public function createRoom(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to create Room', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to create Room', $e->getTraceMessages());
+        }
 
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to create Room', 'Parameter "id" is not provided in uri');
@@ -131,35 +139,33 @@ class RoomController extends Controller {
 
         try {
             $createdRoom = $this->roomDao->create($room);
-        } catch (DataAccessException|ValidationException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create room', $e->getTraceMessages());
-        }
 
-        try {
             return (new EntityModel($this->router, $createdRoom, true))
                 ->linkTo('allRooms', RoomController::class, 'allRooms')
                 ->withSelfRef(RoomController::class, 'getRoomById', [$createdRoom->getId()]);
-        } catch (ModelException $e) {
+        } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create room', $e->getTraceMessages());
         }
     }
 
     public function updateRoom(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to update room', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to update room', $e->getTraceMessages());
+        }
 
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to update room', 'Parameter "id" is not provided in request data');
 
         try {
             $rooms = $this->roomDao->findByCrit(new Room($requestData['id']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to update room', $e->getTraceMessages());
-        }
 
-        if (empty($rooms)) {
-            return new ErrorModel($this->router, 404, 'Failed to update room', "Subject not found with id '{$requestData['id']}'");
-        }
-        try {
+            if (empty($rooms)) {
+                return new ErrorModel($this->router, 404, 'Failed to update room', "Subject not found with id '{$requestData['id']}'");
+            }
+
             $this->roomDao->update(new Room($requestData['id'],
                                             $requestData['capacity']));
 
@@ -170,7 +176,12 @@ class RoomController extends Controller {
     }
 
     public function deleteRoom(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to delete room', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to delete room', $e->getTraceMessages());
+        }
 
         if (!isset($requestData['id'])) {
             return new ErrorModel($this->router, 400, 'Failed to delete room', 'Parameter "id" is not provided in request data');
@@ -178,19 +189,15 @@ class RoomController extends Controller {
 
         try {
             $subjects = $this->roomDao->findByCrit(new Room($requestData['id']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to delete room', $e->getTraceMessages());
-        }
 
-        if (empty($subjects)) {
-            return new ErrorModel($this->router, 404, 'Failed to delete room', "Room not found with id '{$requestData['id']}'");
-        }
+            if (empty($subjects)) {
+                return new ErrorModel($this->router, 404, 'Failed to delete room', "Room not found with id '{$requestData['id']}'");
+            }
 
-        try {
             $this->roomDao->delete($subjects[0]);
             return new MessageModel($this->router, ['message' => 'Room deleted successfully'], true);
         } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to delete subject', $e->getTraceMessages());
+            return new ErrorModel($this->router, 500, 'Failed to delete room', $e->getTraceMessages());
         }
     }
     //endregion

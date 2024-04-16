@@ -3,6 +3,7 @@
 namespace murica_api\Controllers;
 
 use murica_bl\Dao\Exceptions\DataAccessException;
+use murica_bl\Dao\IAdminDao;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\IUser;
@@ -19,12 +20,14 @@ use murica_bl_impl\Router\EndpointRoute;
 class UserController extends Controller {
     //region Properties
     private IUserDao $userDao;
+    private IAdminDao $adminDao;
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router, IUserDao $userDao) {
+    public function __construct(IRouter $router, IUserDao $userDao, IAdminDao $adminDao) {
         parent::__construct($router);
         $this->userDao = $userDao;
+        $this->adminDao = $adminDao;
 
         $this->router->registerController($this, 'user')
             ->registerEndpoint('allUsers', 'all', EndpointRoute::VISIBILITY_PRIVATE)
@@ -41,41 +44,35 @@ class UserController extends Controller {
      * No parameters required. User must have admin role, to access.
      */
     public function allUsers(string $uri, array $requestData): IModel {
-        //TODO: check if user is admin
         try {
-            $users = $this->userDao->findAll();
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to query users', 'Access is forbidden');
         } catch (DataAccessException $e) {
-            return new ErrorModel($this->router,
-                                  500,
-                                  'Failed to query users',
-                                  $e->getTraceMessages());
+            return new ErrorModel($this->router, 500, 'Failed to query users', $e->getTraceMessages());
         }
 
-        $userEntities = array();
+        try {
+            $users = $this->userDao->findAll();
 
-        /* @var $user User */
-        foreach ($users as $user) {
-            try {
+            $userEntities = array();
+
+            /* @var $user User */
+            foreach ($users as $user) {
                 $userEntities[] = (new EntityModel($this->router, $user, true))
                     ->linkTo('allUsers', UserController::class, 'allUsers')
                     ->linkTo('delete', UserController::class, 'deleteUser')
                     ->linkTo('update', UserController::class, 'updateUser')
                     ->withSelfRef(UserController::class, 'getUserById', [$user->getId()]);
-            } catch (ModelException $e) {
-                return new ErrorModel($this->router, 500, 'Failed to query users', $e->getTraceMessages());
             }
-        }
 
-        try {
             return (new CollectionModel($this->router, $userEntities, 'users', true))
                 ->linkTo('createUser', UserController::class, 'createUser')
                 ->withSelfRef(UserController::class, 'allUsers');
-        } catch (ModelException $e) {
-            return new MessageModel($this->router, ['error' => [
-                'code' => '500',
-                'message' => 'Failed to query users',
-                'details' => $e->getTraceMessages()
-            ]], false);
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router,
+                                  500,
+                                  'Failed to query users',
+                                  $e->getTraceMessages());
         }
     }
 
@@ -84,8 +81,13 @@ class UserController extends Controller {
      * Id must be part of the uri. User must have admin role, to access.
      */
     public function getUserById(string $uri, array $requestData): IModel {
-        //TODO: check if user is admin
-        // TODO: validate $uri as user id
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to query user', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to query user', $e->getTraceMessages());
+        }
+
         if (empty($uri)) {
             return new ErrorModel($this->router,
                                   400,
@@ -95,27 +97,23 @@ class UserController extends Controller {
 
         try {
             $users = $this->userDao->findByCrit(new User($uri));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router,
-                                  500,
-                                  'Failed to query user',
-                                  $e->getTraceMessages());
-        }
 
-        if (empty($users)) {
-            return new ErrorModel($this->router,
-                                  404,
-                                  'User not found',
-                                  "User not found with id '$uri'");
-        }
+            if (empty($users)) {
+                return new ErrorModel($this->router,
+                                      404,
+                                      'User not found',
+                                      "User not found with id '$uri'");
+            }
 
-        try {
             return (new EntityModel($this->router, $users[0], true))
                 ->linkTo('allUsers', UserController::class, 'allUsers')
                 ->linkTo('update', UserController::class, 'updateUser')
                 ->withSelfRef(UserController::class, 'getUserById', [$uri]);
-        } catch (ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query user', $e->getTraceMessages());
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router,
+                                  500,
+                                  'Failed to query user',
+                                  $e->getTraceMessages());
         }
     }
 
@@ -125,7 +123,13 @@ class UserController extends Controller {
      * User must have admin role, to access.
      */
     public function createUser(string $uri, array $requestData): IModel {
-        //TODO: check if user is admin
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to create user', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
+        }
+
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to create user', 'Parameter "id" is not provided in uri');
         if (!isset($requestData['name']))
@@ -143,46 +147,46 @@ class UserController extends Controller {
                                                     $requestData['email'],
                                                     password_hash($requestData['password'], PASSWORD_DEFAULT),
                                                     $requestData['birth_date']));
-        } catch (DataAccessException|ValidationException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
-        }
 
-        try {
             return (new EntityModel($this->router, $user, true))
                 ->linkTo('allUsers', UserController::class, 'allUsers')
                 ->withSelfRef(UserController::class, 'getUserById', [$user->getId()]);
-        } catch (ModelException $e) {
+        } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create user', $e->getTraceMessages());
         }
     }
 
     public function updateUser(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin or self
-
-        if (!isset($requestData['id']))
-            return new ErrorModel($this->router, 400, 'Failed to update user', 'Parameter "id" is not provided in request data');
-
         try {
-            $users = $this->userDao->findByCrit(new User($requestData['id']));
+            /* @var $user IUser */
+            $user = $this->$requestData['token']->getUser();
+
+            if (!$this->checkIfAdmin($requestData, $this->adminDao) &&
+                $this->userDao->findByCrit(new User($requestData['id']))[0]->getId() !== $user->getId())
+                    return new ErrorModel($this->router, 403, 'Failed to update user', 'Access is forbidden');
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to update user', $e->getTraceMessages());
         }
 
-        if (empty($users)) {
-            return new ErrorModel($this->router, 404, 'Failed to update user', "User not found with id '{$requestData['id']}'");
-        }
-
-        /* @var $user IUser */
-        $user = $users[0];
-
-        if (isset($requestData['name'])) $user->setName($requestData['name']);
-        if (isset($requestData['email'])) $user->setEmail($requestData['email']);
-        if (isset($requestData['password'])) $user->setPassword(password_hash(trim($requestData['password']), PASSWORD_DEFAULT) );
-        if (isset($requestData['birth_date'])) $user->setBirthDate($requestData['birth_date']);
-
         try {
-            $this->userDao->update($user);
+            if (!isset($requestData['id']))
+                return new ErrorModel($this->router, 400, 'Failed to update user', 'Parameter "id" is not provided in request data');
 
+            $users = $this->userDao->findByCrit(new User($requestData['id']));
+
+            if (empty($users)) {
+                return new ErrorModel($this->router, 404, 'Failed to update user', "User not found with id '{$requestData['id']}'");
+            }
+
+            /* @var $user IUser */
+            $user = $users[0];
+
+            if (isset($requestData['name'])) $user->setName($requestData['name']);
+            if (isset($requestData['email'])) $user->setEmail($requestData['email']);
+            if (isset($requestData['password'])) $user->setPassword(password_hash(trim($requestData['password']), PASSWORD_DEFAULT) );
+            if (isset($requestData['birth_date'])) $user->setBirthDate($requestData['birth_date']);
+
+            $this->userDao->update($user);
             return new MessageModel($this->router, ['message' => 'User updated successfully'], true);
         } catch (DataAccessException|ValidationException $e) {
             return new ErrorModel($this->router, 500, 'Failed to update user', $e->getTraceMessages());
@@ -190,7 +194,12 @@ class UserController extends Controller {
     }
 
     public function deleteUser(string $uri, array $requestData): IModel {
-        // TODO: check if user is admin
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to delete user', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to delete user', $e->getTraceMessages());
+        }
 
         if (!isset($requestData['id'])) {
             return new ErrorModel($this->router, 400, 'Failed to delete user', 'Parameter "id" is not provided in request data');
@@ -198,15 +207,11 @@ class UserController extends Controller {
 
         try {
             $users = $this->userDao->findByCrit(new User($requestData['id']));
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to delete user', $e->getTraceMessages());
-        }
 
-        if (empty($users)) {
-            return new ErrorModel($this->router, 404, 'Failed to delete user', "User not found with id '{$requestData['id']}'");
-        }
+            if (empty($users)) {
+                return new ErrorModel($this->router, 404, 'Failed to delete user', "User not found with id '{$requestData['id']}'");
+            }
 
-        try {
             $this->userDao->delete($users[0]);
             return new MessageModel($this->router, ['message' => 'User deleted successfully'], true);
         } catch (DataAccessException $e) {
