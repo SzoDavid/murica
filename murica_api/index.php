@@ -7,6 +7,7 @@ require_once 'autoloader.php';
 use Exception;
 use murica_api\Controllers\AuthController;
 use murica_api\Controllers\ProgrammeController;
+use murica_api\Controllers\RoleController;
 use murica_api\Controllers\RoomController;
 use murica_api\Controllers\SubjectController;
 use murica_api\Controllers\UserController;
@@ -41,6 +42,9 @@ try {
     $programmeDao = $dataSource->createProgrammeDao();
     $roomDao = $dataSource->createRoomDao();
     $subjectDao = $dataSource->createSubjectDao();
+    $adminDao = $dataSource->createAdminDao();
+    $studentDao = $dataSource->createStudentDao();
+    $courseTeachDao = $dataSource->createCourseTeachDao();
 
     $tokenService = new DataSourceTokenService($dataSource->createTokenDao());
 
@@ -51,6 +55,7 @@ try {
     $programmeController = new ProgrammeController($router, $programmeDao);
     $roomController = new RoomController($router, $roomDao);
     $subjectController = new SubjectController($router, $subjectDao);
+    $roleController = new RoleController($router, $userDao, $adminDao, $studentDao, $programmeDao, $courseTeachDao);
 
 } catch (MuricaException $ex) {
     exit(json_encode(['_success' => false,
