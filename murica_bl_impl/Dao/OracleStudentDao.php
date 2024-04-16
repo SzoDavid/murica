@@ -5,11 +5,11 @@ namespace murica_bl_impl\Dao;
 use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IStudentDao;
+use murica_bl\Dto\IStudent;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Programme;
 use murica_bl_impl\Dto\Student;
-use murica_bl\Dto\IStudent;
 use murica_bl_impl\Dto\User;
 use Override;
 
@@ -64,14 +64,14 @@ class OracleStudentDao implements IStudentDao {
     public function update(IStudent $model): IStudent {
         $model->validate();
         $sql = sprintf("UPDATE %s.%s SET %s = :programmeName, %s = :programmeType, %s = :startTerm WHERE %s = :userId AND %s = :programmeName AND %s = :programmeType",
-            $this->configService->getTableOwner(),
-            TableDefinition::STUDENT_TABLE,
-            TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
-            TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
-            TableDefinition::STUDENT_TABLE_FIELD_START_TERM,
-            TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
-            TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
-            TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE
+                       $this->configService->getTableOwner(),
+                       TableDefinition::STUDENT_TABLE,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::STUDENT_TABLE_FIELD_START_TERM,
+                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE
         );
 
         if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
@@ -101,11 +101,11 @@ class OracleStudentDao implements IStudentDao {
     #[Override]
     public function delete(IStudent $model): void {
         $sql = sprintf("DELETE FROM %s.%s WHERE %s = :userId AND %s = :programmeName AND %s = :programmeType",
-            $this->configService->getTableOwner(),
-            TableDefinition::STUDENT_TABLE,
-            TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
-            TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
-            TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE
+                       $this->configService->getTableOwner(),
+                       TableDefinition::STUDENT_TABLE,
+                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE
         );
 
         if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
@@ -215,14 +215,20 @@ class OracleStudentDao implements IStudentDao {
                        TableDefinition::PROGRAMME_TABLE_FIELD_TYPE
         );
 
-        $userId = $model->getUser()->getId();
-        $programmeName = $model->getProgramme()->getName();
-        $programmeType = $model->getProgramme()->getType();
+        $user = $model->getUser();
+        $programme = $model->getProgramme();
         $startTerm = $model->getStartTerm();
 
-        if (isset($userId)) $crits[] = TableDefinition::STUDENT_TABLE_FIELD_USER_ID . " LIKE :userId";
-        if (isset($programmeName)) $crits[] = TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME . " LIKE :programmeName";
-        if (isset($programmeType)) $crits[] = TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE . " LIKE :programmeType";
+        if (isset($user) && $user->getId() !== null) {
+            $crits[] = TableDefinition::STUDENT_TABLE_FIELD_USER_ID . " LIKE :userId";
+            $userId = $user->getId();
+        }
+        if (isset($programme) && $programme->getName() !== null && $programme->getType() !== null) {
+            $crits[] = TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME . " LIKE :programmeName";
+            $crits[] = TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE . " LIKE :programmeType";
+            $programmeName = $model->getProgramme()->getName();
+            $programmeType = $model->getProgramme()->getType();
+        }
         if (isset($startTerm)) $crits[] = TableDefinition::STUDENT_TABLE_FIELD_START_TERM . " LIKE :startTerm";
 
         if (!empty($crits))

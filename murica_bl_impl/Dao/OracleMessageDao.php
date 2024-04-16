@@ -58,7 +58,7 @@ class OracleMessageDao implements IMessageDao {
             !oci_bind_by_name($stmt, ':subject', $subject, -1) ||
             !oci_bind_by_name($stmt, ':content', $content, -1) ||
             !oci_bind_by_name($stmt, ':date', $date, -1))
-                throw new DataAccessException(json_encode(oci_error($stmt)));
+            throw new DataAccessException(json_encode(oci_error($stmt)));
 
         if (!oci_execute($stmt))
             throw new DataAccessException(json_encode(oci_error($stmt)));
@@ -136,11 +136,14 @@ class OracleMessageDao implements IMessageDao {
                        TableDefinition::USER_TABLE_FIELD_ID,
                        TableDefinition::MESSAGE_TABLE_FIELD_USER_ID);
 
-        $subject = $model->getSubject();
-        $content = $model->getContent();
+        $user = $model->getUser();
+        $date = $model->getDateTime();
 
-        if (isset($subject)) $crits[] = TableDefinition::MESSAGE_TABLE_FIELD_SUBJECT . " LIKE :subject";
-        if (isset($content)) $crits[] = TableDefinition::MESSAGE_TABLE_FIELD_CONTENT . " LIKE :content";
+        if (isset($user) && $user->getId() !== null) {
+            $crits[] = TableDefinition::MESSAGE_TABLE_FIELD_USER_ID . " LIKE :userId";
+            $userId = $user->getId();
+        }
+        if (isset($date)) $crits[] = TableDefinition::MESSAGE_TABLE_FIELD_DATE . " LIKE :date";
 
         if (!empty($crits))
             $sql .= " AND " . implode(" AND ", $crits);
@@ -148,10 +151,10 @@ class OracleMessageDao implements IMessageDao {
         if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
-        if (isset($subject) && !oci_bind_by_name($stmt, ':subject', $subject, -1))
-            throw new DataAccessException('bind subject ' . json_encode(oci_error($stmt)));
-        if (isset($content) && !oci_bind_by_name($stmt, ':content', $content, -1))
-            throw new DataAccessException('content subject ' . json_encode(oci_error($stmt)));
+        if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
+            throw new DataAccessException('bind userId ' . json_encode(oci_error($stmt)));
+        if (isset($date) && !oci_bind_by_name($stmt, ':date', $date, -1))
+            throw new DataAccessException('content date ' . json_encode(oci_error($stmt)));
 
         if (!oci_execute($stmt, OCI_DEFAULT))
             throw new DataAccessException(json_encode(oci_error($stmt)));

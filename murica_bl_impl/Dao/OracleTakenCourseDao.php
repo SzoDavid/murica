@@ -67,7 +67,7 @@ class OracleTakenCourseDao implements ITakenCourseDao {
             !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1) ||
             !oci_bind_by_name($stmt, ':grade', $grade, -1) ||
             !oci_bind_by_name($stmt, ':approved', $approved, -1))
-                throw new DataAccessException(json_encode(oci_error($stmt)));
+            throw new DataAccessException(json_encode(oci_error($stmt)));
 
         if (!oci_execute($stmt))
             throw new DataAccessException(json_encode(oci_error($stmt)));
@@ -147,7 +147,7 @@ class OracleTakenCourseDao implements ITakenCourseDao {
             !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1) ||
             !oci_bind_by_name($stmt, ':courseId', $courseId, -1) ||
             !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-                throw new DataAccessException(json_encode(oci_error($stmt)));
+            throw new DataAccessException(json_encode(oci_error($stmt)));
 
         if (!oci_execute($stmt))
             throw new DataAccessException(json_encode(oci_error($stmt)));
@@ -355,11 +355,11 @@ class OracleTakenCourseDao implements ITakenCourseDao {
         if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
             throw new DataAccessException('parse ' . json_encode(oci_error($stmt)));
 
-        if (isset($user) && isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
+        if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
             throw new DataAccessException('bind user id ' . json_encode(oci_error($stmt)));
-        if (isset($course) && isset($courseId) && !oci_bind_by_name($stmt, ':courseId', $courseId, -1))
+        if (isset($courseId) && !oci_bind_by_name($stmt, ':courseId', $courseId, -1))
             throw new DataAccessException('bind course id ' . json_encode(oci_error($stmt)));
-        if (isset($course) && isset($subjectId) && !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
+        if (isset($subjectId) && !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
             throw new DataAccessException('bind subject id ' . json_encode(oci_error($stmt)));
 
         if (!oci_execute($stmt, OCI_DEFAULT))
