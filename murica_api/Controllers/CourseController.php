@@ -58,7 +58,7 @@ class CourseController extends Controller {
         $this->router->registerController($this, 'course')
             ->registerEndpoint('allCourses', 'all', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getCourseByIdAndSubjectId', '', EndpointRoute::VISIBILITY_PRIVATE)
-            ->registerEndpoint('getCourseByTeacher', '', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getCourseByTeacher', 'byTeacher', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('createCourse', 'new', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('updateCourse', 'update', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('deleteCourse', 'delete', EndpointRoute::VISIBILITY_PRIVATE)
@@ -130,15 +130,15 @@ class CourseController extends Controller {
 
     public function getCourseByTeacher(string $uri, array $requestData): IModel {
         /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
+        $user = $requestData['token']->getUser();
 
         try {
             $teachCourses = $this->courseTeachDao->findByCrit((new CourseTeach($user)));
             $coursesEntities = [];
 
             /* @var $teachCourse ICourseTeach */
-            foreach ($teachCourses as $teachCours) {
-                $coursesEntities[] = (new EntityModel($this->router, $teachCours, true))
+            foreach ($teachCourses as $teachCourse) {
+                $coursesEntities[] = (new EntityModel($this->router, $teachCourse, true))
                     ->withSelfRef(CourseController::class, 'getCourseByTeacher');
             }
 
