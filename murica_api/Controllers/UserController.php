@@ -90,18 +90,22 @@ class UserController extends Controller {
      * Id must be part of the uri. User must have admin role, to access.
      */
     public function getUserById(string $uri, array $requestData): IModel {
-        try {
-            if (!$this->checkIfAdmin($requestData, $this->adminDao))
-                return new ErrorModel($this->router, 403, 'Failed to query user', 'Access is forbidden');
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query user', $e->getTraceMessages());
-        }
-
         if (empty($uri)) {
             return new ErrorModel($this->router,
                                   400,
                                   'Failed to query user',
                                   'Parameter "id" is not provided in uri');
+        }
+
+        try {
+            /* @var $user IUser */
+            $user = $requestData['token']->getUser();
+
+            if (!$this->checkIfAdmin($requestData, $this->adminDao) &&
+                $this->userDao->findByCrit(new User($uri))[0]->getId() !== $user->getId())
+                return new ErrorModel($this->router, 403, 'Failed to query user', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to query user', $e->getTraceMessages());
         }
 
         try {
