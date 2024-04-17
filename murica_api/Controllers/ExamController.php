@@ -173,7 +173,7 @@ class ExamController extends Controller {
             }
 
             return (new CollectionModel($this->router, $examsEntities, 'exams', true))
-                ->withSelfRef(CourseController::class, 'getExamsByTeacher');
+                ->withSelfRef(ExamController::class, 'getExamsByTeacher');
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to query exams', $e->getTraceMessages());
         }

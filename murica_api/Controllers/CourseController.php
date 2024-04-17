@@ -12,6 +12,7 @@ use murica_bl\Dao\ISubjectDao;
 use murica_bl\Dao\ITakenCourseDao;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\Exceptions\ValidationException;
+use murica_bl\Dto\ICourseTeach;
 use murica_bl\Dto\IUser;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
@@ -57,6 +58,7 @@ class CourseController extends Controller {
         $this->router->registerController($this, 'course')
             ->registerEndpoint('allCourses', 'all', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getCourseByIdAndSubjectId', '', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getCourseByTeacher', '', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('createCourse', 'new', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('updateCourse', 'update', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('deleteCourse', 'delete', EndpointRoute::VISIBILITY_PRIVATE)
@@ -123,6 +125,27 @@ class CourseController extends Controller {
                                   500,
                                   'Failed to query course',
                                   $e->getTraceMessages());
+        }
+    }
+
+    public function getCourseByTeacher(string $uri, array $requestData): IModel {
+        /* @var $user IUser */
+        $user = $this->$requestData['token']->getUser();
+
+        try {
+            $teachCourses = $this->courseTeachDao->findByCrit((new CourseTeach($user)));
+            $coursesEntities = [];
+
+            /* @var $teachCourse ICourseTeach */
+            foreach ($teachCourses as $teachCours) {
+                $coursesEntities[] = (new EntityModel($this->router, $teachCours, true))
+                    ->withSelfRef(CourseController::class, 'getCourseByTeacher');
+            }
+
+            return (new CollectionModel($this->router, $coursesEntities, 'courses', true))
+                ->withSelfRef(CourseController::class, 'getCourseByTeacher');
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to query courses', $e->getTraceMessages());
         }
     }
 
