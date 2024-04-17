@@ -57,3 +57,13 @@ main {
 .error {
     color: red;
 }
+
+/* A select elem testreszabása */
+#navbar-role-select {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: white;
+    font-size: 16px;
+    margin-top: 8px;
+}
