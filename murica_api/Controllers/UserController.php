@@ -4,12 +4,17 @@ namespace murica_api\Controllers;
 
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IAdminDao;
+use murica_bl\Dao\ICourseTeachDao;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\Exceptions\ValidationException;
+use murica_bl\Dto\ICourseTeach;
 use murica_bl\Dto\IUser;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
 use murica_bl\Router\IRouter;
+use murica_bl_impl\Dto\Course;
+use murica_bl_impl\Dto\CourseTeach;
+use murica_bl_impl\Dto\Subject;
 use murica_bl_impl\Dto\User;
 use murica_bl_impl\Models\CollectionModel;
 use murica_bl_impl\Models\EntityModel;
@@ -21,13 +26,15 @@ class UserController extends Controller {
     //region Properties
     private IUserDao $userDao;
     private IAdminDao $adminDao;
+    private ICourseTeachDao $courseTeachDao;
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router, IUserDao $userDao, IAdminDao $adminDao) {
+    public function __construct(IRouter $router, IUserDao $userDao, IAdminDao $adminDao, ICourseTeachDao $courseTeachDao) {
         parent::__construct($router);
         $this->userDao = $userDao;
         $this->adminDao = $adminDao;
+        $this->courseTeachDao = $courseTeachDao;
 
         $this->router->registerController($this, 'user')
             ->registerEndpoint('allUsers', 'all', EndpointRoute::VISIBILITY_PRIVATE)
@@ -119,7 +126,7 @@ class UserController extends Controller {
         }
     }
 
-    public function getTeacherByCourse(string $uri, array $requestData): IModel {
+    public function getTeachersByCourse(string $uri, array $requestData): IModel {
         try {
             if (!$this->checkIfAdmin($requestData, $this->adminDao))
                 return new ErrorModel($this->router, 403, 'Failed to query teachers', 'Access is forbidden');
@@ -127,24 +134,24 @@ class UserController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to query teachers', $e->getTraceMessages());
         }
 
+        if (!isset($requestData['subjectId']))
+            return new ErrorModel($this->router, 400, 'Failed to query teachers', 'Parameter "subjectId" is not provided');
+        if (!isset($requestData['courseId']))
+            return new ErrorModel($this->router, 400, 'Failed to query teachers', 'Parameter "courseId" is not provided');
+
         try {
-            $users = $this->userDao->findAll();
+            $teachers = $this->courseTeachDao->findByCrit((new CourseTeach())->setCourse(new Course(new Subject($requestData['subjectId']), $requestData['courseId'])));
 
             $userEntities = array();
 
-            /* @var $user User */
-            foreach ($users as $user) {
-                $userEntities[] = (new EntityModel($this->router, $user, true))
-                    ->linkTo('roles', RoleController::class, 'allRoles', [$user->getId()])
-                    ->linkTo('allUsers', UserController::class, 'allUsers')
-                    ->linkTo('delete', UserController::class, 'deleteUser')
-                    ->linkTo('update', UserController::class, 'updateUser')
-                    ->withSelfRef(UserController::class, 'getUserById', [$user->getId()]);
+            /* @var $teacher ICourseTeach */
+            foreach ($teachers as $teacher) {
+                $userEntities[] = (new EntityModel($this->router, $teacher->getUser(), true))
+                    ->withSelfRef(UserController::class, 'getUserById', [$teacher->getUser()->getId()]);
             }
 
-            return (new CollectionModel($this->router, $userEntities, 'users', true))
-                ->linkTo('createUser', UserController::class, 'createUser')
-                ->withSelfRef(UserController::class, 'allUsers');
+            return (new CollectionModel($this->router, $userEntities, 'teachers', true))
+                ->withSelfRef(UserController::class, 'getTeachersByCourse');
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
                                   500,

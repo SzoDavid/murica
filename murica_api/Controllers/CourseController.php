@@ -116,6 +116,7 @@ class CourseController extends Controller {
                     ->linkTo('allCourses', CourseController::class, 'allCourses')
                     ->linkTo('delete', CourseController::class, 'deleteCourse')
                     ->linkTo('update', CourseController::class, 'updateCourse')
+                    ->linkTo('teachers', UserController::class, 'getTeachersByCourse')
                     ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $course->getId(), 'subjectId' => $course->getSubject()->getId()]);
             }
 

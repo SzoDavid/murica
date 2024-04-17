@@ -198,6 +198,7 @@ function buildCourses(contentElement, container, record) {
         if (!response._success) {
             console.error(response.error);
             alert('Something unexpected happened. Please try again later!');
+            return;
         }
 
         bindClickListener(newCourseButton, () => { saveNewCourse(record, contentElement, response._links.add.href) })
@@ -345,7 +346,11 @@ function buildTeachers(contentElement, container, record) {
     const assignTeacherButton = new Button('Assign teacher', ).build()
     container.append(assignTeacherButton);
 
-    requestInvoker.executePost(record._links.courses.href, { token: tokenObj.token }).then((response) => {
+    requestInvoker.executePost(record._links.teachers.href, {
+        token: tokenObj.token,
+        subjectId: record.subject.id,
+        courseId: record.id
+    }).then((response) => {
         if (!response._success) {
             console.error(response.error);
             alert('Something unexpected happened. Please try again later!');
@@ -360,7 +365,7 @@ function buildTeachers(contentElement, container, record) {
             term: 'Term',
         };
 
-        const subjectsTable= new DropDownTable(tableColumns, response._embedded.courses,
+        const subjectsTable= new DropDownTable(tableColumns, response._embedded.teachers,
             (courseRecord) => { return courseDetails(courseRecord, contentElement) }).build();
         container.append(subjectsTable);
     });

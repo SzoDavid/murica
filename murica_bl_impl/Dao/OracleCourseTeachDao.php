@@ -220,12 +220,12 @@ class OracleCourseTeachDao implements ICourseTeachDao {
         $course = $model->getCourse();
 
         if (isset($user) && $user->getId() !== null) {
-            $crits[] = TableDefinition::COURSETEACH_TABLE_FIELD_USER_ID . " LIKE :userId";
+            $crits[] = 'CRSTCH.' . TableDefinition::COURSETEACH_TABLE_FIELD_USER_ID . " LIKE :userId";
             $userId = $user->getId();
         }
         if (isset($course) && $course->getId() !== null && $course->getSubject() !== null && $course->getSubject()->getId() !== null) {
-            $crits[] = TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID . " LIKE :courseId";
-            $crits[] = TableDefinition::COURSETEACH_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
+            $crits[] = 'CRSTCH.' . TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID . " = :courseId";
+            $crits[] = 'CRSTCH.' . TableDefinition::COURSETEACH_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
             $courseId = $course->getId();
             $subjectId = $course->getSubject()->getId();
         }
@@ -246,6 +246,7 @@ class OracleCourseTeachDao implements ICourseTeachDao {
         if (!oci_execute($stmt, OCI_DEFAULT))
             throw new DataAccessException('exec ' . json_encode(oci_error($stmt)));
 
+        //TODO: investigate
         while (oci_fetch($stmt)) {
             $res[] = new CourseTeach( new User(
                       oci_result($stmt, 'USER_ID'),
