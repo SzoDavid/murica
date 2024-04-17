@@ -6,6 +6,7 @@ require_once 'autoloader.php';
 
 use Exception;
 use murica_api\Controllers\AuthController;
+use murica_api\Controllers\ExamController;
 use murica_api\Controllers\MessageController;
 use murica_api\Controllers\CourseController;
 use murica_api\Controllers\ProgrammeController;
@@ -44,11 +45,13 @@ try {
     $programmeDao = $dataSource->createProgrammeDao();
     $roomDao = $dataSource->createRoomDao();
     $subjectDao = $dataSource->createSubjectDao();
+    $examDao = $dataSource->createExamDao();
+    $takenExamDao = $dataSource->createTakenExamDao();
+    $adminDao = $dataSource->createAdminDao();
+    $studentDao = $dataSource->createStudentDao();
     $messageDao = $dataSource->createMessageDao();
     $courseDao = $dataSource->createCourseDao();
     $takenCourseDao = $dataSource->createTakenCourseDao();
-    $studentDao = $dataSource->createStudentDao();
-    $adminDao = $dataSource->createAdminDao();
     $courseTeachDao = $dataSource->createCourseTeachDao();
 
     $tokenService = new DataSourceTokenService($dataSource->createTokenDao());
@@ -56,10 +59,11 @@ try {
     $router = new Router($configService, $tokenService);
 
     $authController = new AuthController($router, $userDao, $tokenService);
-    $userController = new UserController($router, $userDao, $adminDao);
-    $programmeController = new ProgrammeController($router, $programmeDao, $adminDao);
-    $roomController = new RoomController($router, $roomDao, $adminDao);
-    $subjectController = new SubjectController($router, $subjectDao, $adminDao);
+    $userController = new UserController($router, $userDao);
+    $programmeController = new ProgrammeController($router, $programmeDao);
+    $roomController = new RoomController($router, $roomDao);
+    $subjectController = new SubjectController($router, $subjectDao);
+    $examController = new ExamController($router, $examDao, $subjectDao, $roomDao, $takenExamDao, $studentDao, $adminDao,$userDao);
     $messageController = new MessageController($router, $messageDao);
     $roleController = new RoleController($router, $userDao, $adminDao, $studentDao, $programmeDao, $courseTeachDao);
     $courseController = new CourseController($router, $courseDao, $subjectDao, $roomDao, $takenCourseDao, $studentDao, $adminDao, $courseTeachDao, $userDao);

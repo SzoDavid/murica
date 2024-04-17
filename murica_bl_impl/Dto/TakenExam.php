@@ -71,7 +71,13 @@ class TakenExam extends Entity implements ITakenExam {
     public function jsonSerialize(): array {
         return [
             'student' => $this->student->jsonSerialize(),
-            'exam' => $this->exam->jsonSerialize()
+            'exam' => $this->exam->jsonSerialize(),
+            'subjectId' => $this->exam->getSubject()->getId(),
+            'subjectName' => $this->exam->getSubject()->getName(),
+            'examId' => $this->exam->getId(),
+            'startTime' => $this->exam->getStartTime(),
+            'endTime' => $this->exam->getEndTime(),
+            'roomId' => $this->exam->getRoom()->getId()
         ];
     }
     //endregion
