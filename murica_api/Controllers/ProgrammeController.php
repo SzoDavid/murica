@@ -23,7 +23,7 @@ class ProgrammeController extends Controller {
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router, IProgrammeDao $programmeDao, $adminDao) {
+    public function __construct(IRouter $router, IProgrammeDao $programmeDao, IAdminDao $adminDao) {
         parent::__construct($router);
         $this->programmeDao = $programmeDao;
         $this->adminDao = $adminDao;

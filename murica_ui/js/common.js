@@ -1,3 +1,68 @@
+const init = (requestInvoker, context) => {
+    let tokenObj = JSON.parse(localStorage.getItem('token'));
+
+    if (!tokenObj || new Date(tokenObj.expires_at) < new Date()) {
+        window.location.href = 'login.php';
+    }
+
+    $('#navbar-username').text(tokenObj.user.name);
+
+    requestInvoker.executePost(tokenObj._links.roles.href, { token: tokenObj.token }).then((response) => {
+        if (!response._success) alert('Something unexpected happened. Please try again later!');
+
+        if (response.isAdmin) {
+            $('#navbar-role-select').append($('<option>')
+                .attr({id: 'navbar-role-admin', selected: context === 'admin'})
+                .text('Administrator'));
+
+            bindClickListener($('#navbar-role-admin'), () => {
+                window.location.href = 'admin.php';
+            });
+        }
+
+        if (response.isTeacher) {
+            $('#navbar-role-select').append($('<option>')
+                .attr({id: 'navbar-role-teacher', selected: context === 'teacher'})
+                .text('Teacher'));
+
+            bindClickListener($('#navbar-role-teacher'), () => {
+                window.location.href = 'teacher.php';
+            });
+        }
+
+        $.each(response.student, (index, value) => {
+            let studentObj = JSON.parse(localStorage.getItem('studentVals'))
+            const selected = context === 'student' && studentObj
+                && studentObj.programme.name === value.programme.name
+                && studentObj.programme.type === value.programme.type;
+
+            const option = $('<option>')
+                .attr({ id: 'navbar-role-student-' + index, selected: selected})
+                .text(value.programme.name + '/' + value.programme.type + '/' + value.startTerm);
+
+            $('#navbar-role-select').append(option);
+
+            bindClickListener(option, () => {
+                localStorage.setItem('studentVals', JSON.stringify(value));
+                window.location.href = 'student.php';
+            })
+        });
+    });
+
+    bindClickListener($('#navbar-logo'), () => {
+        window.location.href = 'index.php';
+    });
+
+    bindClickListener($('#navbar-logout'), () => {
+        requestInvoker.executePost(tokenObj._links.logout.href, { token: tokenObj.token}).then(() => {
+            localStorage.removeItem('token');
+            window.location.href = 'login.php';
+        });
+    });
+
+    return tokenObj;
+}
+
 const bindClickListener = (observer, event, unbindOtherListeners = true) => {
     if (unbindOtherListeners) {
         $(observer).off();
@@ -12,7 +77,7 @@ const string2html = (string) => {
     return string.replace(/&/g, '&amp;')
                  .replace(/>/g, '&gt;')
                  .replace(/</g, '&lt;')
-                 .replace(/\\n/g, '<br>');
+                 .replace(/\n/g, '<br>');
 }
 
 class Button {

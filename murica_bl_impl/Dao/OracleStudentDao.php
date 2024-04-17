@@ -45,9 +45,14 @@ class OracleStudentDao implements IStudentDao {
         if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
-        if (!oci_bind_by_name($stmt, ':userId', $IUser, -1) ||
-            !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1) ||
-            !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1) ||
+        $id = $model->getUser()->getId();
+        $name = $model->getProgramme()->getName();
+        $type = $model->getProgramme()->getType();
+        $startTerm = $model->getStartTerm();
+
+        if (!oci_bind_by_name($stmt, ':userId', $id, -1) ||
+            !oci_bind_by_name($stmt, ':programmeName', $name, -1) ||
+            !oci_bind_by_name($stmt, ':programmeType', $type, -1) ||
             !oci_bind_by_name($stmt, ':startTerm', $startTerm, -1))
             throw new DataAccessException(json_encode(oci_error($stmt)));
 

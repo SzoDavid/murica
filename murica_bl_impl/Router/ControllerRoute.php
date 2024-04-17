@@ -64,7 +64,7 @@ class ControllerRoute implements IControllerRoute {
             }
         }
 
-        return $this->controller->$endpoint($uri, $requestData);
+        return $this->controller->$endpoint(implode('/', $uriElements), $requestData);
     }
 
     #[Override]

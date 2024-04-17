@@ -6,6 +6,7 @@ use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IAdminDao;
 use murica_bl\Dao\ISubjectDao;
 use murica_bl\Dto\Exceptions\ValidationException;
+use murica_bl\Dto\ISubject;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
 use murica_bl\Router\IRouter;
@@ -48,9 +49,11 @@ class SubjectController extends Controller {
 
             $subjectEntities = array();
 
+            /* @var $subject ISubject */
             foreach ($subjects as $subject) {
                 $subjectEntities[] = (new EntityModel($this->router, $subject, true))
                     ->linkTo('allSubjects', SubjectController::class, 'allSubjects')
+                    ->linkTo('courses', CourseController::class, 'getCoursesBySubject', [$subject->getId()])
                     ->linkTo('delete', SubjectController::class, 'deleteSubject')
                     ->linkTo('update', SubjectController::class, 'updateSubject')
                     ->withSelfRef(SubjectController::class, 'getSubjectById', [$subject->getId()]);
@@ -72,12 +75,8 @@ class SubjectController extends Controller {
      * Id must be part of the uri.
      */
     public function getSubjectById(string $uri, array $requestData): IModel {
-        if (empty($uri)) {
-            return new ErrorModel($this->router,
-                                  400,
-                                  'Failed to query subject',
-                                  'Parameter "id" is not provided in uri');
-        }
+        if (empty($uri))
+            return new ErrorModel($this->router, 400, 'Failed to query subject', 'Parameter "id" is not provided in uri');
 
         try {
             $subjects = $this->subjectDao->findByCrit(new Subject($uri));
