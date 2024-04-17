@@ -62,10 +62,11 @@ class OracleCourseDao implements ICourseDao {
             !oci_bind_by_name($stmt, ':roomId', $roomId, -1))
                 throw new DataAccessException(json_encode(oci_error($stmt)));
 
-        if (!oci_execute($stmt))
+        if (!oci_execute($stmt, OCI_COMMIT_ON_SUCCESS))
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
-        return $this->findByCrit(new Course($model->getId()))[0];
+        // TODO: figure out why this throws an error
+        return $this->findByCrit(new Course($model->getSubject(), $model->getId()))[0];
     }
 
     /**
@@ -228,14 +229,14 @@ class OracleCourseDao implements ICourseDao {
         $room = $model->getRoom();
 
         if (isset($subject) && $subject->getId() !== null) {
-            $crits[] = TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
+            $crits[] = 'CRS.' . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
             $subjectId = $subject->getId();
         }
-        if (isset($id)) $crits[] = TableDefinition::COURSE_TABLE_FIELD_ID . " LIKE :id";
+        if (isset($id)) $crits[] = 'CRS.' . TableDefinition::COURSE_TABLE_FIELD_ID . " = :id";
         if (isset($schedule)) $crits[] = TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . " LIKE :schedule";
         if (isset($term)) $crits[] = TableDefinition::COURSE_TABLE_FIELD_TERM . " LIKE :term";
         if (isset($room) && $room->getId() !== null) {
-            $crits[] = TableDefinition::COURSE_TABLE_FIELD_ROOM_ID . " LIKE :roomId";
+            $crits[] = 'ROOM.' . TableDefinition::COURSE_TABLE_FIELD_ROOM_ID . " LIKE :roomId";
             $roomId = $room->getId();
         }
 

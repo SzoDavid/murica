@@ -3,6 +3,7 @@
 namespace murica_bl_impl\Dto;
 
 use murica_bl\Dto\IRole;
+use murica_bl\Dto\IStudent;
 use murica_bl_impl\Models\Entity;
 use Override;
 
@@ -68,10 +69,23 @@ class Role extends Entity implements IRole {
      * @inheritDoc
      */
     public function jsonSerialize(): array {
+        $studentEntities = array();
+
+        /* @var $student IStudent */
+        foreach ($this->students as $student) {
+            $studentEntities[] = [
+                'user' => $student->getUser()->jsonSerialize(),
+                'programme' => $student->getProgramme()->jsonSerialize(),
+                'startTerm' => $student->getStartTerm(),
+                'name' => $student->getProgramme()->getName(),
+                'type' => $student->getProgramme()->getType()
+            ];
+        }
+
         return [
             'isAdmin' => $this->adminRole,
             'isTeacher' => $this->teacherRole,
-            'student' => $this->students
+            'student' => $studentEntities
         ];
     }
     //endregion

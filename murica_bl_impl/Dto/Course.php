@@ -103,12 +103,15 @@ class Course extends Entity implements ICourse {
     public function validate(): bool {
         $errors = "";
         // TODO refactor validation to return false if no issues was found or a string with all the issues
-        if (empty($this->subject) || $this->subject->validate()) $errors .= "\nSubject cannot be empty or subject is invalid!";
+        $this->subject->validate();
+        $this->room->validate();
+
+        if (empty($this->subject)) $errors .= "\nSubject cannot be empty!";
         if (empty($this->id) || strlen($this->id) > 6) $errors .= "\nID cannot be empty or longer than 6 characters!";
         if (empty($this->capacity) || $this->capacity > 999 || $this->capacity < 1) $errors .= "\nCapacity cannot be empty or bigger than 999!";
         if (empty($this->schedule) || !preg_match('/^[1-7]-([01]?[0-9]|2[0-3]):([0-5]?[0-9])-([01]?[0-9]|2[0-3]):([0-5]?[0-9])$/', $this->schedule)) $errors .= "\nSchedule cannot be empty or invalid format!";
         if (empty($this->term) || !preg_match('/^\d{4}\/\d{2}\/\d{1}$/', $this->term)) $errors .= "\nTerm is invalid!";
-        if (empty($this->room) || $this->room->validate()) $errors .= "\nRoom is invalid!";
+        if (empty($this->room)) $errors .= "\nRoom is invalid!";
 
         if (!empty($errors)) throw new ValidationException(ltrim($errors, "\n"));
 

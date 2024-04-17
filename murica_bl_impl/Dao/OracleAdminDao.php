@@ -47,6 +47,7 @@ class OracleAdminDao implements IAdminDao {
             if (!oci_execute($stmt))
                 throw new DataAccessException(json_encode(oci_error($stmt)));
 
+        //TODO: investigate
         return $this->findByCrit($model)[0];
     }
 

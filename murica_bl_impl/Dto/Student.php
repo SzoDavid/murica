@@ -64,8 +64,8 @@ class Student extends Entity implements IStudent {
     public function validate(): bool {
         $errors = "";
         // TODO refactor validation to return false if no issues was found or a string with all the issues
-        if (empty($this->user) || $this->user->validate()) $errors .= "\nID cannot be empty or user is invalid!";
-        if (empty($this->programme) || $this->programme->validate()) $errors .= "\nProgramme is empty or invalid!";
+        if (empty($this->user) || !$this->user->validate()) $errors .= "\nID cannot be empty or user is invalid!";
+        if (empty($this->programme) || !$this->programme->validate()) $errors .= "\nProgramme is empty or invalid!";
         if (empty($this->startTerm) || !preg_match('/^\d{4}\/\d{2}\/\d{1}$/', $this->startTerm)) $errors .= "\nStart-term is invalid!";
 
         if (!empty($errors)) throw new ValidationException(ltrim($errors, "\n"));

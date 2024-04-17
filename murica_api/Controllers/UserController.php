@@ -32,6 +32,7 @@ class UserController extends Controller {
         $this->router->registerController($this, 'user')
             ->registerEndpoint('allUsers', 'all', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getUserById', '', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getTeachersByCourse', 'teachers', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('createUser', 'new', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('updateUser', 'update', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('deleteUser', 'delete', EndpointRoute::VISIBILITY_PRIVATE);
@@ -59,6 +60,7 @@ class UserController extends Controller {
             /* @var $user User */
             foreach ($users as $user) {
                 $userEntities[] = (new EntityModel($this->router, $user, true))
+                    ->linkTo('roles', RoleController::class, 'allRoles', [$user->getId()])
                     ->linkTo('allUsers', UserController::class, 'allUsers')
                     ->linkTo('delete', UserController::class, 'deleteUser')
                     ->linkTo('update', UserController::class, 'updateUser')
@@ -117,6 +119,40 @@ class UserController extends Controller {
         }
     }
 
+    public function getTeacherByCourse(string $uri, array $requestData): IModel {
+        try {
+            if (!$this->checkIfAdmin($requestData, $this->adminDao))
+                return new ErrorModel($this->router, 403, 'Failed to query teachers', 'Access is forbidden');
+        } catch (DataAccessException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to query teachers', $e->getTraceMessages());
+        }
+
+        try {
+            $users = $this->userDao->findAll();
+
+            $userEntities = array();
+
+            /* @var $user User */
+            foreach ($users as $user) {
+                $userEntities[] = (new EntityModel($this->router, $user, true))
+                    ->linkTo('roles', RoleController::class, 'allRoles', [$user->getId()])
+                    ->linkTo('allUsers', UserController::class, 'allUsers')
+                    ->linkTo('delete', UserController::class, 'deleteUser')
+                    ->linkTo('update', UserController::class, 'updateUser')
+                    ->withSelfRef(UserController::class, 'getUserById', [$user->getId()]);
+            }
+
+            return (new CollectionModel($this->router, $userEntities, 'users', true))
+                ->linkTo('createUser', UserController::class, 'createUser')
+                ->withSelfRef(UserController::class, 'allUsers');
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router,
+                                  500,
+                                  'Failed to query users',
+                                  $e->getTraceMessages());
+        }
+    }
+
     /**
      * Returns with the user created with the given values.
      * Parameters are expected as part of request data.
@@ -159,7 +195,7 @@ class UserController extends Controller {
     public function updateUser(string $uri, array $requestData): IModel {
         try {
             /* @var $user IUser */
-            $user = $this->$requestData['token']->getUser();
+            $user = $requestData['token']->getUser();
 
             if (!$this->checkIfAdmin($requestData, $this->adminDao) &&
                 $this->userDao->findByCrit(new User($requestData['id']))[0]->getId() !== $user->getId())

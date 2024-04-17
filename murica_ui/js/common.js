@@ -77,7 +77,7 @@ const string2html = (string) => {
     return string.replace(/&/g, '&amp;')
                  .replace(/>/g, '&gt;')
                  .replace(/</g, '&lt;')
-                 .replace(/\\n/g, '<br>');
+                 .replace(/\n/g, '<br>');
 }
 
 class Button {

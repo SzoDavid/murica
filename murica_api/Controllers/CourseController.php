@@ -114,10 +114,13 @@ class CourseController extends Controller {
             foreach ($courses as $course) {
                 $courseEntities[] = (new EntityModel($this->router, $course, true))
                     ->linkTo('allCourses', CourseController::class, 'allCourses')
+                    ->linkTo('delete', CourseController::class, 'deleteCourse')
+                    ->linkTo('update', CourseController::class, 'updateCourse')
                     ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $course->getId(), 'subjectId' => $course->getSubject()->getId()]);
             }
 
             return (new CollectionModel($this->router, $courseEntities, 'courses', true))
+                ->linkTo('add', CourseController::class, 'createCourse')
                 ->withSelfRef(CourseController::class, 'getCoursesBySubject', [$uri]);
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
@@ -211,17 +214,17 @@ class CourseController extends Controller {
         }
 
         if (!isset($requestData['id']))
-            return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "id" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "id" is not provided');
         if (!isset($requestData['subjectId']))
-            return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "subjectId" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "subjectId" is not provided');
         if (!isset($requestData['capacity']))
-            return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "capacity" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "capacity" is not provided');
         if (!isset($requestData['schedule']))
-            return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "schedule" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "schedule" is not provided');
         if (!isset($requestData['term']))
-            return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "term" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "term" is not provided');
         if (!isset($requestData['roomId']))
-            return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "roomId" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to create Course', 'Parameter "roomId" is not provided');
 
         try {
            $subjects =  $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
