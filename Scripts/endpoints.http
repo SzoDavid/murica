@@ -1,0 +1,88 @@
+@token = e2cdf4da-0770-49f5-ab5c-b71901ca87c6
+
+# AuthController
+
+### login
+
+POST https://localhost/murica_api/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+id=G1P52N &
+password=G1P52N
+
+### logout
+
+POST https://localhost/murica_api/auth/logout
+x-api-key: {{token}}
+
+# UserController
+
+### Get all users (valid)
+
+POST https://localhost/murica_api/user/all
+x-api-key: {{token}}
+
+### Get all users (unaunthicated)
+
+GET https://localhost/murica_api/user/all
+
+### Get user by id (valid)
+
+POST https://localhost/murica_api/user/ADMIN1
+x-api-key: {{token}}
+
+### Get user by id (unaunthicated)
+
+GET https://localhost/murica_api/user/ADMIN1
+
+### Get user by id (invalid id)
+
+POST https://localhost/murica_api/user/ADMIN
+x-api-key: {{token}}
+
+### Get user by id (invalid request)
+
+POST https://localhost/murica_api/user?id=ADMIN1
+x-api-key: {{token}}
+
+### Create user (valid)
+
+POST https://localhost/murica_api/user/new
+Content-Type: application/x-www-form-urlencoded
+
+id=G1P52N&name=Gipsz%20Odon&email=gipsz.odon%40murica.com&password=G1P52N&birth_date=2003-03-22
+
+### Create user (no id)
+
+POST https://localhost/murica_api/user/new
+Content-Type: application/x-www-form-urlencoded
+
+name=Gipsz%20Odon&email=gipsz.odon%40murica.com&password=G1P52N&birth_date=2003-03-22
+
+### Create user (no name)
+
+POST https://localhost/murica_api/user/new
+Content-Type: application/x-www-form-urlencoded
+
+id=G1P52N&email=gipsz.odon%40murica.com&password=G1P52N&birth_date=2003-03-22
+
+### Create user (no email)
+
+POST https://localhost/murica_api/user/new
+Content-Type: application/x-www-form-urlencoded
+
+id=G1P52N&name=Gipsz%20Odon&password=G1P52N&birth_date=2003-03-22
+
+### Create user (no password)
+
+POST https://localhost/murica_api/user/new
+Content-Type: application/x-www-form-urlencoded
+
+id=G1P52N&name=Gipsz%20Odon&email=gipsz.odon%40murica.com&birth_date=2003-03-22
+
+### Create user (no birth date)
+
+POST https://localhost/murica_api/user/new
+Content-Type: application/x-www-form-urlencoded
+
+id=G1P52N&name=Gipsz%20Odon&email=gipsz.odon%40murica.com&password=G1P52N

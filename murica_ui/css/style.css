@@ -1,0 +1,68 @@
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.dropDownRow {
+    cursor: pointer;
+}
+
+.dropDownRow:hover {
+    background-color: aliceblue;
+}
+
+.dropDownRow > td:first-child::before {
+    content: '▶';
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.dropDownRow.open {
+    background: rgb(0,234,255);
+    background: linear-gradient(45deg, rgba(0,234,255,1) 0%, rgba(183,249,255,1) 100%);
+}
+
+.dropDownRow.open > td:first-child::before {
+    content: '▼';
+}
+
+.dropDownContainer {
+    padding: 0;
+}
+
+table, tr, td, th {
+    border: black 1px solid;
+    border-collapse: collapse;
+}
+
+table:not(.editTable) {
+    width: 100%;
+}
+
+.editTable, .editTable tr, .editTable td, .editTable th {
+    border: none;
+}
+
+td, th {
+    padding: 5px;
+}
+
+.hidden {
+    display: none;
+}
+
+main {
+    margin: 75px 50px 50px 50px;
+}
+
+.error {
+    color: red;
+}
+
+#navbar-role-select {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: white;
+    font-size: 16px;
+    margin-top: 8px;
+}
