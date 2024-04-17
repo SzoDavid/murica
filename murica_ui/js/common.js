@@ -16,6 +16,7 @@ const init = (requestInvoker, context) => {
                 .text('Administrator'));
 
             bindClickListener($('#navbar-role-admin'), () => {
+                console.log('asd');
                 window.location.href = 'admin.php';
             });
         }
@@ -26,6 +27,7 @@ const init = (requestInvoker, context) => {
                 .text('Teacher'));
 
             bindClickListener($('#navbar-role-teacher'), () => {
+                console.log('asd');
                 window.location.href = 'teacher.php';
             });
         }

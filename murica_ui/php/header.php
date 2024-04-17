@@ -22,6 +22,7 @@
     ?>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/login.css">
     <link rel="icon" type="image/svg" href="img/svg/murica-square-small.svg">
     <title>MURICA<?php
             echo match ($context) {
@@ -36,16 +37,17 @@
 </head>
 <body>
 <?php
-    switch ($context) {
-        case 'index': ?>
-<nav>
-    <span id="username"></span>
-    <button id="logoutButton">Logout</button>
-    <a href="admin.php">Admin</a>
-    <a href="student.php">Student</a>
-    <a href="teacher.php">Teacher</a>
-</nav>
-<?php
+switch ($context) {
+    case 'index': ?>
+        <nav>
+            <ul id="navbar" class="navbar">
+                <li><img id="navbar-logo" src="/murica_ui/img/svg/murica-square-small.svg" alt="logo"></li>
+                <li style="float:right"><span id="navbar-username"></span></li>
+                <li style="float:right"><span id="navbar-logout">Log out</span></li>
+                <li style="float:right"><select id="navbar-role-select"></select></li>
+            </ul>
+        </nav>
+        <?php
         break;
         case 'admin':?>
 <nav>

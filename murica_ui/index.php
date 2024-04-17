@@ -1,12 +1,13 @@
 <?php
-    $context = 'index';
-    require 'php/header.php'
+$context = 'index';
+require 'php/header.php';
 ?>
 <main>
-    <img src="img/svg/murica-square.svg" alt="murica logo">
-    <h1>Welcome to murica!</h1>
-    <div id="error" class="hidden"></div>
+    <div class="index-container">
+        <img src="img/png/murica-oval-index.png" alt="Murica Logo">
+        <h1 style="text-align: center;">Welcome to Murica!</h1>
+        <div id="error" class="hidden"></div>
+    </div>
 </main>
-<?php
-require 'php/footer.php';
+<?php require 'php/footer.php';
 ?>
