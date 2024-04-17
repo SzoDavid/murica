@@ -13,11 +13,11 @@ body {
 
 .index-container {
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
+    position: fixed;
+    top: 20%;
+    left: 20%;
+    margin-top: -50px;
+    margin-left: -50px;
 }
 
 .login-heading {
