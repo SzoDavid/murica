@@ -372,22 +372,30 @@ INSERT INTO murica_tokens VALUES('2fb15997-1c1c-4d12-aabb-6ee9d2252370', 'A16BQN
 INSERT INTO murica_tokens VALUES('1b98c05a-d630-4a6b-b11e-ea763e907f8a', 'NPM4AC', TO_DATE('2024-06-01 13:30', 'YYYY-MM-DD HH24:MI'));
 INSERT INTO murica_tokens VALUES('affbdc1a-b73d-4a2d-9ab2-45ee40b5c393', 'AX3RW4', TO_DATE('2024-06-01 13:30', 'YYYY-MM-DD HH24:MI'));
 
-CREATE OR REPLACE TRIGGER grade_approval_notification
-AFTER INSERT ON MURICA_TAKEN_COURSE
+CREATE OR REPLACE TRIGGER grade_notification
+AFTER UPDATE ON MURICA_TAKEN_COURSE
 FOR EACH ROW
 DECLARE
     v_grade INT;
     v_approved NUMBER(1);
 BEGIN
     v_grade := :NEW.GRADE;
-    v_approved := :NEW.APPROVED;
+    IF v_grade IS NOT NULL THEN
+            DBMS_OUTPUT.PUT_LINE('Értesítés elküldve a hallgatónak a kurzus jegy beításáról.');
+    END IF;
+END;
+
+
+CREATE OR REPLACE TRIGGER aprooval_notification
+AFTER UPDATE ON MURICA_TAKEN_COURSE
+FOR EACH ROW
+DECLARE
+    v_approved NUMBER(1);
+BEGIN
+    v_approved := :OLD.APPROVED;
 
     IF v_approved = 1 THEN
         DBMS_OUTPUT.PUT_LINE('Értesítés elküldve a hallgatónak a kurzus jóváhagyásáról.');
-    END IF;
-
-    IF v_grade IS NOT NULL THEN
-            DBMS_OUTPUT.PUT_LINE('Értesítés elküldve a hallgatónak a kurzus jegy beításáról.');
     END IF;
 END;
 
