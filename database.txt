@@ -448,6 +448,6 @@ CREATE OR REPLACE FUNCTION calculate_ki(student_id CHAR)
      WHEN NO_DATA_FOUND THEN
          RETURN NULL;
  END;
- /
+
 
 
