@@ -1,3 +1,4 @@
+
 DROP TABLE MURICA_COURSETEACH;
 DROP TABLE MURICA_TAKEN_COURSE;
 DROP TABLE MURICA_TAKEN_EXAM;
@@ -29,8 +30,6 @@ CREATE TABLE MURICA_PROGRAMME
     NO_TERMS INTEGER NOT NULL,
     CONSTRAINT MURICA_PROGRAMME_PK PRIMARY KEY (NAME, TYPE) ENABLE
 );
-
-COMMENT ON COLUMN MURICA_PROGRAMME.TYPE IS 'Bsc/Msc/etc';
 
 CREATE TABLE MURICA_STUDENT
 (
@@ -194,15 +193,15 @@ ALTER TABLE MURICA_TAKEN_EXAM
 
 CREATE TABLE MURICA_TOKENS
 (
-  TOKEN CHAR(36) NOT NULL,
-  USER_ID CHAR(6) NOT NULL,
-  EXPIRES_AT DATE NOT NULL
+    TOKEN CHAR(36) NOT NULL,
+    USER_ID CHAR(6) NOT NULL,
+    EXPIRES_AT DATE NOT NULL
 );
 
 ALTER TABLE MURICA_TOKENS
-ADD CONSTRAINT MURICA_TOKENS_FK1 FOREIGN KEY ( USER_ID )
-REFERENCES MURICA_USER ( ID )
-ON DELETE CASCADE ENABLE;
+    ADD CONSTRAINT MURICA_TOKENS_FK1 FOREIGN KEY ( USER_ID )
+        REFERENCES MURICA_USER ( ID )
+            ON DELETE CASCADE ENABLE;
 
 INSERT INTO murica_user VALUES ('ADMIN1', 'Admin 1', 'admin1@murica.com', '$2y$10$0oorIkBjl7Ba/XGecVsMi.LGDAHma5DbdqTo41GzURmtiddE4l6jK', TO_DATE('2001-01-01', 'YYYY-MM-DD'));
 INSERT INTO murica_user VALUES ('ADMIN2', 'Admin 2', 'admin2@murica.com', '$2y$10$vs/bxUepCzzOgFZgmzCz/ejgiThRqCEAqk7684xJbLboMLTGL/day', TO_DATE('1954-11-08', 'YYYY-MM-DD'));
@@ -372,90 +371,112 @@ INSERT INTO murica_tokens VALUES('2fb15997-1c1c-4d12-aabb-6ee9d2252370', 'A16BQN
 INSERT INTO murica_tokens VALUES('1b98c05a-d630-4a6b-b11e-ea763e907f8a', 'NPM4AC', TO_DATE('2024-06-01 13:30', 'YYYY-MM-DD HH24:MI'));
 INSERT INTO murica_tokens VALUES('affbdc1a-b73d-4a2d-9ab2-45ee40b5c393', 'AX3RW4', TO_DATE('2024-06-01 13:30', 'YYYY-MM-DD HH24:MI'));
 
+CREATE OR REPLACE TRIGGER approval_notification
+    AFTER UPDATE OF APPROVED ON MURICA_TAKEN_COURSE
+    FOR EACH ROW
+DECLARE
+    aNew NUMBER;
+    aOld NUMBER;
+    uOld CHAR(6);
+    sOld CHAR(6);
+    text CLOB;
+BEGIN
+    aNew := :NEW.APPROVED;
+    aOld := :OLD.APPROVED;
+    sOld := :OLD.SUBJECT_ID;
+    uOld := :OLD.USER_ID;
+
+
+    IF aNew = 1 AND aOld != aNew THEN
+        text :='The registration for the subject with code '|| sOld ||' has been approved.';
+        INSERT INTO MURICA_MESSAGE VALUES (CURRENT_TIMESTAMP,text,'Status change', uOld);
+    END IF;
+    IF aNew = 0 AND aOld != aNew THEN
+        text :='The registration for the subject with code '|| sOld ||' has not been approved.';
+        INSERT INTO MURICA_MESSAGE VALUES (CURRENT_TIMESTAMP,text,'Status change', uOld);
+    END IF;
+END;
+
 CREATE OR REPLACE TRIGGER grade_notification
-AFTER UPDATE ON MURICA_TAKEN_COURSE
-FOR EACH ROW
+    AFTER UPDATE OF GRADE ON MURICA_TAKEN_COURSE
+    FOR EACH ROW
 DECLARE
-    v_grade INT;
-    v_approved NUMBER(1);
+    gNew NUMBER;
+    gOld NUMBER;
+    uOld CHAR(6);
+    sOld CHAR(6);
+    text CLOB;
 BEGIN
-    v_grade := :NEW.GRADE;
-    IF v_grade IS NOT NULL THEN
-            DBMS_OUTPUT.PUT_LINE('Értesítés elküldve a hallgatónak a kurzus jegy beításáról.');
+    gNew := :NEW.GRADE;
+    gOld := :OLD.GRADE;
+    uOld := :OLD.USER_ID;
+    sOld := :OLD.SUBJECT_ID;
+
+    IF gNew IS NOT NULL AND gOld != gNew THEN
+        text :='A grade of '|| gNew ||' has been entered for the subject with code '|| sOld ||'.';
+        INSERT INTO MURICA_MESSAGE VALUES (CURRENT_TIMESTAMP,text,'Grade entry', uOld);
     END IF;
 END;
 
-
-CREATE OR REPLACE TRIGGER aprooval_notification
-AFTER UPDATE ON MURICA_TAKEN_COURSE
-FOR EACH ROW
-DECLARE
-    v_approved NUMBER(1);
+CREATE OR REPLACE FUNCTION calculate_ki(student_id CHAR, programmeName CHAR, programmeType CHAR)
+    RETURN NUMBER
+    IS
+    total_credits NUMBER;
+    total_grade_points NUMBER;
+    average_grade NUMBER;
 BEGIN
-    v_approved := :OLD.APPROVED;
+    SELECT SUM(CREDIT) INTO total_credits
+    FROM MURICA_TAKEN_COURSE TC
+             JOIN MURICA_SUBJECT S ON TC.SUBJECT_ID = S.ID
+    WHERE TC.USER_ID = student_id AND TC.PROGRAMME_NAME = programmeName AND TC.PROGRAMME_TYPE = programmeType;
 
-    IF v_approved = 1 THEN
-        DBMS_OUTPUT.PUT_LINE('Értesítés elküldve a hallgatónak a kurzus jóváhagyásáról.');
+    SELECT SUM(CREDIT * TC.GRADE) INTO total_grade_points
+    FROM MURICA_TAKEN_COURSE TC
+             JOIN MURICA_SUBJECT S ON TC.SUBJECT_ID = S.ID
+    WHERE TC.USER_ID = student_id AND TC.PROGRAMME_NAME = programmeName AND TC.PROGRAMME_TYPE = programmeType;
+
+    IF total_credits IS NULL OR total_credits = 0 THEN
+        average_grade := NULL;
+    ELSE
+        average_grade := total_grade_points / total_credits;
     END IF;
+
+    RETURN average_grade;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
 END;
 
-CREATE OR REPLACE FUNCTION calculate_ki(student_id CHAR)
- RETURN NUMBER
- IS
-     total_credits NUMBER;
-     total_grade_points NUMBER;
-     average_grade NUMBER;
- BEGIN
-     SELECT SUM(C.CREDIT) INTO total_credits
-     FROM MURICA_TAKEN_COURSE TC
-     JOIN MURICA_SUBJECT S ON TC.SUBJECT_ID = S.ID
-     WHERE TC.USER_ID = student_id;
+CREATE OR REPLACE FUNCTION calculate_kki(student_id CHAR, programmeName CHAR, programmeType CHAR)
+    RETURN NUMBER
+    IS
 
-     SELECT SUM(C.CREDIT * TC.GRADE) INTO total_grade_points
-     FROM MURICA_TAKEN_COURSE TC
-     JOIN MURICA_SUBJECT S ON TC.SUBJECT_ID = S.ID
-     WHERE TC.USER_ID = student_id;
+    total_grade_points NUMBER;
+    average_grade NUMBER;
+    total_credits NUMBER;
+BEGIN
+    SELECT SUM(CREDIT) INTO total_credits
+    FROM MURICA_TAKEN_COURSE TC
+             JOIN MURICA_SUBJECT S ON TC.SUBJECT_ID = S.ID
+    WHERE TC.USER_ID = student_id AND TC.PROGRAMME_NAME = programmeName AND TC.PROGRAMME_TYPE = programmeType;
 
-     IF total_credits IS NULL OR total_credits = 0 THEN
-         average_grade := NULL;
-     ELSE
-         average_grade := total_grade_points / total_credits;
-     END IF;
+    SELECT SUM(CREDIT * TC.GRADE) INTO total_grade_points
+    FROM MURICA_TAKEN_COURSE TC
+             JOIN MURICA_SUBJECT S ON TC.SUBJECT_ID = S.ID
+    WHERE TC.USER_ID = student_id AND TC.PROGRAMME_NAME = programmeName AND TC.PROGRAMME_TYPE = programmeType;
 
-     RETURN average_grade;
- EXCEPTION
-     WHEN NO_DATA_FOUND THEN
-         RETURN NULL;
- END;
+    IF total_credits IS NULL OR total_credits = 0 THEN
+        average_grade := NULL;
+    ELSE
+        average_grade := total_grade_points / 30;
+    END IF;
 
- CREATE OR REPLACE FUNCTION calculate_kki(student_id CHAR)
- RETURN NUMBER
- IS
+    RETURN average_grade;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
+END;
 
-     total_grade_points NUMBER;
-     average_grade NUMBER;
- BEGIN
-     SELECT SUM(C.CREDIT) INTO total_credits
-     FROM MURICA_TAKEN_COURSE TC
-     JOIN MURICA_SUBJECT S ON TC.SUBJECT_ID = S.ID
-     WHERE TC.USER_ID = student_id;
-
-     SELECT SUM(C.CREDIT * TC.GRADE) INTO total_grade_points
-     FROM MURICA_TAKEN_COURSE TC
-     JOIN MURICA_SUBJECT S ON TC.SUBJECT_ID = S.ID
-     WHERE TC.USER_ID = student_id;
-
-     IF total_credits IS NULL OR total_credits = 0 THEN
-         average_grade := NULL;
-     ELSE
-         average_grade := total_grade_points / 30;
-     END IF;
-
-     RETURN average_grade;
- EXCEPTION
-     WHEN NO_DATA_FOUND THEN
-         RETURN NULL;
- END;
 
 
 
