@@ -116,6 +116,7 @@ class CourseController extends Controller {
             foreach ($courses as $course) {
                 $courseEntities[] = (new EntityModel($this->router, $course, true))
                     ->linkTo('allCourses', CourseController::class, 'allCourses')
+                    ->linkTo('register', CourseController::class, 'registerCourse')
                     ->linkTo('delete', CourseController::class, 'deleteCourse')
                     ->linkTo('update', CourseController::class, 'updateCourse')
                     ->linkTo('teachers', UserController::class, 'getTeachersByCourse')
@@ -175,7 +176,7 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to query taken courses', 'Parameter "programmeType" is not provided in uri');
 
         /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
+        $user = $requestData['token']->getUser();
 
         try {
             $students = $this->studentDao->findByCrit(new Student($user, new Programme($requestData['programmeName'], $requestData['programmeType'])));
@@ -190,6 +191,7 @@ class CourseController extends Controller {
             /* @var $takenCourse ITakenCourse */
             foreach ($takenCourses as $takenCourse) {
                 $takenCourseEntities[] = (new EntityModel($this->router, $takenCourse, true))
+                    ->linkTo('unregister', CourseController::class, 'unregisterCourse')
                     ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], [
                         'id' => $takenCourse->getCourse()->getId(),
                         'subjectId' => $takenCourse->getCourse()->getSubject()->getId()]);
@@ -354,7 +356,7 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to register Course', 'Parameter "programmeType" is not provided in uri');
 
         /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
+        $user = $requestData['token']->getUser();
 
         try {
             $students = $this->studentDao->findByCrit(new Student($user, new Programme($requestData['programmeName'], $requestData['programmeType'])));
@@ -399,7 +401,7 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to unregister Course', 'Parameter "programmeType" is not provided in uri');
 
         /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
+        $user = $requestData['token']->getUser();
 
         try {
             $students = $this->studentDao->findByCrit(new Student($user, new Programme($requestData['programmeName'], $requestData['programmeType'])));

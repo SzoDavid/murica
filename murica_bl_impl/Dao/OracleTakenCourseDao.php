@@ -339,12 +339,12 @@ class OracleTakenCourseDao implements ITakenCourseDao {
         $course = $model->getCourse();
 
         if (isset($user) && $user->getUser() !== null && $user->getUser()->getId() !== null) {
-            $crits[] = TableDefinition::USER_TABLE . "." . TableDefinition::USER_TABLE_FIELD_ID . " LIKE :userId";
+            $crits[] = "USR." . TableDefinition::USER_TABLE_FIELD_ID . " LIKE :userId";
             $userId = $model->getStudent()->getUser()->getId();
         }
         if (isset($course) && $course->getSubject() !== null && $course->getSubject()->getId() !== null) {
-            $crits[] = TableDefinition::COURSE_TABLE . '.' . TableDefinition::COURSE_TABLE_FIELD_ID . " LIKE :courseId AND "
-                . TableDefinition::COURSE_TABLE . '.' . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
+            $crits[] = "CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . " = :courseId AND "
+                . "CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
             $courseId = $course->getId();
             $subjectId = $course->getSubject()->getId();
         }
