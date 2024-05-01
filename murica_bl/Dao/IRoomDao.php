@@ -29,4 +29,8 @@ interface IRoomDao {
      * @throws DataAccessException
      */
     public function findByCrit(IRoom $model): array;
+
+    public function getRoomIdWithMostMathSubjects();
+    public function getRoomIdWithMostInfoSubjects();
+
 }
