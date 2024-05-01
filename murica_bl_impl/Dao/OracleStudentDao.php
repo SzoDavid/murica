@@ -189,6 +189,7 @@ class OracleStudentDao implements IStudentDao {
     /**
      * @inheritDoc
      */
+
     #[Override]
     public function findByCrit(IStudent $model): array {
         $res = array();
@@ -272,6 +273,101 @@ class OracleStudentDao implements IStudentDao {
 
         return $res;
     }
+
+    #[Override]
+    public function countDistinctStudentsInMathematics(): int {
+        $sql = sprintf("SELECT COUNT(DISTINCT s.%s || s.%s || s.%s) AS hallgatok_szama
+                FROM %s.%s s
+                JOIN %s.%s tc ON s.%s = tc.%s
+                JOIN %s.%s c ON tc.%s = c.%s AND tc.%s = c.%s
+                JOIN %s.%s subj ON c.%s = subj.%s
+                WHERE subj.%s = 'Matematika'",
+                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::STUDENT_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::TAKENCOURSE_TABLE,
+                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::COURSE_TABLE,
+                       TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_ID,
+                       TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::SUBJECT_TABLE,
+                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE);
+
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (!oci_execute($stmt))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (oci_fetch($stmt)) {
+            $count = oci_result($stmt, 'MATH');
+        } else {
+            $count = 0; // No results found
+        }
+
+        oci_free_statement($stmt);
+
+        return $count;
+    }
+
+    #[Override]
+    public function countDistinctStudentsInInformatics(): int {
+        $sql = sprintf("SELECT COUNT(DISTINCT s.%s || s.%s || s.%s) AS hallgatok_szama
+                FROM %s.%s s
+                JOIN %s.%s tc ON s.%s = tc.%s
+                JOIN %s.%s c ON tc.%s = c.%s AND tc.%s = c.%s
+                JOIN %s.%s subj ON c.%s = subj.%s
+                WHERE subj.%s = 'Informatics'",
+                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::STUDENT_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::TAKENCOURSE_TABLE,
+                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::COURSE_TABLE,
+                       TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_ID,
+                       TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::SUBJECT_TABLE,
+                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE);
+
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (!oci_execute($stmt))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (oci_fetch($stmt)) {
+            $count = oci_result($stmt, 'INF');
+        } else {
+            $count = 0;
+        }
+
+        oci_free_statement($stmt);
+
+        return $count;
+    }
+
     //endregion
 }
 

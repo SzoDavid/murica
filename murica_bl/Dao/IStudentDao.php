@@ -29,4 +29,12 @@ interface IStudentDao {
      * @throws DataAccessException
      */
     public function findByCrit(IStudent $model): array;
+    /**
+     * @throws DataAccessException
+     */
+    public function countDistinctStudentsInMathematics();
+    /**
+     * @throws DataAccessException
+     */
+    public function countDistinctStudentsInInformatics();
 }
