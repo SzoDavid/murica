@@ -5,12 +5,15 @@ namespace murica_bl_impl\Dao;
 use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IStudentDao;
+use murica_bl\Dto\IMessage;
 use murica_bl\Dto\IStudent;
+use murica_bl\Dto\IUser;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Programme;
 use murica_bl_impl\Dto\Student;
 use murica_bl_impl\Dto\User;
+use murica_bl_impl\Models\MessageModel;
 use Override;
 
 class OracleStudentDao implements IStudentDao {
@@ -273,6 +276,78 @@ class OracleStudentDao implements IStudentDao {
         return $res;
     }
     //endregion
+
+    //region PL/SQL functions
+    public function plsqlCalcKi(IStudent $model): string {
+
+        $sql = "BEGIN :res := calculate_ki(:userId, :programmeName, :programmeType); END;";
+
+        $user = $model->getUser();
+        $programme = $model->getProgramme();
+
+
+        if (isset($user) && $user->getId() !== null) {
+            $userId = $user->getId();
+        }
+        if (isset($programme) && $programme->getName() !== null && $programme->getType() !== null) {
+            $programmeName = $model->getProgramme()->getName();
+            $programmeType = $model->getProgramme()->getType();
+        }
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        oci_bind_by_name($stmt, ':res', $res, 200);
+
+        if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
+            throw new DataAccessException('bind userId ' . json_encode(oci_error($stmt)));
+        if (isset($programmeName) && !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1))
+            throw new DataAccessException('bind programmeName ' . json_encode(oci_error($stmt)));
+        if (isset($programmeType) && !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1))
+            throw new DataAccessException('bind programmeType' . json_encode(oci_error($stmt)));
+
+        if (!oci_execute($stmt, OCI_DEFAULT))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        return $res;
+    }
+
+    public function plsqlCalcKki(IStudent $model): string {
+
+        $sql = "BEGIN :res := calculate_kki(:userId, :programmeName, :programmeType); END;";
+
+        $user = $model->getUser();
+        $programme = $model->getProgramme();
+
+
+        if (isset($user) && $user->getId() !== null) {
+            $userId = $user->getId();
+        }
+        if (isset($programme) && $programme->getName() !== null && $programme->getType() !== null) {
+            $programmeName = $model->getProgramme()->getName();
+            $programmeType = $model->getProgramme()->getType();
+        }
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        oci_bind_by_name($stmt, ':res', $res, 200);
+
+        if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
+            throw new DataAccessException('bind userId ' . json_encode(oci_error($stmt)));
+        if (isset($programmeName) && !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1))
+            throw new DataAccessException('bind programmeName ' . json_encode(oci_error($stmt)));
+        if (isset($programmeType) && !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1))
+            throw new DataAccessException('bind programmeType' . json_encode(oci_error($stmt)));
+
+        if (!oci_execute($stmt, OCI_DEFAULT))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        return $res;
+    }
+
+    //endregion
+
 }
 
 

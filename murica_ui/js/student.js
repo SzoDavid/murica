@@ -13,9 +13,46 @@ function takenCourses(contentElement) {
     $('#navbar-taken-courses').addClass('active');
     $('#navbar-courses').addClass('active');
 
-    contentElement.append($('<h1>').text('Taken courses'));
+    contentElement.append($('<h2>').text('Statistics'));
+
+    let table = $("<table>").addClass("editTable");
+    let cell_ki = $("<td>").attr('id', 'calc-ki');
+    let cell_kki = $("<td>").attr('id', 'calc-kki');
+
+    table.append(
+        $("<tr>").append(
+            $("<th>").text("Credit index:"),
+            cell_ki
+        ),
+        $("<tr>").append(
+            $("<th>").text("Korigalt Credit index:"),
+            cell_kki
+        )
+    );
 
     let studentObj = JSON.parse(localStorage.getItem('studentVals'));
+
+    requestInvoker.executePost('course/ki', {
+        token: tokenObj.token,
+        programmeName: studentObj.programme.name,
+        programmeType: studentObj.programme.type
+    }).then((response) => {
+        $('#calc-ki').text(response.value);
+    });
+
+    requestInvoker.executePost('course/kki', {
+        token: tokenObj.token,
+        programmeName: studentObj.programme.name,
+        programmeType: studentObj.programme.type
+    }).then((response) => {
+        $('#calc-kki').text(response.value);
+    });
+
+    contentElement.append(table);
+
+
+
+    contentElement.append($('<h1>').text('Taken courses'));
 
     // TODO: add student data to request arguments
     requestInvoker.executePost('course/taken', {
