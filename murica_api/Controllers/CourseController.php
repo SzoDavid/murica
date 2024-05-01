@@ -546,6 +546,5 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to calculate kki', $e->getTraceMessages());
         }
     }
-
     //endregion
 }

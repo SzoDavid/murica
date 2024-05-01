@@ -279,7 +279,7 @@ class OracleStudentDao implements IStudentDao {
 
     #[Override]
     public function countDistinctStudentsInMathematics(): int {
-        $sql = sprintf("SELECT COUNT(DISTINCT s.%s || s.%s || s.%s) AS hallgatok_szama
+        $sql = sprintf("SELECT COUNT(DISTINCT s.%s || s.%s || s.%s) AS HALLGATOK_SZAMA
                 FROM %s.%s s
                 JOIN %s.%s tc ON s.%s = tc.%s
                 JOIN %s.%s c ON tc.%s = c.%s AND tc.%s = c.%s
@@ -314,9 +314,7 @@ class OracleStudentDao implements IStudentDao {
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
         if (oci_fetch($stmt)) {
-            $count = oci_result($stmt, 'MATH');
-        } else {
-            $count = 0; // No results found
+            $count = oci_result($stmt, 'HALLGATOK_SZAMA');
         }
 
         oci_free_statement($stmt);
@@ -326,12 +324,12 @@ class OracleStudentDao implements IStudentDao {
 
     #[Override]
     public function countDistinctStudentsInInformatics(): int {
-        $sql = sprintf("SELECT COUNT(DISTINCT s.%s || s.%s || s.%s) AS hallgatok_szama
+        $sql = sprintf("SELECT COUNT(DISTINCT s.%s || s.%s || s.%s) AS HALLGATOK_SZAMA
                 FROM %s.%s s
                 JOIN %s.%s tc ON s.%s = tc.%s
                 JOIN %s.%s c ON tc.%s = c.%s AND tc.%s = c.%s
                 JOIN %s.%s subj ON c.%s = subj.%s
-                WHERE subj.%s = 'Informatics'",
+                WHERE subj.%s = 'Informatika'",
                        TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
                        TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
                        TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
@@ -361,7 +359,7 @@ class OracleStudentDao implements IStudentDao {
             throw new DataAccessException(json_encode(oci_error($stmt)));
 
         if (oci_fetch($stmt)) {
-            $count = oci_result($stmt, 'INF');
+            $count = oci_result($stmt, 'HALLGATOK_SZAMA');
         } else {
             $count = 0;
         }

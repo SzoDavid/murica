@@ -1,4 +1,4 @@
-@token = 1eb1702f-fc3b-48f1-a1ab-02465aaa6d6f
+@token = 9c2f90e8-252e-4827-ae27-1658bb5c0f1a
 
 # AuthController
 
@@ -7,8 +7,8 @@
 POST https://localhost/murica_api/auth/login
 Content-Type: application/x-www-form-urlencoded
 
-id=ZV692D &
-password=ZV692D
+id=ADMIN2 &
+password=admin2
 
 ### logout
 
@@ -102,3 +102,15 @@ x-api-key: {{token}}
 Content-Type: application/x-www-form-urlencoded
 
 programmeName=Programtervezo%20informatikus&programmeType=BSc
+
+### Room with most Math
+
+POST https://localhost/murica_api/room/mostMath
+x-api-key: {{token}}
+Content-Type: application/x-www-form-urlencoded
+
+### Count math users
+
+POST https://localhost/murica_api/user/mathCount
+x-api-key: {{token}}
+Content-Type: application/x-www-form-urlencoded

@@ -184,7 +184,7 @@ class OracleRoomDao implements IRoomDao {
     }
 
     #[Override]
-    public function getRoomIdWithMostMathSubjects(): int {
+    public function getRoomIdWithMostMathSubjects(): IRoom {
         $sql = sprintf("SELECT %s
                     FROM (
                              SELECT c.%s, COUNT(*) AS math_subject_count
@@ -195,8 +195,8 @@ class OracleRoomDao implements IRoomDao {
                              ORDER BY math_subject_count DESC
                          )
                     WHERE ROWNUM = 1",
-                       TableDefinition::ROOM_TABLE_FIELD_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
                        $this->configService->getTableOwner(),
                        TableDefinition::COURSE_TABLE,
                        $this->configService->getTableOwner(),
@@ -220,11 +220,11 @@ class OracleRoomDao implements IRoomDao {
 
         oci_free_statement($stmt);
 
-        return $roomId;
+        return new Room($roomId);
     }
 
     #[Override]
-    public function getRoomIdWithMostInfoSubjects(): int {
+    public function getRoomIdWithMostInfoSubjects(): IRoom {
         $sql = sprintf("SELECT %s
                     FROM (
                              SELECT c.%s, COUNT(*) AS math_subject_count
@@ -235,8 +235,8 @@ class OracleRoomDao implements IRoomDao {
                              ORDER BY math_subject_count DESC
                          )
                     WHERE ROWNUM = 1",
-                       TableDefinition::ROOM_TABLE_FIELD_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
                        $this->configService->getTableOwner(),
                        TableDefinition::COURSE_TABLE,
                        $this->configService->getTableOwner(),
@@ -254,14 +254,11 @@ class OracleRoomDao implements IRoomDao {
 
         if (oci_fetch($stmt)) {
             $roomId = oci_result($stmt, 'ROOM_ID');
-        } else {
-            $roomId = 0;
         }
 
         oci_free_statement($stmt);
 
-        return $roomId;
+        return new Room($roomId);
     }
-
     //endregion
 }

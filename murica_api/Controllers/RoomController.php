@@ -33,6 +33,8 @@ class RoomController extends Controller {
             ->registerEndpoint('getRoomById', '', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('createRoom', 'new', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('updateRoom', 'update', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('mostMathRoom', 'mostMath', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('mostInfRoom', 'mostInf', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('deleteRoom', 'delete', EndpointRoute::VISIBILITY_PRIVATE);
     }
     //endregion
@@ -200,5 +202,28 @@ class RoomController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to delete room', $e->getTraceMessages());
         }
     }
+
+    public function mostMathRoom(string $uri, array $requestData): IModel {
+        try {
+            $res = $this->roomDao->getRoomIdWithMostMathSubjects();
+
+            return (new EntityModel($this->router, $res, true))
+                ->withSelfRef(RoomController::class, 'mostMathRoom', [], []);
+        } catch (DataAccessException|ValidationException|ModelException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to get room with most Math courses', $e->getTraceMessages());
+        }
+    }
+
+    public function mostInfRoom(string $uri, array $requestData): IModel {
+        try {
+            $res = $this->roomDao->getRoomIdWithMostInfoSubjects();
+
+            return (new EntityModel($this->router, $res, true))
+                ->withSelfRef(RoomController::class, 'mostInfRoom', [], []);
+        } catch (DataAccessException|ValidationException|ModelException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to get room with most Inf courses', $e->getTraceMessages());
+        }
+    }
+
     //endregion
 }
