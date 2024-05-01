@@ -120,7 +120,7 @@ class OracleMessageDao implements IMessageDao {
         $res = array();
         $crits = array();
 
-        $sql = sprintf("SELECT USR.%s AS ID, USR.%s AS NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE, MSG.%s AS SUBJECT, MSG.%s AS CONTENT, TO_CHAR(MSG.%s, 'YYYY-MM-DD HH24:MI') AS MSG_DATE FROM %s.%s USR, %s.%s MSG WHERE USR.%s = MSG.%s",
+        $sql = sprintf("SELECT USR.%s AS ID, USR.%s AS NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE, MSG.%s AS SUBJECT, TO_CHAR(MSG.%s) AS CONTENT, TO_CHAR(MSG.%s, 'YYYY-MM-DD HH24:MI') AS MSG_DATE FROM %s.%s USR, %s.%s MSG WHERE USR.%s = MSG.%s",
                        TableDefinition::USER_TABLE_FIELD_ID,
                        TableDefinition::USER_TABLE_FIELD_NAME,
                        TableDefinition::USER_TABLE_FIELD_EMAIL,

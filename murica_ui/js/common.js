@@ -16,7 +16,6 @@ const init = (requestInvoker, context) => {
                 .text('Administrator'));
 
             bindClickListener($('#navbar-role-admin'), () => {
-                console.log('asd');
                 window.location.href = 'admin.php';
             });
         }
@@ -27,7 +26,6 @@ const init = (requestInvoker, context) => {
                 .text('Teacher'));
 
             bindClickListener($('#navbar-role-teacher'), () => {
-                console.log('asd');
                 window.location.href = 'teacher.php';
             });
         }
@@ -77,9 +75,9 @@ const bindClickListener = (observer, event, unbindOtherListeners = true) => {
 
 const string2html = (string) => {
     return string.replace(/&/g, '&amp;')
-                 .replace(/>/g, '&gt;')
-                 .replace(/</g, '&lt;')
-                 .replace(/\n/g, '<br>');
+        .replace(/>/g, '&gt;')
+        .replace(/</g, '&lt;')
+        .replace(/\n/g, '<br>');
 }
 
 class Button {
@@ -317,6 +315,21 @@ class SelfPage {
 
             bindClickListener(updateButton, () => { this.updateSelf(response) });
         });
+
+        requestInvoker.executePost('message/all', { token: tokenObj.token }).then((response) => {
+            console.log(response);
+            const tableColumns = {
+                subject: 'subject',
+                dateTime: 'Date Time'
+            };
+
+            const messagesTable= new DropDownTable(tableColumns, response._embedded.message, (record) => { return messagesDetails(record, this.contentElement)}).build();
+            this.contentElement.append(messagesTable);
+        });
+
+        //messages(this.contentElement);
+
+
     }
 
     updateSelf(record) {
@@ -348,4 +361,34 @@ class SelfPage {
         });
     }
 
+}
+/*
+function messages(contentElement) {
+    requestInvoker.executePost('messages/all', { token: tokenObj.token }).then((response) => {
+        console.log(response);
+        const tableColumns = {
+            subject: 'subject',
+            dateTime: 'dateTime'
+        };
+
+        const messagesTable= new DropDownTable(tableColumns, response._embedded, (record) => { return messagesDetails(record, this.contentElement)}).build();
+        contentElement.append(messagesTable);
+    });
+}
+*/
+function messagesDetails(record, contentElement) {
+    let container = $('<div>');
+
+    let table = $("<table>").addClass("editTable");
+    table.append(
+        $("<tr>").append(
+            $("<td>").text(record.content)
+        )
+    );
+
+    container.append(table);
+
+    container.append($('<div>').prop('id', 'edit-subject-error').addClass('hidden error'));
+
+    return container;
 }

@@ -182,5 +182,83 @@ class OracleRoomDao implements IRoomDao {
 
         return $res;
     }
+
+    #[Override]
+    public function getRoomIdWithMostMathSubjects(): IRoom {
+        $sql = sprintf("SELECT %s
+                    FROM (
+                             SELECT c.%s, COUNT(*) AS math_subject_count
+                             FROM %s.%s c
+                                      JOIN %s.%s s ON c.%s = s.%s
+                             WHERE s.%s = 'Matematika'
+                             GROUP BY c.%s
+                             ORDER BY math_subject_count DESC
+                         )
+                    WHERE ROWNUM = 1",
+                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::COURSE_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::SUBJECT_TABLE,
+                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
+                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID);
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (!oci_execute($stmt))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (oci_fetch($stmt)) {
+            $roomId = oci_result($stmt, 'ROOM_ID');
+        } else {
+            $roomId = 0;
+        }
+
+        oci_free_statement($stmt);
+
+        return new Room($roomId);
+    }
+
+    #[Override]
+    public function getRoomIdWithMostInfoSubjects(): IRoom {
+        $sql = sprintf("SELECT %s
+                    FROM (
+                             SELECT c.%s, COUNT(*) AS math_subject_count
+                             FROM %s.%s c
+                                      JOIN %s.%s s ON c.%s = s.%s
+                             WHERE s.%s = 'Informatika'
+                             GROUP BY c.%s
+                             ORDER BY math_subject_count DESC
+                         )
+                    WHERE ROWNUM = 1",
+                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::COURSE_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::SUBJECT_TABLE,
+                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
+                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID);
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (!oci_execute($stmt))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (oci_fetch($stmt)) {
+            $roomId = oci_result($stmt, 'ROOM_ID');
+        }
+
+        oci_free_statement($stmt);
+
+        return new Room($roomId);
+    }
     //endregion
 }

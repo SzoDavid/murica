@@ -249,7 +249,7 @@ class OracleTakenExamDao implements ITakenExamDao {
                                FROM %s.%s USR, %s.%s EXAM, %s.%s TKN, %s.%s STD,
                                %s.%s PRG, %s.%s TCHR, %s.%s SUB, %s.%s ROOM
                                WHERE TKN.%s = STD.%s AND TKN.%s = STD.%s AND TKN.%s = STD.%s AND TKN.%s = USR.%s AND
-                               TKN.%s = PRG.%s AND TKN.%s = PRG.%s AND TKN.%s = EXAM.%s AND TKN.%s = EXAM.%s AND EXAM.%s = SUB.%s AND EXAM.%s = TCHR.%s AND EXAM.%s = ROOM.%s;",
+                               TKN.%s = PRG.%s AND TKN.%s = PRG.%s AND TKN.%s = EXAM.%s AND TKN.%s = EXAM.%s AND EXAM.%s = SUB.%s AND EXAM.%s = TCHR.%s AND EXAM.%s = ROOM.%s",
                        TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID,
                        TableDefinition::USER_TABLE_FIELD_NAME,
                        TableDefinition::USER_TABLE_FIELD_EMAIL,
@@ -319,11 +319,11 @@ class OracleTakenExamDao implements ITakenExamDao {
         $exam = $model->getExam();
 
         if (isset($student) && $student->getUser() !== null && $student->getUser()->getId() !== null) {
-            $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID . " LIKE :userId";
+            $crits[] = "TKN." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID . " LIKE :userId";
             $userId = $model->getStudent()->getUser()->getId();
         }
         if (isset($exam) && $exam->getId() !== null && $exam->getSubject() !== null) {
-            $crits[] = "EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID . " LIKE :examId";
+            $crits[] = "TKN." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID . " LIKE :examId";
             $examId = $model->getExam()->getId();
         }
 

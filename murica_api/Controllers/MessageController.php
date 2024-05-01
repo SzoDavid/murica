@@ -35,7 +35,7 @@ class MessageController extends Controller {
 
     public function getAllByUser(string $uri, array $requestData): IModel {
         /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
+        $user = $requestData['token']->getUser();
 
         try {
             $messages = $this->messageDao->findByCrit(new Message(null, null, null, $user));
@@ -45,11 +45,10 @@ class MessageController extends Controller {
             /* @var $message IMessage */
             foreach ($messages as $message) {
                 $messageEntities[] = (new EntityModel($this->router, $message, true))
-                    ->linkTo('getAllByUser', RoomController::class, 'Messages')
                     ->withSelfRef(MessageController::class, 'getAllByUser');
             }
 
-            return (new CollectionModel($this->router, $messageEntities, 'messages', true))
+            return (new CollectionModel($this->router, $messageEntities, 'message', true))
                 ->withSelfRef(MessageController::class, 'getAllByUser');
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,

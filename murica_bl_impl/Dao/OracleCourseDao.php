@@ -155,7 +155,7 @@ class OracleCourseDao implements ICourseDao {
                        TableDefinition::ROOM_TABLE_FIELD_ID,
                        TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
                        $this->configService->getTableOwner(),
-                       TableDefinition::USER_TABLE,
+                       TableDefinition::SUBJECT_TABLE,
                        $this->configService->getTableOwner(),
                        TableDefinition::COURSE_TABLE,
                        $this->configService->getTableOwner(),

@@ -1,4 +1,4 @@
-@token = e2cdf4da-0770-49f5-ab5c-b71901ca87c6
+@token = 9c2f90e8-252e-4827-ae27-1658bb5c0f1a
 
 # AuthController
 
@@ -7,8 +7,8 @@
 POST https://localhost/murica_api/auth/login
 Content-Type: application/x-www-form-urlencoded
 
-id=G1P52N &
-password=G1P52N
+id=ADMIN2 &
+password=admin2
 
 ### logout
 
@@ -86,3 +86,31 @@ POST https://localhost/murica_api/user/new
 Content-Type: application/x-www-form-urlencoded
 
 id=G1P52N&name=Gipsz%20Odon&email=gipsz.odon%40murica.com&password=G1P52N
+
+### Course register
+
+POST https://localhost/murica_api/course/register
+x-api-key: {{token}}
+Content-Type: application/x-www-form-urlencoded
+
+subjectId=IB042E&id=7&programmeName=Programtervezo%20informatikus&programmeType=BSc
+
+### Calculate ki
+
+POST https://localhost/murica_api/course/ki
+x-api-key: {{token}}
+Content-Type: application/x-www-form-urlencoded
+
+programmeName=Programtervezo%20informatikus&programmeType=BSc
+
+### Room with most Math
+
+POST https://localhost/murica_api/room/mostMath
+x-api-key: {{token}}
+Content-Type: application/x-www-form-urlencoded
+
+### Count math users
+
+POST https://localhost/murica_api/user/mathCount
+x-api-key: {{token}}
+Content-Type: application/x-www-form-urlencoded

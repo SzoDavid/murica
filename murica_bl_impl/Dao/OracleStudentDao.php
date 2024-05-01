@@ -5,12 +5,15 @@ namespace murica_bl_impl\Dao;
 use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IStudentDao;
+use murica_bl\Dto\IMessage;
 use murica_bl\Dto\IStudent;
+use murica_bl\Dto\IUser;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Programme;
 use murica_bl_impl\Dto\Student;
 use murica_bl_impl\Dto\User;
+use murica_bl_impl\Models\MessageModel;
 use Override;
 
 class OracleStudentDao implements IStudentDao {
@@ -189,6 +192,7 @@ class OracleStudentDao implements IStudentDao {
     /**
      * @inheritDoc
      */
+
     #[Override]
     public function findByCrit(IStudent $model): array {
         $res = array();
@@ -272,7 +276,172 @@ class OracleStudentDao implements IStudentDao {
 
         return $res;
     }
+
+    #[Override]
+    public function countDistinctStudentsInMathematics(): int {
+        $sql = sprintf("SELECT COUNT(DISTINCT s.%s || s.%s || s.%s) AS HALLGATOK_SZAMA
+                FROM %s.%s s
+                JOIN %s.%s tc ON s.%s = tc.%s
+                JOIN %s.%s c ON tc.%s = c.%s AND tc.%s = c.%s
+                JOIN %s.%s subj ON c.%s = subj.%s
+                WHERE subj.%s = 'Matematika'",
+                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::STUDENT_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::TAKENCOURSE_TABLE,
+                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::COURSE_TABLE,
+                       TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_ID,
+                       TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::SUBJECT_TABLE,
+                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE);
+
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (!oci_execute($stmt))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (oci_fetch($stmt)) {
+            $count = oci_result($stmt, 'HALLGATOK_SZAMA');
+        }
+
+        oci_free_statement($stmt);
+
+        return $count;
+    }
+
+    #[Override]
+    public function countDistinctStudentsInInformatics(): int {
+        $sql = sprintf("SELECT COUNT(DISTINCT s.%s || s.%s || s.%s) AS HALLGATOK_SZAMA
+                FROM %s.%s s
+                JOIN %s.%s tc ON s.%s = tc.%s
+                JOIN %s.%s c ON tc.%s = c.%s AND tc.%s = c.%s
+                JOIN %s.%s subj ON c.%s = subj.%s
+                WHERE subj.%s = 'Informatika'",
+                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
+                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::STUDENT_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::TAKENCOURSE_TABLE,
+                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
+                       TableDefinition::TAKEN_EXAM_TABLE_FIELD_USER_ID,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::COURSE_TABLE,
+                       TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_ID,
+                       TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::SUBJECT_TABLE,
+                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE);
+
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (!oci_execute($stmt))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        if (oci_fetch($stmt)) {
+            $count = oci_result($stmt, 'HALLGATOK_SZAMA');
+        } else {
+            $count = 0;
+        }
+
+        oci_free_statement($stmt);
+
+        return $count;
+    }
+
     //endregion
+
+    //region PL/SQL functions
+    public function plsqlCalcKi(IStudent $model): string {
+
+        $sql = "BEGIN :res := calculate_ki(:userId, :programmeName, :programmeType); END;";
+
+        $user = $model->getUser();
+        $programme = $model->getProgramme();
+
+
+        if (isset($user) && $user->getId() !== null) {
+            $userId = $user->getId();
+        }
+        if (isset($programme) && $programme->getName() !== null && $programme->getType() !== null) {
+            $programmeName = $model->getProgramme()->getName();
+            $programmeType = $model->getProgramme()->getType();
+        }
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        oci_bind_by_name($stmt, ':res', $res, 200);
+
+        if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
+            throw new DataAccessException('bind userId ' . json_encode(oci_error($stmt)));
+        if (isset($programmeName) && !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1))
+            throw new DataAccessException('bind programmeName ' . json_encode(oci_error($stmt)));
+        if (isset($programmeType) && !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1))
+            throw new DataAccessException('bind programmeType' . json_encode(oci_error($stmt)));
+
+        if (!oci_execute($stmt, OCI_DEFAULT))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        return $res;
+    }
+
+    public function plsqlCalcKki(IStudent $model): string {
+
+        $sql = "BEGIN :res := calculate_kki(:userId, :programmeName, :programmeType); END;";
+
+        $user = $model->getUser();
+        $programme = $model->getProgramme();
+
+
+        if (isset($user) && $user->getId() !== null) {
+            $userId = $user->getId();
+        }
+        if (isset($programme) && $programme->getName() !== null && $programme->getType() !== null) {
+            $programmeName = $model->getProgramme()->getName();
+            $programmeType = $model->getProgramme()->getType();
+        }
+
+        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        oci_bind_by_name($stmt, ':res', $res, 200);
+
+        if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
+            throw new DataAccessException('bind userId ' . json_encode(oci_error($stmt)));
+        if (isset($programmeName) && !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1))
+            throw new DataAccessException('bind programmeName ' . json_encode(oci_error($stmt)));
+        if (isset($programmeType) && !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1))
+            throw new DataAccessException('bind programmeType' . json_encode(oci_error($stmt)));
+
+        if (!oci_execute($stmt, OCI_DEFAULT))
+            throw new DataAccessException(json_encode(oci_error($stmt)));
+
+        return $res;
+    }
+
+    //endregion
+
 }
 
 

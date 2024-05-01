@@ -504,6 +504,37 @@ function users(contentElement) {
     $('#navbar .active').removeClass('active');
     $('#navbar-users').addClass('active');
 
+    contentElement.append($('<h2>').text('Statistics'));
+
+    let table = $("<table>").addClass("editTable");
+    let cell_math = $("<td>").attr('id', 'math-count');
+    let cell_inf = $("<td>").attr('id', 'inf-count');
+
+    table.append(
+        $("<tr>").append(
+            $("<th>").text("All Math students:"),
+            cell_math
+        ),
+        $("<tr>").append(
+            $("<th>").text("All Inf students:"),
+            cell_inf
+        )
+    );
+
+    requestInvoker.executePost('user/mathCount', {
+        token: tokenObj.token
+    }).then((response) => {
+        $('#math-count').text(response.value);
+    });
+
+    requestInvoker.executePost('user/infCount', {
+        token: tokenObj.token
+    }).then((response) => {
+        $('#inf-count').text(response.value);
+    });
+
+    contentElement.append(table);
+
     let newUserButton = new Button('New user').build();
     contentElement.append(newUserButton);
 
@@ -764,6 +795,37 @@ function rooms(contentElement) {
 
     $('#navbar .active').removeClass('active');
     $('#navbar-rooms').addClass('active');
+
+    contentElement.append($('<h2>').text('Statistics'));
+
+    let table = $("<table>").addClass("editTable");
+    let cell_ki = $("<td>").attr('id', 'most-math');
+    let cell_kki = $("<td>").attr('id', 'most-inf');
+
+    table.append(
+        $("<tr>").append(
+            $("<th>").text("Room with most math subjects:"),
+            cell_ki
+        ),
+        $("<tr>").append(
+            $("<th>").text("Room with most info subjects:"),
+            cell_kki
+        )
+    );
+
+    requestInvoker.executePost('room/mostMath', {
+        token: tokenObj.token
+    }).then((response) => {
+        $('#most-math').text(response.id);
+    });
+
+    requestInvoker.executePost('room/mostInf', {
+        token: tokenObj.token
+    }).then((response) => {
+        $('#most-inf').text(response.id);
+    });
+
+    contentElement.append(table);
 
     let newRoomButton = new Button('New room').build();
     contentElement.append(newRoomButton);

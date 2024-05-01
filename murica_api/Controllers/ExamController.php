@@ -129,7 +129,7 @@ class ExamController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to query taken exams', 'Parameter "programmeType" is not provided in uri');
 
         /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
+        $user = $requestData['token']->getUser();
 
         try {
             $students = $this->studentDao->findByCrit(new Student($user, new Programme($requestData['programmeName'], $requestData['programmeType'])));
@@ -160,7 +160,7 @@ class ExamController extends Controller {
 
     public function getExamsByTeacher(string $uri, array $requestData): IModel {
         /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
+        $user = $requestData['token']->getUser();
 
         try {
             $exams = $this->examDao->findByCrit((new Exam())->setTeacher($user));
@@ -330,7 +330,7 @@ class ExamController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to register Exam', 'Parameter "programmeType" is not provided in uri');
 
         /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
+        $user = $requestData['token']->getUser();
 
         try {
             $subjects = $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
@@ -382,7 +382,7 @@ class ExamController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to unregister Exam', 'Parameter "programmeType" is not provided in uri');
 
         /* @var $user IUser */
-        $user = $this->$requestData['token']->getUser();
+        $user = $requestData['token']->getUser();
 
         try {
             $subjects = $this->subjectDao->findByCrit(new Subject($requestData['subjectId']));
