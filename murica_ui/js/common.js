@@ -283,23 +283,38 @@ class SelfPage {
             ),
             $("<tr>").append(
                 $("<th>").append($("<label>").attr("for", "self-details-name").text("Name:")),
-                $("<td>").append($("<input>").attr({ id: "self-details-name", name: "name", type: "text", required: true }))
+                $("<td>").append($("<input>").attr({
+                    id: "self-details-name",
+                    name: "name",
+                    type: "text",
+                    required: true
+                }))
             ),
             $("<tr>").append(
                 $("<th>").append($("<label>").attr("for", "self-details-email").text("E-mail address:")),
-                $("<td>").append($("<input>").attr({ id: "self-details-email", name: "email", type: "email", required: true }))
+                $("<td>").append($("<input>").attr({
+                    id: "self-details-email",
+                    name: "email",
+                    type: "email",
+                    required: true
+                }))
             ),
             $("<tr>").append(
                 $("<th>").append($("<label>").attr("for", "self-details-birth").text("Birth date:")),
-                $("<td>").append($("<input>").attr({ id: "self-details-birth", name: "birth_date", type: "date", required: true }))
+                $("<td>").append($("<input>").attr({
+                    id: "self-details-birth",
+                    name: "birth_date",
+                    type: "date",
+                    required: true
+                }))
             ),
             $("<tr>").append(
                 $("<th>").append($("<label>").attr("for", "self-details-password").text("Password:")),
-                $("<td>").append($("<input>").attr({ id: "self-details-password", type: "password", required: true }))
+                $("<td>").append($("<input>").attr({id: "self-details-password", type: "password", required: true}))
             ),
             $("<tr>").append(
                 $("<th>").append($("<label>").attr("for", "self-details-password2").text("Password again:")),
-                $("<td>").append($("<input>").attr({ id: "self-details-password2", type: "password", required: true }))
+                $("<td>").append($("<input>").attr({id: "self-details-password2", type: "password", required: true}))
             )
         );
 
@@ -309,16 +324,20 @@ class SelfPage {
         this.contentElement.append($('<div>').prop('id', 'edit-self-error').addClass('hidden error'));
         this.contentElement.append(updateButton);
 
-        requestInvoker.executePost(this.fetchUserUrl, { token: tokenObj.token }).then((response) => {
+        requestInvoker.executePost(this.fetchUserUrl, {token: tokenObj.token}).then((response) => {
             $('#self-details-id').text(response.id);
             $('#self-details-name').val(response.name);
             $('#self-details-email').val(response.email);
             $('#self-details-birth').val(response.birth_date);
 
-            bindClickListener(updateButton, () => { this.updateSelf(response) });
+            bindClickListener(updateButton, () => {
+                this.updateSelf(response)
+            });
         });
-    }
+       //* this.contentElement.append(messages(this.contentElement));
 
+
+    }
     updateSelf(record) {
         const errorContainer = $('#edit-self-error').addClass('hidden');
 
@@ -346,6 +365,32 @@ class SelfPage {
             if (response._success) this.build();
             else errorContainer.html(string2html(response.error.details)).removeClass('hidden');
         });
-    }
+    };
+}
 
+function messages(contentElement) {
+    requestInvoker.executePost('messages/all', { token: tokenObj.token }).then((response) => {
+
+        console.log(response);
+        const tableColumns = {
+            subject: 'subject',
+            dateTime: 'dateTime'
+        };
+        const messageTable= new DropDownTable(tableColumns, response._embedded.messages, (record) => { return messagesDetails(record, contentElement)}).build();
+        contentElement.append(messageTable);
+    });
+}
+
+function messagesDetails(record, contentElement) {
+    let container = $('<div>');
+
+    let table = $("<table>").addClass("editTable");
+    table.append(
+        $("<tr>").append(
+            $("<td>").text(record.content
+            ),));
+
+    container.append(table);
+    container.append($('<div>').prop('id', 'edit-subject-error').addClass('hidden error'));
+    return container;
 }
