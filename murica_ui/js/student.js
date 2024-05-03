@@ -32,25 +32,16 @@ function takenCourses(contentElement) {
 
     let studentObj = JSON.parse(localStorage.getItem('studentVals'));
 
-    requestInvoker.executePost('course/ki', {
+    requestInvoker.executePost('course/averages', {
         token: tokenObj.token,
         programmeName: studentObj.programme.name,
         programmeType: studentObj.programme.type
     }).then((response) => {
-        $('#calc-ki').text(response.value);
-    });
-
-    requestInvoker.executePost('course/kki', {
-        token: tokenObj.token,
-        programmeName: studentObj.programme.name,
-        programmeType: studentObj.programme.type
-    }).then((response) => {
-        $('#calc-kki').text(response.value);
+        $('#calc-ki').text(response.ki);
+        $('#calc-kki').text(response.kki);
     });
 
     contentElement.append(table);
-
-
 
     contentElement.append($('<h1>').text('Taken courses'));
 
@@ -66,7 +57,7 @@ function takenCourses(contentElement) {
             name: 'Name',
             term: 'Term',
             schedule: 'Schedule',
-            credit: 'Credit',
+            grade: 'Grade',
         };
 
         const coursesTable= new DropDownTable(tableColumns, response._embedded.takenCourses,

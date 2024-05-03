@@ -247,6 +247,7 @@ class OracleStudentDao implements IStudentDao {
         $userId = $model->getUser()->getId();
         $programmeName = $model->getProgramme()->getName();
         $programmeType = $model->getProgramme()->getType();
+        $res = null;
 
         try {
             $this->dataSource->getConnection()
@@ -265,11 +266,10 @@ class OracleStudentDao implements IStudentDao {
     }
 
     public function calculateKki(IStudent $model): string {
-
-        $sql = "BEGIN :res := calculate_kki(:userId, :programmeName, :programmeType); END;";
-
-        $user = $model->getUser();
-        $programme = $model->getProgramme();
+        $userId = $model->getUser()->getId();
+        $programmeName = $model->getProgramme()->getName();
+        $programmeType = $model->getProgramme()->getType();
+        $res = null;
 
         try {
             $this->dataSource->getConnection()

@@ -68,7 +68,7 @@ class TakenCourse extends Entity implements ITakenCourse {
     }
 
     #[Override]
-    public function setGrade(int $grade): ITakenCourse {
+    public function setGrade(?int $grade): ITakenCourse {
         $this->grade = $grade;
         return $this;
     }
@@ -84,11 +84,11 @@ class TakenCourse extends Entity implements ITakenCourse {
     #[Override]
     public function validate(): bool {
         $errors = "";
+        $this->student->validate();
+        $this->course->validate();
         // TODO refactor validation to return false if no issues was found or a string with all the issues
-        if (empty($this->student) || $this->student->validate()) $errors .= '\nStudent is invalid!';
-        if (empty($this->course) || $this->course->validate()) $errors .= '\nCourse is invalid!';
-        if (empty($this->grade) || ($this->grade > 5) || ($this->grade < 0)) $errors .= '\nGrade is invalid!';
-        if (empty($this->approved)) $errors .= '\nApproved is empty!';
+        if (isset($this->grade) && ($this->grade > 5 || $this->grade < 1)) $errors .= '\nGrade is invalid!';
+        if (!isset($this->approved)) $errors .= '\nApproved is empty!';
         if (!empty($errors)) throw new ValidationException(ltrim($errors, '\n'));
 
         return true;

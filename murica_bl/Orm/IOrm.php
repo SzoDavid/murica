@@ -20,5 +20,5 @@ interface IOrm {
     /**
      * @throws OciException
      */
-    public function bind($name, &$variable, $size=-1): IOrm;
+    public function bind($name, &$variable, $size=-1, $type=null): IOrm;
 }

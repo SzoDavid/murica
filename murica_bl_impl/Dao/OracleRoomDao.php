@@ -179,7 +179,7 @@ class OracleRoomDao implements IRoomDao {
                              SELECT ROOM.%s, ROOM.%s, COUNT(*) AS math_subject_count
                              FROM %s.%s CRS, %s.%s SBJ, %s.%s ROOM 
                              WHERE CRS.%s = SBJ.%s AND CRS.%s = ROOM.%s AND SBJ.%s = 'Matematika'
-                             GROUP BY CRS.%s
+                             GROUP BY ROOM.%s, ROOM.%s
                              ORDER BY math_subject_count DESC
                          )
                     WHERE ROWNUM = 1",
@@ -198,7 +198,8 @@ class OracleRoomDao implements IRoomDao {
                        TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
                        TableDefinition::ROOM_TABLE_FIELD_ID,
                        TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID);
+                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY);
 
         try {
             $room = $this->dataSource->getConnection()
@@ -219,7 +220,7 @@ class OracleRoomDao implements IRoomDao {
                              SELECT ROOM.%s, ROOM.%s, COUNT(*) AS math_subject_count
                              FROM %s.%s CRS, %s.%s SBJ, %s.%s ROOM 
                              WHERE CRS.%s = SBJ.%s AND CRS.%s = ROOM.%s AND SBJ.%s = 'Informatika'
-                             GROUP BY CRS.%s
+                             GROUP BY ROOM.%s, ROOM.%s
                              ORDER BY math_subject_count DESC
                          )
                     WHERE ROWNUM = 1",
@@ -238,7 +239,8 @@ class OracleRoomDao implements IRoomDao {
                        TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
                        TableDefinition::ROOM_TABLE_FIELD_ID,
                        TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID);
+                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY);
 
         try {
             $room = $this->dataSource->getConnection()

@@ -25,7 +25,6 @@ class OracleOrm implements IOrm {
     }
 
     public function close(): void {
-        oci_free_statement($this->stmt);
         oci_close($this->connection);
     }
 
@@ -65,10 +64,10 @@ class OracleOrm implements IOrm {
         return $res;
     }
 
-    public function bind($name, &$variable, $size=-1): IOrm {
-        $resp = isset($variable) && is_numeric($variable)
-            ? oci_bind_by_name($this->stmt, $name, $variable, $size, SQLT_INT)
-            : oci_bind_by_name($this->stmt, $name, $variable, $size);
+    public function bind($name, &$variable, $size=-1, $type=null): IOrm {
+        $dataType = $type ?? (is_numeric($variable) ? SQLT_INT : SQLT_CHR);
+
+        $resp = oci_bind_by_name($this->stmt, $name, $variable, $size, $dataType);
 
         if (!$resp) throw new OciException("Couldn't bind parameter $name: " . json_encode(oci_error($this->stmt)));
 
