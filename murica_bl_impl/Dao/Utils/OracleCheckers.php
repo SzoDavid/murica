@@ -5,6 +5,7 @@ namespace murica_bl_impl\Dao\Utils;
 use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dto\IUser;
+use murica_bl\Orm\Exception\OciException;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Services\ConfigService\OracleDataSourceConfigService;
 
@@ -13,22 +14,18 @@ class OracleCheckers {
      * @throws DataAccessException
      */
     public static function checkIfUserExists(IUser $user, OracleDataSourceConfigService $configService, OracleDataSource $dataSource): bool {
-        $sql = sprintf("SELECT * FROM %s.%s WHERE %s = :id",
-                       $configService->getTableOwner(),
-                       TableDefinition::USER_TABLE,
-                       TableDefinition::USER_TABLE_FIELD_ID);
-
-        if (!$stmt = oci_parse($dataSource->getConnection(), $sql))
-            throw new DataAccessException('parse ' . json_encode(oci_error($stmt)));
+        $sql = "SELECT * FROM {${$configService->getTableOwner()}}.{${TableDefinition::USER_TABLE}} WHERE %s = :id";
 
         $id = $user->getId();
 
-        if (!oci_bind_by_name($stmt, ':id', $id, -1))
-            throw new DataAccessException('bind id ' . json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException('exec ' . json_encode(oci_error($stmt)));
-
-        return oci_fetch($stmt);
+        try {
+            return empty($dataSource->getConnection()
+                ->query($sql)
+                ->bind(':id', $id)
+                ->execute(OCI_DEFAULT)
+                ->result());
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query users', $e);
+        }
     }
 }

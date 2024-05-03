@@ -7,6 +7,7 @@ use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IMessageDao;
 use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\IMessage;
+use murica_bl\Orm\Exception\OciException;
 use murica_bl_impl\Dao\Utils\OracleCheckers;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Message;
@@ -46,22 +47,22 @@ class OracleMessageDao implements IMessageDao {
                        TableDefinition::MESSAGE_TABLE_FIELD_CONTENT,
                        TableDefinition::MESSAGE_TABLE_FIELD_DATE);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $id = $model->getUser()->getId();
         $subject = $model->getSubject();
         $content = $model->getContent();
         $date = $model->getDateTime();
 
-        if (!oci_bind_by_name($stmt, ':userId', $id, -1) ||
-            !oci_bind_by_name($stmt, ':subject', $subject, -1) ||
-            !oci_bind_by_name($stmt, ':content', $content, -1) ||
-            !oci_bind_by_name($stmt, ':date', $date, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':userId', $id)
+                ->bind(':subject', $subject)
+                ->bind(':content', $content)
+                ->bind(':date', $date)
+                ->execute(OCI_COMMIT_ON_SUCCESS);
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to create message', $e);
+        }
 
         return $this->findByCrit(new Message($date))[0];
     }
@@ -71,8 +72,6 @@ class OracleMessageDao implements IMessageDao {
      */
     #[Override]
     function findAll(): array {
-        $res = array();
-
         $sql = sprintf("SELECT USR.%s AS ID, USR.%s AS NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE, MSG.%s AS SUBJECT, MSG.%s AS CONTENT, TO_CHAR(MSG.%s, 'YYYY-MM-DD HH24:MI') AS MSG_DATE FROM %s.%s USR, %s.%s MSG WHERE USR.%s = MSG.%s",
                        TableDefinition::USER_TABLE_FIELD_ID,
                        TableDefinition::USER_TABLE_FIELD_NAME,
@@ -89,27 +88,16 @@ class OracleMessageDao implements IMessageDao {
                        TableDefinition::USER_TABLE_FIELD_ID,
                        TableDefinition::MESSAGE_TABLE_FIELD_USER_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        while (oci_fetch($stmt)) {
-            $res[] = new Message(
-                oci_result($stmt, 'MSG_DATE'),
-                oci_result($stmt, 'SUBJECT'),
-                oci_result($stmt, 'CONTENT'),
-                new User(
-                    oci_result($stmt, 'ID'),
-                    oci_result($stmt, 'NAME'),
-                    oci_result($stmt, 'EMAIL'),
-                    oci_result($stmt, 'PASSWORD'),
-                    oci_result($stmt, 'BIRTH_DATE')
-                ));
+        try {
+            $messages = $this->dataSource->getConnection()
+                ->query($sql)
+                ->execute(OCI_DEFAULT)
+                ->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query messages', $e);
         }
 
-        return $res;
+        return $this->fetchMessages($messages);
     }
 
     /**
@@ -117,7 +105,6 @@ class OracleMessageDao implements IMessageDao {
      */
     #[Override]
     public function findByCrit(IMessage $model): array {
-        $res = array();
         $crits = array();
 
         $sql = sprintf("SELECT USR.%s AS ID, USR.%s AS NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE, MSG.%s AS SUBJECT, TO_CHAR(MSG.%s) AS CONTENT, TO_CHAR(MSG.%s, 'YYYY-MM-DD HH24:MI') AS MSG_DATE FROM %s.%s USR, %s.%s MSG WHERE USR.%s = MSG.%s",
@@ -148,32 +135,37 @@ class OracleMessageDao implements IMessageDao {
         if (!empty($crits))
             $sql .= " AND " . implode(" AND ", $crits);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $stmt = $this->dataSource->getConnection()->query($sql);
 
-        if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
-            throw new DataAccessException('bind userId ' . json_encode(oci_error($stmt)));
-        if (isset($date) && !oci_bind_by_name($stmt, ':date', $date, -1))
-            throw new DataAccessException('content date ' . json_encode(oci_error($stmt)));
+            if (isset($userId)) $stmt->bind(':userId', $userId);
+            if (isset($date)) $stmt->bind(':date', $date);
 
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+            $messages = $stmt->execute(OCI_DEFAULT)->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query messages', $e);
+        }
 
-        while (oci_fetch($stmt)) {
+        return $this->fetchMessages($messages);
+    }
+    //endregion
+
+    private function fetchMessages(array $messages): array {
+        $res = array();
+
+        foreach ($messages as $message) {
             $res[] = new Message(
-                oci_result($stmt, 'MSG_DATE'),
-                oci_result($stmt, 'SUBJECT'),
-                oci_result($stmt, 'CONTENT'),
+                $message['MSG_DATE'],
+                $message['SUBJECT'],
+                $message['CONTENT'],
                 new User(
-                    oci_result($stmt, 'ID'),
-                    oci_result($stmt, 'NAME'),
-                    oci_result($stmt, 'EMAIL'),
-                    oci_result($stmt, 'PASSWORD'),
-                    oci_result($stmt, 'BIRTH_DATE')
-                ));
+                    $message['ID'],
+                    $message['NAME'],
+                    $message['EMAIL'],
+                    $message['PASSWORD'],
+                    $message['BIRTH_DATE']));
         }
 
         return $res;
     }
-    //endregion
 }

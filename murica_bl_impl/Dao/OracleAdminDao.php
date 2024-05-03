@@ -7,6 +7,7 @@ use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IAdminDao;
 use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\IAdmin;
+use murica_bl\Orm\Exception\OciException;
 use murica_bl_impl\Dao\Utils\OracleCheckers;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Admin;
@@ -38,16 +39,17 @@ class OracleAdminDao implements IAdminDao {
                        TableDefinition::ADMIN_TABLE,
                        TableDefinition::ADMIN_TABLE_FIELD_USER_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $id = $model->getUser()->getId();
 
-        if (!oci_bind_by_name($stmt, ':id', $id, -1))
-            if (!oci_execute($stmt))
-                throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':id', $id)
+                ->execute(OCI_COMMIT_ON_SUCCESS);
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to create admin', $e);
+        }
 
-        //TODO: investigate
         return $this->findByCrit($model)[0];
     }
 
@@ -58,22 +60,20 @@ class OracleAdminDao implements IAdminDao {
                        TableDefinition::ADMIN_TABLE,
                        TableDefinition::ADMIN_TABLE_FIELD_USER_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $id = $model->getUser()->getId();
 
-        if (!oci_bind_by_name($stmt, ':id', $id, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':id', $id)
+                ->execute(OCI_COMMIT_ON_SUCCESS);
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to delete admin', $e);
+        }
     }
 
     #[Override]
     public function findAll(): array {
-        $res = array();
-
         $sql = sprintf("SELECT USR.%s AS ID, USR.%s AS NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE FROM %s.%s USR, %s.%s ADMIN WHERE USR.%s = ADMIN.%s",
                        TableDefinition::USER_TABLE_FIELD_ID,
                        TableDefinition::USER_TABLE_FIELD_NAME,
@@ -87,28 +87,20 @@ class OracleAdminDao implements IAdminDao {
                        TableDefinition::USER_TABLE_FIELD_ID,
                        TableDefinition::ADMIN_TABLE_FIELD_USER_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        while (oci_fetch($stmt)) {
-            $res[] = new Admin(new User(
-                oci_result($stmt, 'ID'),
-                oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'EMAIL'),
-                oci_result($stmt, 'PASSWORD'),
-                oci_result($stmt, 'BIRTH_DATE')
-            ));
+        try {
+            $admins = $this->dataSource->getConnection()
+                ->query($sql)
+                ->execute(OCI_DEFAULT)
+                ->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query admins', $e);
         }
 
-        return $res;
+        return $this->fetchAdmins($admins);
     }
 
     #[Override]
     public function findByCrit(IAdmin $model): array {
-        $res = array();
         $crits = array();
 
         $sql = sprintf("SELECT USR.%s AS ID, USR.%s AS NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE FROM %s.%s USR, %s.%s ADMIN WHERE USR.%s = ADMIN.%s",
@@ -135,31 +127,36 @@ class OracleAdminDao implements IAdminDao {
         if (!empty($crits))
             $sql .= " AND " . implode(" AND ", $crits);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $stmt = $this->dataSource->getConnection()->query($sql);
 
-        if (isset($id) && !oci_bind_by_name($stmt, ':id', $id, -1))
-            throw new DataAccessException('bind id ' . json_encode(oci_error($stmt)));
-        if (isset($name) && !oci_bind_by_name($stmt, ':name', $name, -1))
-            throw new DataAccessException('bind name ' . json_encode(oci_error($stmt)));
-        if (isset($email) && !oci_bind_by_name($stmt, ':email', $email, -1))
-            throw new DataAccessException('bind email ' . json_encode(oci_error($stmt)));
+            if (isset($id)) $stmt->bind(':id', $id);
+            if (isset($name)) $stmt->bind(':name', $name);
+            if (isset($email)) $stmt->bind(':email', $email);
 
+            $admins = $stmt->execute(OCI_DEFAULT)->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query admins', $e);
+        }
 
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        return $this->fetchAdmins($admins);
+    }
+    //endregion
 
-        while (oci_fetch($stmt)) {
-            $res[] = new Admin(new User(
-                                   oci_result($stmt, 'ID'),
-                                   oci_result($stmt, 'NAME'),
-                                   oci_result($stmt, 'EMAIL'),
-                                   oci_result($stmt, 'PASSWORD'),
-                                   oci_result($stmt, 'BIRTH_DATE')
-                               ));
+    private function fetchAdmins(array $admins): array {
+        $res = array();
+
+        foreach ($admins as $admin) {
+            $res[] = new Admin(
+                new User(
+                    $admin['ID'],
+                    $admin['NAME'],
+                    $admin['EMAIL'],
+                    $admin['PASSWORD'],
+                    $admin['BIRTH_DATE']
+                ));
         }
 
         return $res;
     }
-    //endregion
 }

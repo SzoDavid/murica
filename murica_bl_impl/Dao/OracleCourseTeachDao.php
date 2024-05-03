@@ -6,6 +6,7 @@ use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\ICourseTeachDao;
 use murica_bl\Dto\ICourseTeach;
+use murica_bl\Orm\Exception\OciException;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Course;
 use murica_bl_impl\Dto\CourseTeach;
@@ -43,21 +44,20 @@ class OracleCourseTeachDao implements ICourseTeachDao {
                        TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID,
                        TableDefinition::COURSETEACH_TABLE_FIELD_SUBJECT_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $userId = $model->getUser()->getId();
         $courseId = $model->getCourse()->getId();
         $subjectId = $model->getCourse()->getSubject()->getId();
 
-
-        if (!oci_bind_by_name($stmt, ':userId', $userId, -1) ||
-            !oci_bind_by_name($stmt, ':courseId', $courseId, -1) ||
-            !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-                throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':userId', $userId)
+                ->bind(':courseId', $courseId)
+                ->bind(':subjectId', $subjectId)
+                ->execute(OCI_COMMIT_ON_SUCCESS);
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to create courseTeach', $e);
+        }
 
         return $this->findByCrit(new CourseTeach($model->getUser(), $model->getCourse()))[0];
     }
@@ -74,20 +74,20 @@ class OracleCourseTeachDao implements ICourseTeachDao {
                        TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID,
                        TableDefinition::COURSETEACH_TABLE_FIELD_SUBJECT_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $userId = $model->getUser()->getId();
         $courseId = $model->getCourse()->getId();
         $subjectId = $model->getCourse()->getSubject()->getId();
 
-        if (!oci_bind_by_name($stmt, ':userId', $userId, -1) ||
-            !oci_bind_by_name($stmt, ':courseId', $courseId, -1) ||
-            !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':userId', $userId)
+                ->bind(':courseId', $courseId)
+                ->bind(':subjectId', $subjectId)
+                ->execute(OCI_COMMIT_ON_SUCCESS);
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to delete courseTeach', $e);
+        }
     }
 
     /**
@@ -95,8 +95,6 @@ class OracleCourseTeachDao implements ICourseTeachDao {
      */
     #[Override]
     public function findAll(): array {
-        $res = array();
-
         $sql = sprintf("SELECT USR.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE, SUB.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, CRS.%s AS CRS_ID, CRS.%s AS CRS_CAPACITY, CRS.%s AS SCHEDULE, CRS.%s AS TERM, ROOM.%s AS ROOM_ID, ROOM.%s AS ROOM_CAPACITY FROM %s.%s USR, %s.%s CRS, %s.%s SUB, %s.%s ROOM, %s.%s CRSTCH WHERE CRSTCH.%s = USR.%s AND CRSTCH.%s = CRS.%s AND CRSTCH.%s = SUB.%s AND CRS.%s = SUB.%s AND CRS.%s = ROOM.%s",
            TableDefinition::USER_TABLE_FIELD_ID,
                    TableDefinition::USER_TABLE_FIELD_NAME,
@@ -136,37 +134,16 @@ class OracleCourseTeachDao implements ICourseTeachDao {
                    TableDefinition::ROOM_TABLE_FIELD_ID
         );
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        while (oci_fetch($stmt)) {
-            $res[] = new CourseTeach( new User(
-                oci_result($stmt, 'ID'),
-                oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'EMAIL'),
-                oci_result($stmt, 'PASSWORD'),
-                oci_result($stmt, 'BIRTH_DATE')),
-                new Course(
-                    new Subject(
-                        oci_result($stmt, 'SUBJECT_ID'),
-                        oci_result($stmt, 'NAME'),
-                        oci_result($stmt, 'APPROVAL'),
-                        oci_result($stmt, 'CREDIT'),
-                        oci_result($stmt, 'TYPE')),
-                    oci_result($stmt, 'CRS_ID'),
-                    oci_result($stmt, 'CRS_CAPACITY'),
-                    oci_result($stmt, 'SCHEDULE'),
-                    oci_result($stmt, 'TERM'),
-                    new Room(
-                        oci_result($stmt, 'ROOM_ID'),
-                        oci_result($stmt, 'ROOM_CAPACITY')))
-            );
+        try {
+            $courseTeaches = $this->dataSource->getConnection()
+                ->query($sql)
+                ->execute(OCI_DEFAULT)
+                ->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query courseTeaches', $e);
         }
 
-        return $res;
+        return $this->fetchCourseTeaches($courseTeaches);
     }
 
     /**
@@ -174,7 +151,6 @@ class OracleCourseTeachDao implements ICourseTeachDao {
      */
     #[Override]
     public function findByCrit(ICourseTeach $model): array {
-        $res = array();
         $crits = array();
 
         $sql = sprintf("SELECT USR.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE, SUB.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, CRS.%s AS CRS_ID, CRS.%s AS CRS_CAPACITY, CRS.%s AS SCHEDULE, CRS.%s AS TERM, ROOM.%s AS ROOM_ID, ROOM.%s AS ROOM_CAPACITY FROM %s.%s USR, %s.%s CRS, %s.%s SUB, %s.%s ROOM, %s.%s CRSTCH WHERE CRSTCH.%s = USR.%s AND CRSTCH.%s = CRS.%s AND CRSTCH.%s = SUB.%s AND CRS.%s = SUB.%s AND CRS.%s = ROOM.%s",
@@ -233,45 +209,49 @@ class OracleCourseTeachDao implements ICourseTeachDao {
         if (!empty($crits))
             $sql .= " AND " . implode(" AND ", $crits);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException('parse ' . json_encode(oci_error($stmt)));
+        try {
+            $stmt = $this->dataSource->getConnection()->query($sql);
 
-        if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
-            throw new DataAccessException('bind userId ' . json_encode(oci_error($stmt)));
-        if (isset($courseId) && !oci_bind_by_name($stmt, ':courseId', $courseId, -1))
-            throw new DataAccessException('bind courseId ' . json_encode(oci_error($stmt)));
-        if (isset($subjectId) && !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-            throw new DataAccessException('bind subjectId ' . json_encode(oci_error($stmt)));
+            if (isset($userId)) $stmt->bind(':userId', $userId);
+            if (isset($courseId)) $stmt->bind(':courseId', $courseId);
+            if (isset($subjectId)) $stmt->bind(':subjectId', $subjectId);
 
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException('exec ' . json_encode(oci_error($stmt)));
+            $courseTeaches = $stmt->execute(OCI_DEFAULT)->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query admins', $e);
+        }
 
-        //TODO: investigate
-        while (oci_fetch($stmt)) {
-            $res[] = new CourseTeach( new User(
-                      oci_result($stmt, 'USER_ID'),
-                      oci_result($stmt, 'USER_NAME'),
-                      oci_result($stmt, 'EMAIL'),
-                      oci_result($stmt, 'PASSWORD'),
-                      oci_result($stmt, 'BIRTH_DATE')),
-                  new Course(
-                      new Subject(
-                          oci_result($stmt, 'SUBJECT_ID'),
-                          oci_result($stmt, 'SUBJECT_NAME'),
-                          oci_result($stmt, 'APPROVAL'),
-                          oci_result($stmt, 'CREDIT'),
-                          oci_result($stmt, 'TYPE')),
-                      oci_result($stmt, 'CRS_ID'),
-                      oci_result($stmt, 'CRS_CAPACITY'),
-                      oci_result($stmt, 'SCHEDULE'),
-                      oci_result($stmt, 'TERM'),
-                      new Room(
-                          oci_result($stmt, 'ROOM_ID'),
-                          oci_result($stmt, 'ROOM_CAPACITY')))
-            );
+        return $this->fetchCourseTeaches($courseTeaches);
+    }
+    //endregion
+
+    private function fetchCourseTeaches(array $courseTeaches): array {
+        $res = array();
+
+        foreach ($courseTeaches as $courseTeach) {
+            $res[] = new CourseTeach(
+                new User(
+                    $courseTeach['USER_ID'],
+                    $courseTeach['USER_NAME'],
+                    $courseTeach['EMAIL'],
+                    $courseTeach['PASSWORD'],
+                    $courseTeach['BIRTH_DATE']),
+                new Course(
+                    new Subject(
+                        $courseTeach['SUBJECT_ID'],
+                        $courseTeach['SUBJECT_NAME'],
+                        $courseTeach['APPROVAL'],
+                        $courseTeach['CREDIT'],
+                        $courseTeach['TYPE']),
+                    $courseTeach['CRS_ID'],
+                    $courseTeach['CRS_CAPACITY'],
+                    $courseTeach['SCHEDULE'],
+                    $courseTeach['TERM'],
+                    new Room(
+                        $courseTeach['ROOM_ID'],
+                        $courseTeach['ROOM_CAPACITY'])));
         }
 
         return $res;
     }
-    //endregion
 }
