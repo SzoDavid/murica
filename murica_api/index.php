@@ -59,7 +59,7 @@ try {
     $router = new Router($configService, $tokenService);
 
     $authController = new AuthController($router, $userDao, $tokenService);
-    $userController = new UserController($router, $userDao, $adminDao, $courseTeachDao);
+    $userController = new UserController($router, $userDao, $adminDao, $courseTeachDao, $takenCourseDao);
     $programmeController = new ProgrammeController($router, $programmeDao, $adminDao);
     $roomController = new RoomController($router, $roomDao, $adminDao);
     $subjectController = new SubjectController($router, $subjectDao, $adminDao);

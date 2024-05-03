@@ -6,9 +6,11 @@ use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IAdminDao;
 use murica_bl\Dao\ICourseTeachDao;
 use murica_bl\Dao\IStudentDao;
+use murica_bl\Dao\ITakenCourseDao;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\ICourseTeach;
+use murica_bl\Dto\ITakenCourse;
 use murica_bl\Dto\IUser;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
@@ -16,6 +18,7 @@ use murica_bl\Router\IRouter;
 use murica_bl_impl\Dto\Course;
 use murica_bl_impl\Dto\CourseTeach;
 use murica_bl_impl\Dto\Subject;
+use murica_bl_impl\Dto\TakenCourse;
 use murica_bl_impl\Dto\User;
 use murica_bl_impl\Models\CollectionModel;
 use murica_bl_impl\Models\EntityModel;
@@ -28,19 +31,22 @@ class UserController extends Controller {
     private IUserDao $userDao;
     private IAdminDao $adminDao;
     private ICourseTeachDao $courseTeachDao;
+    private ITakenCourseDao $takenCourseDao;
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router, IUserDao $userDao, IAdminDao $adminDao, ICourseTeachDao $courseTeachDao) {
+    public function __construct(IRouter $router, IUserDao $userDao, IAdminDao $adminDao, ICourseTeachDao $courseTeachDao, ITakenCourseDao $takenCourseDao) {
         parent::__construct($router);
         $this->userDao = $userDao;
         $this->adminDao = $adminDao;
         $this->courseTeachDao = $courseTeachDao;
+        $this->takenCourseDao = $takenCourseDao;
 
         $this->router->registerController($this, 'user')
             ->registerEndpoint('allUsers', 'all', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getUserById', '', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getTeachersByCourse', 'teachers', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getStudentsByCourse', 'students', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('createUser', 'new', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('updateUser', 'update', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('deleteUser', 'delete', EndpointRoute::VISIBILITY_PRIVATE);
@@ -159,6 +165,35 @@ class UserController extends Controller {
             return (new CollectionModel($this->router, $userEntities, 'teachers', true))
                 ->linkTo('assignTeacher', CourseController::class, 'addTeacherToCourse')
                 ->withSelfRef(UserController::class, 'getTeachersByCourse');
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router,
+                                  500,
+                                  'Failed to query users',
+                                  $e->getTraceMessages());
+        }
+    }
+
+    public function getStudentsByCourse(string $uri, array $requestData): IModel {
+        // TODO: check if user is teacher at given course
+        if (!isset($requestData['subjectId']))
+            return new ErrorModel($this->router, 400, 'Failed to query students', 'Parameter "subjectId" is not provided');
+        if (!isset($requestData['courseId']))
+            return new ErrorModel($this->router, 400, 'Failed to query students', 'Parameter "courseId" is not provided');
+
+        try {
+            $students = $this->takenCourseDao->findByCrit((new TakenCourse())->setCourse(new Course(new Subject($requestData['subjectId']), $requestData['courseId'])));
+
+            $userEntities = array();
+
+            /* @var $student ITakenCourse */
+            foreach ($students as $student) {
+                $userEntities[] = (new EntityModel($this->router, $student, true))
+                    ->linkTo('updateResults', CourseController::class, 'updateCourseResults')
+                    ->withSelfRef(UserController::class, 'getUserById', [$student->getStudent()->getUser()->getId()]);
+            }
+
+            return (new CollectionModel($this->router, $userEntities, 'students', true))
+                ->withSelfRef(UserController::class, 'getStudentsByCourse');
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
                                   500,
