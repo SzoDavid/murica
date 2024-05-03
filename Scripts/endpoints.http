@@ -1,4 +1,4 @@
-@token = 9c2f90e8-252e-4827-ae27-1658bb5c0f1a
+@token = 7c2e4f95-b01c-40ed-b103-c12b0b8ce0fa
 
 # AuthController
 
@@ -7,8 +7,8 @@
 POST https://localhost/murica_api/auth/login
 Content-Type: application/x-www-form-urlencoded
 
-id=ADMIN2 &
-password=admin2
+id=G1P52N &
+password=G1P52N
 
 ### logout
 
@@ -93,7 +93,7 @@ POST https://localhost/murica_api/course/register
 x-api-key: {{token}}
 Content-Type: application/x-www-form-urlencoded
 
-subjectId=IB042E&id=7&programmeName=Programtervezo%20informatikus&programmeType=BSc
+subjectId=IB042E&id=7&programmeName=Info-bionika%20mernoki&programmeType=BSc
 
 ### Calculate ki
 

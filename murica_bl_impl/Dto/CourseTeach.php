@@ -57,8 +57,8 @@ class CourseTeach extends Entity implements ICourseTeach {
     public function validate(): bool {
         $errors = "";
         // TODO refactor validation to return false if no issues was found or a string with all the issues
-        if (empty($this->user) || $this->user->validate()) $errors .= '\nUser is invalid!';
-        if (empty($this->course) || $this->course->validate()) $errors .= '\nCourse is invalid!';
+        $this->user->validate();
+        $this->course->validate();
         if (!empty($errors)) throw new ValidationException(ltrim($errors, '\n'));
 
         return true;

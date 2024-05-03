@@ -115,10 +115,10 @@ class Exam extends Entity implements IExam {
     public function validate(): bool {
         $errors = "";
         // TODO refactor validation to return false if no issues was found or a string with all the issues
-        if (empty($this->subject) || $this->subject->validate()) $errors .= '\nSubject is invalid!';
+        $this->subject->validate();
+        $this->teacher->validate();
+        $this->room->validate();
         if (empty($this->id) || strlen($this->id) > 6) $errors .= '\nID is empty or longer than 6 characters!';
-        if (empty($this->teacher) || $this->teacher->validate()) $errors .= '\nTeacher is empty or invalid!';
-        if (empty($this->room) || $this->room->validate()) $errors .= '\nRoom is empty or invalid!';
         if (!empty($this->startTime)) {
             $dateTime = DateTime::createFromFormat('YYYY-MM-DD HH24:MI', $this->startTime);
 
