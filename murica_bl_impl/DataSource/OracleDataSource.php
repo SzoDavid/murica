@@ -32,6 +32,7 @@ use murica_bl_impl\Dao\OracleTakenCourseDao;
 use murica_bl_impl\Dao\OracleTakenExamDao;
 use murica_bl_impl\Dao\OracleTokenDao;
 use murica_bl_impl\Dao\OracleUserDao;
+use murica_bl_impl\Orm\OracleOrm;
 use murica_bl_impl\Services\ConfigService\OracleDataSourceConfigService;
 use Override;
 
@@ -53,22 +54,19 @@ class OracleDataSource implements IDataSource {
                 throw new DataSourceException("Data source configs are invalid");
             }
 
-            $this->connection = oci_connect(
+            $this->connection = new OracleOrm(
                 $configService->getUser(),
                 $configService->getPassword(),
                 $configService->getConnectionString()
             );
 
-            if (!$this->connection) {
-                throw new DataSourceException('Failed to establish connection with database: ' . oci_error());
-            }
         } catch (Exception $ex) {
             throw new DataSourceException('Could not establish database connection', $ex);
         }
     }
 
     public function __destruct() {
-        oci_close($this->connection);
+        $this->connection->close();
     }
 
     //endregion
@@ -140,7 +138,7 @@ class OracleDataSource implements IDataSource {
     }
     //endregion
 
-    public function getConnection() {
+    public function getConnection(): OracleOrm {
         return $this->connection;
     }
 }

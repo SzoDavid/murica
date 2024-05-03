@@ -5,6 +5,7 @@ namespace murica_bl_impl\Dao;
 use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IRoomDao;
+use murica_bl\Orm\Exception\OciException;
 use murica_bl\Services\ConfigService\IDataSourceConfigService;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Room;
@@ -39,18 +40,19 @@ class OracleRoomDao implements IRoomDao {
                        TableDefinition::ROOM_TABLE_FIELD_CAPACITY
         );
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $id = $model->getId();
         $capacity = $model->getCapacity();
 
-        if (!oci_bind_by_name($stmt, ':id', $id, -1) ||
-            !oci_bind_by_name($stmt, ':capacity', $capacity, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':id', $id)
+                ->bind(':capacity', $capacity)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to create room', $e);
+        }
 
         return $this->findByCrit(new Room($model->getId()))[0];
     }
@@ -69,18 +71,19 @@ class OracleRoomDao implements IRoomDao {
             TableDefinition::ROOM_TABLE_FIELD_ID
         );
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $id = $model->getId();
         $capacity = $model->getCapacity();
 
-        if (!oci_bind_by_name($stmt, ':id', $id, -1) ||
-            !oci_bind_by_name($stmt, ':capacity', $capacity, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':id', $id)
+                ->bind(':capacity', $capacity)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to update room', $e);
+        }
 
         return $this->findByCrit(new Room($model->getId()))[0];
     }
@@ -97,16 +100,17 @@ class OracleRoomDao implements IRoomDao {
             TableDefinition::ROOM_TABLE_FIELD_ID
         );
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $id = $model->getId();
 
-        if (!oci_bind_by_name($stmt, ':id', $id, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':id', $id)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to delete room', $e);
+        }
     }
 
     /**
@@ -114,8 +118,6 @@ class OracleRoomDao implements IRoomDao {
      */
     #[Override]
     public function findAll(): array {
-        $res = array();
-
         $sql = sprintf("SELECT %s AS ID, %s AS CAPACITY FROM %s.%s",
                        TableDefinition::ROOM_TABLE_FIELD_ID,
                        TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
@@ -123,20 +125,16 @@ class OracleRoomDao implements IRoomDao {
                        TableDefinition::ROOM_TABLE
         );
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        while (oci_fetch($stmt)) {
-            $res[] = new Room(
-                oci_result($stmt, 'ID'),
-                oci_result($stmt, 'CAPACITY')
-            );
+        try {
+            $rooms = $this->dataSource->getConnection()
+                ->query($sql)
+                ->execute(OCI_DEFAULT)
+                ->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query rooms', $e);
         }
 
-        return $res;
+        return $this->fetchRooms($rooms);
     }
 
     /**
@@ -144,7 +142,6 @@ class OracleRoomDao implements IRoomDao {
      */
     #[Override]
     public function findByCrit(IRoom $model): array {
-        $res = array();
         $crits = array();
 
         $sql = sprintf("SELECT ROOM.%s AS ID, ROOM.%s AS CAPACITY FROM %s.%s ROOM",
@@ -162,103 +159,115 @@ class OracleRoomDao implements IRoomDao {
         if (!empty($crits))
             $sql .= " WHERE " . implode(" AND ", $crits);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $stmt = $this->dataSource->getConnection()->query($sql);
 
-        if (isset($id) && !oci_bind_by_name($stmt, ':id', $id, -1))
-            throw new DataAccessException('bind id ' . json_encode(oci_error($stmt)));
-        if (isset($capacity) && !oci_bind_by_name($stmt, ':capacity', $capacity, -1))
-            throw new DataAccessException('bind capacity ' . json_encode(oci_error($stmt)));
+            if (isset($id)) $stmt->bind(':id', $id);
+            if (isset($capacity)) $stmt->bind(':capacity', $capacity);
 
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+            $rooms = $stmt->execute(OCI_DEFAULT)->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query rooms', $e);
+        }
+        return $this->fetchRooms($rooms);
+    }
 
-        while (oci_fetch($stmt)) {
-            $res[] = new Room(
-                oci_result($stmt, 'ID'),
-                oci_result($stmt, 'CAPACITY')
-            );
+    #[Override]
+    public function getRoomIdWithMostMathSubjects(): IRoom {
+        $sql = sprintf("SELECT %s AS ID, %s AS CAPACITY
+                    FROM (
+                             SELECT ROOM.%s, ROOM.%s, COUNT(*) AS math_subject_count
+                             FROM %s.%s CRS, %s.%s SBJ, %s.%s ROOM 
+                             WHERE CRS.%s = SBJ.%s AND CRS.%s = ROOM.%s AND SBJ.%s = 'Matematika'
+                             GROUP BY ROOM.%s, ROOM.%s
+                             ORDER BY math_subject_count DESC
+                         )
+                    WHERE ROWNUM = 1",
+                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
+                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::COURSE_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::SUBJECT_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::ROOM_TABLE,
+                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
+                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY);
+
+        try {
+            $room = $this->dataSource->getConnection()
+                ->query($sql)
+                ->execute(OCI_DEFAULT)
+                ->firstResult();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query room', $e);
+        }
+
+        return $this->fetchRoom($room);
+    }
+
+    #[Override]
+    public function getRoomIdWithMostInfoSubjects(): IRoom {
+        $sql = sprintf("SELECT %s AS ID, %s AS CAPACITY
+                    FROM (
+                             SELECT ROOM.%s, ROOM.%s, COUNT(*) AS math_subject_count
+                             FROM %s.%s CRS, %s.%s SBJ, %s.%s ROOM 
+                             WHERE CRS.%s = SBJ.%s AND CRS.%s = ROOM.%s AND SBJ.%s = 'Informatika'
+                             GROUP BY ROOM.%s, ROOM.%s
+                             ORDER BY math_subject_count DESC
+                         )
+                    WHERE ROWNUM = 1",
+                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
+                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::COURSE_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::SUBJECT_TABLE,
+                       $this->configService->getTableOwner(),
+                       TableDefinition::ROOM_TABLE,
+                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
+                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
+                       TableDefinition::ROOM_TABLE_FIELD_ID,
+                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY);
+
+        try {
+            $room = $this->dataSource->getConnection()
+                ->query($sql)
+                ->execute(OCI_DEFAULT)
+                ->firstResult();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query room', $e);
+        }
+
+        return $this->fetchRoom($room);
+    }
+    //endregion
+
+    private function fetchRooms(array $rooms): array {
+        $res = array();
+
+        foreach ($rooms as $room) {
+            $res[] = $this->fetchRoom($room);
         }
 
         return $res;
     }
 
-    #[Override]
-    public function getRoomIdWithMostMathSubjects(): IRoom {
-        $sql = sprintf("SELECT %s
-                    FROM (
-                             SELECT c.%s, COUNT(*) AS math_subject_count
-                             FROM %s.%s c
-                                      JOIN %s.%s s ON c.%s = s.%s
-                             WHERE s.%s = 'Matematika'
-                             GROUP BY c.%s
-                             ORDER BY math_subject_count DESC
-                         )
-                    WHERE ROWNUM = 1",
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::COURSE_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::SUBJECT_TABLE,
-                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID);
-
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (oci_fetch($stmt)) {
-            $roomId = oci_result($stmt, 'ROOM_ID');
-        } else {
-            $roomId = 0;
-        }
-
-        oci_free_statement($stmt);
-
-        return new Room($roomId);
+    private function fetchRoom(array $room): IRoom {
+        return new Room(
+            $room['ID'],
+            $room['CAPACITY']);
     }
-
-    #[Override]
-    public function getRoomIdWithMostInfoSubjects(): IRoom {
-        $sql = sprintf("SELECT %s
-                    FROM (
-                             SELECT c.%s, COUNT(*) AS math_subject_count
-                             FROM %s.%s c
-                                      JOIN %s.%s s ON c.%s = s.%s
-                             WHERE s.%s = 'Informatika'
-                             GROUP BY c.%s
-                             ORDER BY math_subject_count DESC
-                         )
-                    WHERE ROWNUM = 1",
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::COURSE_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::SUBJECT_TABLE,
-                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID);
-
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (oci_fetch($stmt)) {
-            $roomId = oci_result($stmt, 'ROOM_ID');
-        }
-
-        oci_free_statement($stmt);
-
-        return new Room($roomId);
-    }
-    //endregion
 }
