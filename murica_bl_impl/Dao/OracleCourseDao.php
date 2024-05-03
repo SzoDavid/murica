@@ -61,7 +61,8 @@ class OracleCourseDao implements ICourseDao {
                 ->bind(':schedule', $schedule)
                 ->bind(':term', $term)
                 ->bind(':roomId', $roomId)
-                ->execute(OCI_COMMIT_ON_SUCCESS);
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
         } catch (OciException $exception) {
             throw new DataAccessException('Failed to create Course', $exception);
         }
@@ -102,7 +103,8 @@ class OracleCourseDao implements ICourseDao {
                 ->bind(':schedule', $schedule)
                 ->bind(':term', $term)
                 ->bind(':roomId', $roomId)
-                ->execute(OCI_COMMIT_ON_SUCCESS);
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
         } catch (OciException $exception) {
             throw new DataAccessException('Failed to update Course', $exception);
         }
@@ -130,7 +132,8 @@ class OracleCourseDao implements ICourseDao {
                 ->query($sql)
                 ->bind(':subjectId', $subjectId)
                 ->bind(':id', $id)
-                ->execute(OCI_COMMIT_ON_SUCCESS);
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
         } catch (OciException $e) {
             throw new DataAccessException('Failed to delete Course', $e);
         }

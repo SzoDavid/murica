@@ -6,6 +6,7 @@ use murica_bl\Orm\Exception\OciException;
 
 interface IOrm {
     public function close(): void;
+    public function free(): IOrm;
     /**
      * @throws OciException
      */
@@ -19,5 +20,5 @@ interface IOrm {
     /**
      * @throws OciException
      */
-    public function bind($name, &$variable): IOrm;
+    public function bind($name, &$variable, $size=-1): IOrm;
 }

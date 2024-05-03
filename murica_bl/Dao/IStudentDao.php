@@ -32,9 +32,9 @@ interface IStudentDao {
     /**
      * @throws DataAccessException
      */
-    public function countDistinctStudentsInMathematics();
+    public function calculateKi(IStudent $model): string;
     /**
      * @throws DataAccessException
      */
-    public function countDistinctStudentsInInformatics();
+    public function calculateKki(IStudent $model): string;
 }

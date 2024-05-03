@@ -45,7 +45,8 @@ class OracleAdminDao implements IAdminDao {
             $this->dataSource->getConnection()
                 ->query($sql)
                 ->bind(':id', $id)
-                ->execute(OCI_COMMIT_ON_SUCCESS);
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
         } catch (OciException $e) {
             throw new DataAccessException('Failed to create admin', $e);
         }
@@ -66,7 +67,8 @@ class OracleAdminDao implements IAdminDao {
             $this->dataSource->getConnection()
                 ->query($sql)
                 ->bind(':id', $id)
-                ->execute(OCI_COMMIT_ON_SUCCESS);
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
         } catch (OciException $e) {
             throw new DataAccessException('Failed to delete admin', $e);
         }

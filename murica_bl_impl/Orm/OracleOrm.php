@@ -25,7 +25,13 @@ class OracleOrm implements IOrm {
     }
 
     public function close(): void {
+        oci_free_statement($this->stmt);
         oci_close($this->connection);
+    }
+
+    public function free(): IOrm {
+        oci_free_statement($this->stmt);
+        return $this;
     }
 
     public function query(string $sql): IOrm {
@@ -38,6 +44,8 @@ class OracleOrm implements IOrm {
     public function execute(int $mode): IOrm {
         if (!oci_execute($this->stmt, $mode))
             throw new OciException(json_encode(oci_error($this->stmt)));
+
+        return $this;
     }
 
     public function result(): array {
@@ -46,17 +54,21 @@ class OracleOrm implements IOrm {
         // delete last NULL element
         array_pop($res);
 
+        $this->free();
+
         return $res;
     }
 
     public function firstResult(): array {
-        return oci_fetch_assoc($this->stmt);
+        $res = oci_fetch_assoc($this->stmt);
+        $this->free();
+        return $res;
     }
 
-    public function bind($name, &$variable): IOrm {
-        $resp = is_numeric($variable)
-            ? oci_bind_by_name($this->stmt, $name, $variable, -1, SQLT_INT)
-            : oci_bind_by_name($this->stmt, $name, $variable, -1);
+    public function bind($name, &$variable, $size=-1): IOrm {
+        $resp = isset($variable) && is_numeric($variable)
+            ? oci_bind_by_name($this->stmt, $name, $variable, $size, SQLT_INT)
+            : oci_bind_by_name($this->stmt, $name, $variable, $size);
 
         if (!$resp) throw new OciException("Couldn't bind parameter $name: " . json_encode(oci_error($this->stmt)));
 

@@ -6,6 +6,7 @@ use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\ITakenCourseDao;
 use murica_bl\Dto\ITakenCourse;
+use murica_bl\Orm\Exception\OciException;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Course;
 use murica_bl_impl\Dto\Programme;
@@ -49,9 +50,6 @@ class OracleTakenCourseDao implements ITakenCourseDao {
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_GRADE,
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_APPROVED);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $userId = $model->getStudent()->getUser()->getId();
         $programmeName = $model->getStudent()->getProgramme()->getName();
         $programmeType = $model->getStudent()->getProgramme()->getType();
@@ -60,17 +58,21 @@ class OracleTakenCourseDao implements ITakenCourseDao {
         $grade = $model->getGrade();
         $approved = $model->isApproved() ? 1 : 0;
 
-        if (!oci_bind_by_name($stmt, ':userId', $userId, -1) ||
-            !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1) ||
-            !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1) ||
-            !oci_bind_by_name($stmt, ':courseId', $courseId, -1) ||
-            !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1) ||
-            !oci_bind_by_name($stmt, ':grade', $grade, -1) ||
-            !oci_bind_by_name($stmt, ':approved', $approved, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':userId', $userId)
+                ->bind(':programmeName', $programmeName)
+                ->bind(':programmeType', $programmeType)
+                ->bind(':courseId', $courseId)
+                ->bind(':subjectId', $subjectId)
+                ->bind(':grade', $grade)
+                ->bind(':approved', $approved)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to create taken course', $e);
+        }
 
         return $this->findByCrit(new TakenCourse($model->getStudent(), $model->getCourse()))[0];
     }
@@ -93,9 +95,6 @@ class OracleTakenCourseDao implements ITakenCourseDao {
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID,
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $userId = $model->getStudent()->getUser()->getId();
         $programmeName = $model->getStudent()->getProgramme()->getName();
         $programmeType = $model->getStudent()->getProgramme()->getType();
@@ -104,17 +103,21 @@ class OracleTakenCourseDao implements ITakenCourseDao {
         $grade = $model->getGrade();
         $approved = $model->isApproved() ? 1 : 0;
 
-        if (!oci_bind_by_name($stmt, ':userId', $userId, -1) ||
-            !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1) ||
-            !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1) ||
-            !oci_bind_by_name($stmt, ':courseId', $courseId, -1) ||
-            !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1) ||
-            !oci_bind_by_name($stmt, ':grade', $grade, -1) ||
-            !oci_bind_by_name($stmt, ':approved', $approved, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':userId', $userId)
+                ->bind(':programmeName', $programmeName)
+                ->bind(':programmeType', $programmeType)
+                ->bind(':courseId', $courseId)
+                ->bind(':subjectId', $subjectId)
+                ->bind(':grade', $grade)
+                ->bind(':approved', $approved)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to update taken course', $e);
+        }
 
         return $this->findByCrit(new TakenCourse($model->getStudent(), $model->getCourse()))[0];
     }
@@ -133,24 +136,25 @@ class OracleTakenCourseDao implements ITakenCourseDao {
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID,
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $userId = $model->getStudent()->getUser()->getId();
         $programmeName = $model->getStudent()->getProgramme()->getName();
         $programmeType = $model->getStudent()->getProgramme()->getType();
         $courseId = $model->getCourse()->getId();
         $subjectId = $model->getCourse()->getSubject()->getId();
 
-        if (!oci_bind_by_name($stmt, ':userId', $userId, -1) ||
-            !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1) ||
-            !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1) ||
-            !oci_bind_by_name($stmt, ':courseId', $courseId, -1) ||
-            !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':userId', $userId)
+                ->bind(':programmeName', $programmeName)
+                ->bind(':programmeType', $programmeType)
+                ->bind(':courseId', $courseId)
+                ->bind(':subjectId', $subjectId)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to delete taken course', $e);
+        }
     }
 
     /**
@@ -158,8 +162,6 @@ class OracleTakenCourseDao implements ITakenCourseDao {
      */
     #[Override]
     public function findAll(): array {
-        $res = array();
-
         $sql = sprintf("SELECT USR.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE,
                                 TKN.%s AS PROGRAMME_NAME, TKN.%s AS PROGRAMME_TYPE, STD.%s AS START_TERM, PRG.%s AS NO_TERMS,
                                 TKN.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, 
@@ -222,47 +224,16 @@ class OracleTakenCourseDao implements ITakenCourseDao {
                        TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
                        TableDefinition::PROGRAMME_TABLE_FIELD_TYPE);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        while (oci_fetch($stmt)) {
-            $res[] = new TakenCourse(
-                new Student(
-                    new User(
-                        oci_result($stmt, 'USER_ID'),
-                        oci_result($stmt, 'USER_NAME'),
-                        oci_result($stmt, 'EMAIL'),
-                        oci_result($stmt, 'PASSWORD'),
-                        oci_result($stmt, 'BIRTH_DATE')),
-                    new Programme(
-                        oci_result($stmt, 'PROGRAMME_NAME'),
-                        oci_result($stmt, 'PROGRAMME_TYPE'),
-                        oci_result($stmt, 'NO_TERMS')),
-                    oci_result($stmt, 'START_TERM')),
-                new Course(
-                    new Subject(
-                        oci_result($stmt, 'SUBJECT_ID'),
-                        oci_result($stmt, 'SUBJECT_NAME'),
-                        oci_result($stmt, 'APPROVAL'),
-                        oci_result($stmt, 'CREDIT'),
-                        oci_result($stmt, 'TYPE')),
-                    oci_result($stmt, 'CRS_ID'),
-                    oci_result($stmt, 'CRS_CAPACITY'),
-                    oci_result($stmt, 'SCHEDULE'),
-                    oci_result($stmt, 'TERM'),
-                    new Room(
-                        oci_result($stmt, 'ROOM_ID'),
-                        oci_result($stmt, 'ROOM_CAPACITY')
-                    )),
-                oci_result($stmt, 'GRADE'),
-                oci_result($stmt, 'APPROVED')
-            );
+        try {
+            $takenCourses = $this->dataSource->getConnection()
+                ->query($sql)
+                ->execute(OCI_DEFAULT)
+                ->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query taken courses', $e);
         }
 
-        return $res;
+        return $this->fetchTakenCourses($takenCourses);
     }
 
     /**
@@ -270,9 +241,6 @@ class OracleTakenCourseDao implements ITakenCourseDao {
      */
     #[Override]
     public function findByCrit(ITakenCourse $model): array {
-        $res = array();
-        $crits = array();
-
         $sql = sprintf("SELECT USR.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE,
                                 TKN.%s AS PROGRAMME_NAME, TKN.%s AS PROGRAMME_TYPE, STD.%s AS START_TERM, PRG.%s AS NO_TERMS,
                                 TKN.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, 
@@ -352,54 +320,59 @@ class OracleTakenCourseDao implements ITakenCourseDao {
         if (!empty($crits))
             $sql .= " AND " . implode(" AND ", $crits);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException('parse ' . json_encode(oci_error($stmt)));
+        try {
+            $stmt = $this->dataSource->getConnection()->query($sql);
 
-        if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
-            throw new DataAccessException('bind user id ' . json_encode(oci_error($stmt)));
-        if (isset($courseId) && !oci_bind_by_name($stmt, ':courseId', $courseId, -1))
-            throw new DataAccessException('bind course id ' . json_encode(oci_error($stmt)));
-        if (isset($subjectId) && !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-            throw new DataAccessException('bind subject id ' . json_encode(oci_error($stmt)));
+            if (isset($userId)) $stmt->bind(':userId', $userId);
+            if (isset($courseId)) $stmt->bind(':courseId', $courseId);
+            if (isset($subjectId)) $stmt->bind(':subjectId', $subjectId);
 
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException('exec ' . json_encode(oci_error($stmt)));
+            $takenCourses = $stmt->execute(OCI_DEFAULT)->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query subjects', $e);
+        }
 
-        while (oci_fetch($stmt)) {
+        return $this->fetchTakenCourses($takenCourses);
+    }
+    //endregion
+
+    private function fetchTakenCourses(array $takenCourses): array {
+        $res = array();
+
+        foreach ($takenCourses as $course) {
             $res[] = new TakenCourse(
                 new Student(
                     new User(
-                        oci_result($stmt, 'USER_ID'),
-                        oci_result($stmt, 'USER_NAME'),
-                        oci_result($stmt, 'EMAIL'),
-                        oci_result($stmt, 'PASSWORD'),
-                        oci_result($stmt, 'BIRTH_DATE')),
+                        $course['USER_ID'],
+                        $course['USER_NAME'],
+                        $course['EMAIL'],
+                        $course['PASSWORD'],
+                        $course['BIRTH_DATE']),
                     new Programme(
-                        oci_result($stmt, 'PROGRAMME_NAME'),
-                        oci_result($stmt, 'PROGRAMME_TYPE'),
-                        oci_result($stmt, 'NO_TERMS')),
-                    oci_result($stmt, 'START_TERM')),
+                        $course['PROGRAMME_NAME'],
+                        $course['PROGRAMME_TYPE'],
+                        $course['NO_TERMS']),
+                    $course['START_TERM']),
                 new Course(
                     new Subject(
-                        oci_result($stmt, 'SUBJECT_ID'),
-                        oci_result($stmt, 'SUBJECT_NAME'),
-                        oci_result($stmt, 'APPROVAL'),
-                        oci_result($stmt, 'CREDIT'),
-                        oci_result($stmt, 'TYPE')),
-                    oci_result($stmt, 'CRS_ID'),
-                    oci_result($stmt, 'CRS_CAPACITY'),
-                    oci_result($stmt, 'SCHEDULE'),
-                    oci_result($stmt, 'TERM'),
+                        $course['SUBJECT_ID'],
+                        $course['SUBJECT_NAME'],
+                        $course['APPROVAL'],
+                        $course['CREDIT'],
+                        $course['TYPE']),
+                    $course['CRS_ID'],
+                    $course['CRS_CAPACITY'],
+                    $course['SCHEDULE'],
+                    $course['TERM'],
                     new Room(
-                        oci_result($stmt, 'ROOM_ID'),
-                        oci_result($stmt, 'ROOM_CAPACITY')
+                        $course['ROOM_ID'],
+                        $course['ROOM_CAPACITY']
                     )),
-                oci_result($stmt, 'GRADE'),
-                oci_result($stmt, 'APPROVED')
+                $course['GRADE'],
+                $course['APPROVED']
             );
         }
 
         return $res;
     }
-    //endregion
 }

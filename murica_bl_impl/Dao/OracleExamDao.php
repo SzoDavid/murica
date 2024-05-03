@@ -62,7 +62,8 @@ class OracleExamDao implements IExamDao {
                 ->bind(':endTime', $endTime)
                 ->bind(':teacherId', $teacherId)
                 ->bind(':roomId', $roomId)
-                ->execute(OCI_COMMIT_ON_SUCCESS);
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
         } catch (OciException $e) {
             throw new DataAccessException('Failed to create exam', $e);
         }
@@ -101,7 +102,8 @@ class OracleExamDao implements IExamDao {
                 ->bind(':endTime', $endTime)
                 ->bind(':teacherId', $teacherId)
                 ->bind(':roomId', $roomId)
-                ->execute(OCI_COMMIT_ON_SUCCESS);
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
         } catch (OciException $e) {
             throw new DataAccessException('Failed to update exam', $e);
         }
@@ -128,7 +130,8 @@ class OracleExamDao implements IExamDao {
                 ->query($sql)
                 ->bind(':subjectId', $subjectId)
                 ->bind(':id', $id)
-                ->execute(OCI_COMMIT_ON_SUCCESS);
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
         } catch (OciException $e) {
             throw new DataAccessException('Failed to delete exam', $e);
         }

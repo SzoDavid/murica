@@ -59,7 +59,8 @@ class OracleMessageDao implements IMessageDao {
                 ->bind(':subject', $subject)
                 ->bind(':content', $content)
                 ->bind(':date', $date)
-                ->execute(OCI_COMMIT_ON_SUCCESS);
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
         } catch (OciException $e) {
             throw new DataAccessException('Failed to create message', $e);
         }

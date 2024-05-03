@@ -54,7 +54,8 @@ class OracleCourseTeachDao implements ICourseTeachDao {
                 ->bind(':userId', $userId)
                 ->bind(':courseId', $courseId)
                 ->bind(':subjectId', $subjectId)
-                ->execute(OCI_COMMIT_ON_SUCCESS);
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
         } catch (OciException $e) {
             throw new DataAccessException('Failed to create courseTeach', $e);
         }
@@ -84,7 +85,8 @@ class OracleCourseTeachDao implements ICourseTeachDao {
                 ->bind(':userId', $userId)
                 ->bind(':courseId', $courseId)
                 ->bind(':subjectId', $subjectId)
-                ->execute(OCI_COMMIT_ON_SUCCESS);
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
         } catch (OciException $e) {
             throw new DataAccessException('Failed to delete courseTeach', $e);
         }

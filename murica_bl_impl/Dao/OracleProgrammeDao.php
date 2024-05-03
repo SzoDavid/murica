@@ -6,6 +6,7 @@ use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IProgrammeDao;
 use murica_bl\Dto\IProgramme;
+use murica_bl\Orm\Exception\OciException;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Programme;
 use murica_bl_impl\Services\ConfigService\OracleDataSourceConfigService;
@@ -39,20 +40,21 @@ class OracleProgrammeDao implements IProgrammeDao {
                        TableDefinition::PROGRAMME_TABLE_FIELD_TYPE,
                        TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $name = $model->getName();
         $type = $model->getType();
         $noTerms = $model->getNoTerms();
 
-        if (!oci_bind_by_name($stmt, ':name', $name, -1) ||
-            !oci_bind_by_name($stmt, ':type', $type, -1) ||
-            !oci_bind_by_name($stmt, ':noTerms', $noTerms, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':name', $name)
+                ->bind(':type', $type)
+                ->bind(':noTerms', $noTerms)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to create programme', $e);
+        }
 
         return $this->findByCrit(new Programme($name, $type))[0];
     }
@@ -71,20 +73,21 @@ class OracleProgrammeDao implements IProgrammeDao {
                        TableDefinition::PROGRAMME_TABLE_FIELD_NAME,
                        TableDefinition::PROGRAMME_TABLE_FIELD_TYPE);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $name = $model->getName();
         $type = $model->getType();
         $noTerms = $model->getNoTerms();
 
-        if (!oci_bind_by_name($stmt, ':name', $name, -1) ||
-            !oci_bind_by_name($stmt, ':type', $type, -1) ||
-            !oci_bind_by_name($stmt, ':noTerms', $noTerms, -1))
-                throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':name', $name)
+                ->bind(':type', $type)
+                ->bind(':noTerms', $noTerms)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to update programme', $e);
+        }
 
         return $this->findByCrit(new Programme($name, $type))[0];
     }
@@ -100,19 +103,19 @@ class OracleProgrammeDao implements IProgrammeDao {
                        TableDefinition::PROGRAMME_TABLE_FIELD_NAME,
                        TableDefinition::PROGRAMME_TABLE_FIELD_TYPE);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $name = $model->getName();
         $type = $model->getType();
 
-        if (!oci_bind_by_name($stmt, ':name', $name, -1) ||
-            !oci_bind_by_name($stmt, ':type', $type, -1))
-                throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':name', $name)
+                ->bind(':type', $type)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to delete programme', $e);
+        }
     }
 
     /**
@@ -120,8 +123,6 @@ class OracleProgrammeDao implements IProgrammeDao {
      */
     #[Override]
     public function findAll(): array {
-        $res = array();
-
         $sql = sprintf("SELECT %s AS NAME, %s AS TYPE, %s AS NO_TERMS FROM %s.%s",
                        TableDefinition::PROGRAMME_TABLE_FIELD_NAME,
                        TableDefinition::PROGRAMME_TABLE_FIELD_TYPE,
@@ -129,21 +130,16 @@ class OracleProgrammeDao implements IProgrammeDao {
                        $this->configService->getTableOwner(),
                        TableDefinition::PROGRAMME_TABLE);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        while (oci_fetch($stmt)) {
-            $res[] = new Programme(
-                oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'TYPE'),
-                oci_result($stmt, 'NO_TERMS')
-            );
+        try {
+            $programmes = $this->dataSource->getConnection()
+                ->query($sql)
+                ->execute(OCI_DEFAULT)
+                ->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query programmes', $e);
         }
 
-        return $res;
+        return $this->fetchProgrammes($programmes);
     }
 
     /**
@@ -151,7 +147,6 @@ class OracleProgrammeDao implements IProgrammeDao {
      */
     #[Override]
     public function findByCrit(IProgramme $model): array {
-        $res = array();
         $crits = array();
 
         $sql = sprintf("SELECT %s AS NAME, %s AS TYPE, %s AS NO_TERMS FROM %s.%s",
@@ -172,28 +167,32 @@ class OracleProgrammeDao implements IProgrammeDao {
         if (!empty($crits))
             $sql .= " WHERE " . implode(" AND ", $crits);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException('parse ' . json_encode(oci_error($stmt)));
+        try {
+            $stmt = $this->dataSource->getConnection()->query($sql);
 
-        if (isset($name) && !oci_bind_by_name($stmt, ':name', $name, -1))
-            throw new DataAccessException('bind name ' . json_encode(oci_error($stmt)));
-        if (isset($type) && !oci_bind_by_name($stmt, ':type', $type, -1))
-            throw new DataAccessException('bind type ' . json_encode(oci_error($stmt)));
-        if (isset($noTerms) && !oci_bind_by_name($stmt, ':noTerms', $noTerms, -1))
-            throw new DataAccessException('bind noTerms ' . json_encode(oci_error($stmt)));
+            if (isset($name)) $stmt->bind(':name', $name);
+            if (isset($type)) $stmt->bind(':type', $type);
+            if (isset($noTerms)) $stmt->bind(':noTerms', $noTerms);
 
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+            $programmes = $stmt->execute(OCI_DEFAULT)->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query programmes', $e);
+        }
 
-        while (oci_fetch($stmt)) {
+        return $this->fetchProgrammes($programmes);
+    }
+    //endregion
+
+    private function fetchProgrammes(array $programmes): array {
+        $res = array();
+
+        foreach ($programmes as $programme) {
             $res[] = new Programme(
-                oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'TYPE'),
-                oci_result($stmt, 'NO_TERMS')
-            );
+                $programme['NAME'],
+                $programme['TYPE'],
+                $programme['NO_TERMS']);
         }
 
         return $res;
     }
-    //endregion
 }
