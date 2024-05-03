@@ -69,8 +69,7 @@ class CourseController extends Controller {
             ->registerEndpoint('registerCourse', 'register', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('unregisterCourse', 'unregister', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('addTeacherToCourse', 'add', EndpointRoute::VISIBILITY_PRIVATE)
-            ->registerEndpoint('calculateKi', 'ki', EndpointRoute::VISIBILITY_PRIVATE)
-            ->registerEndpoint('calculateKki', 'kki', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('calculateAverages', 'averages', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('removeTeacherFromCourse', 'remove', EndpointRoute::VISIBILITY_PRIVATE);
 
     }
@@ -381,7 +380,7 @@ class CourseController extends Controller {
 
             $takeCourses = $this->takenCourseDao->create(new TakenCourse($students[0],
                                                                          $courses[0],
-                                                                         0,
+                                                                         null,
                                                                          false));
 
             return (new EntityModel($this->router, $takeCourses[0], true))
@@ -494,7 +493,7 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to remove teacher from course', $e->getTraceMessages());
         }
     }
-    public function calculateKi(string $uri, array $requestData): IModel {
+    public function calculateAverages(string $uri, array $requestData): IModel {
          if (!isset($requestData['programmeName']))
             return new ErrorModel($this->router, 400, 'Failed to register Course', 'Parameter "programmeName" is not provided in uri');
         if (!isset($requestData['programmeType']))
@@ -504,46 +503,19 @@ class CourseController extends Controller {
         $user = $requestData['token']->getUser();
 
         try {
-            //TODO: findbycrit doesnt work
-            /*
             $students = $this->studentDao->findByCrit(new Student(new User($user->getId()), new Programme($requestData['programmeName'], $requestData['programmeType'])));
             if (empty($students)) {
                 return new ErrorModel($this->router, 403, 'Failed to register course', 'Access is forbidden');
-            }*/
+            }
 
-            $res = $this->studentDao->plsqlCalcKi(new Student(new User($user->getId()), new Programme($requestData['programmeName'], $requestData['programmeType'])));
+            $ki = $this->studentDao->calculateKi($students[0]);
+            $kki = $this->studentDao->calculateKki($students[0]);
 
-            return (new MessageModel($this->router, ['value' => $res], true))
+            return (new MessageModel($this->router, ['ki' => $ki, 'kki' => $kki], true))
                 ->linkTo('allCourses', CourseController::class, 'allCourses')
-                ->withSelfRef(CourseController::class, 'calculateKi', [], ['userId' => $user->getId(),'programmeName' => $requestData['programmeName'], 'programmeType' => $requestData['programmeType']]);
-        } catch (DataAccessException|ValidationException|ModelException $e) {
+                ->withSelfRef(CourseController::class, 'calculateAverages', [], ['userId' => $user->getId(),'programmeName' => $requestData['programmeName'], 'programmeType' => $requestData['programmeType']]);
+        } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to calculate ki', $e->getTraceMessages());
-        }
-    }
-    public function calculateKki(string $uri, array $requestData): IModel {
-        if (!isset($requestData['programmeName']))
-            return new ErrorModel($this->router, 400, 'Failed to register Course', 'Parameter "programmeName" is not provided in uri');
-        if (!isset($requestData['programmeType']))
-            return new ErrorModel($this->router, 400, 'Failed to register Course', 'Parameter "programmeType" is not provided in uri');
-
-        /* @var $user IUser */
-        $user = $requestData['token']->getUser();
-
-        try {
-            //TODO: findbycrit doesnt work
-            /*
-            $students = $this->studentDao->findByCrit(new Student(new User($user->getId()), new Programme($requestData['programmeName'], $requestData['programmeType'])));
-            if (empty($students)) {
-                return new ErrorModel($this->router, 403, 'Failed to register course', 'Access is forbidden');
-            }*/
-
-            $res = $this->studentDao->plsqlCalcKki(new Student(new User($user->getId()), new Programme($requestData['programmeName'], $requestData['programmeType'])));
-
-            return (new MessageModel($this->router, ['value' => $res], true))
-                ->linkTo('allCourses', CourseController::class, 'allCourses')
-                ->withSelfRef(CourseController::class, 'calculateKki', [], ['userId' => $user->getId(),'programmeName' => $requestData['programmeName'], 'programmeType' => $requestData['programmeType']]);
-        } catch (DataAccessException|ValidationException|ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to calculate kki', $e->getTraceMessages());
         }
     }
     //endregion

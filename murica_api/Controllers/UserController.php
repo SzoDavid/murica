@@ -28,16 +28,14 @@ class UserController extends Controller {
     private IUserDao $userDao;
     private IAdminDao $adminDao;
     private ICourseTeachDao $courseTeachDao;
-    private IStudentDao $studentDao;
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router, IUserDao $userDao, IAdminDao $adminDao, ICourseTeachDao $courseTeachDao, IStudentDao $studentDao) {
+    public function __construct(IRouter $router, IUserDao $userDao, IAdminDao $adminDao, ICourseTeachDao $courseTeachDao) {
         parent::__construct($router);
         $this->userDao = $userDao;
         $this->adminDao = $adminDao;
         $this->courseTeachDao = $courseTeachDao;
-        $this->studentDao = $studentDao;
 
         $this->router->registerController($this, 'user')
             ->registerEndpoint('allUsers', 'all', EndpointRoute::VISIBILITY_PRIVATE)
@@ -45,8 +43,6 @@ class UserController extends Controller {
             ->registerEndpoint('getTeachersByCourse', 'teachers', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('createUser', 'new', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('updateUser', 'update', EndpointRoute::VISIBILITY_PRIVATE)
-            ->registerEndpoint('mathUserCount', 'mathCount', EndpointRoute::VISIBILITY_PRIVATE)
-            ->registerEndpoint('infUserCount', 'infCount', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('deleteUser', 'delete', EndpointRoute::VISIBILITY_PRIVATE);
     }
     //endregion
@@ -270,29 +266,6 @@ class UserController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to delete user', $e->getTraceMessages());
         }
     }
-
-    public function mathUserCount(string $uri, array $requestData): IModel {
-        try {
-            $res = $this->studentDao->countDistinctStudentsInMathematics();
-
-            return (new MessageModel($this->router, ['value' => $res], true))
-                ->withSelfRef(UserController::class, 'mathUserCount', [], []);
-        } catch (DataAccessException|ValidationException|ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to get math user count', $e->getTraceMessages());
-        }
-    }
-
-    public function infUserCount(string $uri, array $requestData): IModel {
-        try {
-            $res = $this->studentDao->countDistinctStudentsInInformatics();
-
-            return (new MessageModel($this->router, ['value' => $res], true))
-                ->withSelfRef(UserController::class, 'infUserCount', [], []);
-        } catch (DataAccessException|ValidationException|ModelException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to get inf user count', $e->getTraceMessages());
-        }
-    }
-
     //endregion
 
 }

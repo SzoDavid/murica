@@ -6,6 +6,7 @@ use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\IUser;
+use murica_bl\Orm\Exception\OciException;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\User;
 use murica_bl_impl\Services\ConfigService\OracleDataSourceConfigService;
@@ -41,24 +42,25 @@ class OracleUserDao implements IUserDao {
                        TableDefinition::USER_TABLE_FIELD_PASSWORD,
                        TableDefinition::USER_TABLE_FIELD_BIRTH_DATE);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $id = $model->getId();
         $name = $model->getName();
         $email = $model->getEmail();
         $password = $model->getPassword();
         $birth_date = $model->getBirthDate();
 
-        if (!oci_bind_by_name($stmt, ':id', $id, -1) ||
-            !oci_bind_by_name($stmt, ':name', $name, -1) ||
-            !oci_bind_by_name($stmt, ':email', $email, -1) ||
-            !oci_bind_by_name($stmt, ':password', $password, -1) ||
-            !oci_bind_by_name($stmt, ':birth_date', $birth_date, -1))
-                throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':id', $id)
+                ->bind(':name', $name)
+                ->bind(':email', $email)
+                ->bind(':password', $password)
+                ->bind(':birth_date', $birth_date)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to create user', $e);
+        }
 
         return $this->findByCrit(new User($model->getId()))[0];
     }
@@ -79,24 +81,25 @@ class OracleUserDao implements IUserDao {
                        TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
                        TableDefinition::USER_TABLE_FIELD_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $id = $model->getId();
         $name = $model->getName();
         $email = $model->getEmail();
         $password = $model->getPassword();
         $birth_date = $model->getBirthDate();
 
-        if (!oci_bind_by_name($stmt, ':id', $id, -1) ||
-            !oci_bind_by_name($stmt, ':name', $name, -1) ||
-            !oci_bind_by_name($stmt, ':email', $email, -1) ||
-            !oci_bind_by_name($stmt, ':password', $password, -1) ||
-            !oci_bind_by_name($stmt, ':birth_date', $birth_date, -1))
-                throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':id', $id)
+                ->bind(':name', $name)
+                ->bind(':email', $email)
+                ->bind(':password', $password)
+                ->bind(':birth_date', $birth_date)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to update user', $e);
+        }
 
         return $this->findByCrit(new User($model->getId()))[0];
     }
@@ -111,16 +114,17 @@ class OracleUserDao implements IUserDao {
                        TableDefinition::USER_TABLE,
                        TableDefinition::USER_TABLE_FIELD_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $id = $model->getId();
 
-        if (!oci_bind_by_name($stmt, ':id', $id, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':id', $id)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to create user', $e);
+        }
     }
 
     /**
@@ -128,8 +132,6 @@ class OracleUserDao implements IUserDao {
      */
     #[Override]
     public function findAll(): array {
-        $res = array();
-
         $sql = sprintf("SELECT %s AS ID, %s AS NAME, %s AS EMAIL, %s AS PASSWORD, TO_CHAR(%s,'YYYY-MM-DD') AS BIRTH_DATE FROM %s.%s",
             TableDefinition::USER_TABLE_FIELD_ID,
             TableDefinition::USER_TABLE_FIELD_NAME,
@@ -140,23 +142,16 @@ class OracleUserDao implements IUserDao {
             TableDefinition::USER_TABLE
         );
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        while (oci_fetch($stmt)) {
-            $res[] = new User(
-                oci_result($stmt, 'ID'),
-                oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'EMAIL'),
-                oci_result($stmt, 'PASSWORD'),
-                oci_result($stmt, 'BIRTH_DATE')
-            );
+        try {
+            $users = $this->dataSource->getConnection()
+                ->query($sql)
+                ->execute(OCI_DEFAULT)
+                ->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query users', $e);
         }
 
-        return $res;
+        return $this->fetchUsers($users);
     }
 
     /**
@@ -190,30 +185,34 @@ class OracleUserDao implements IUserDao {
         if (!empty($crits))
             $sql .= " WHERE " . implode(" AND ", $crits);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException('parse ' . json_encode(oci_error($stmt)));
+        try {
+            $stmt = $this->dataSource->getConnection()->query($sql);
 
-        if (isset($id) && !oci_bind_by_name($stmt, ':id', $id, -1))
-            throw new DataAccessException('bind id ' . json_encode(oci_error($stmt)));
-        if (isset($name) && !oci_bind_by_name($stmt, ':name', $name, -1))
-            throw new DataAccessException('bind name ' . json_encode(oci_error($stmt)));
-        if (isset($email) && !oci_bind_by_name($stmt, ':email', $email, -1))
-            throw new DataAccessException('bind email ' . json_encode(oci_error($stmt)));
+            if (isset($id)) $stmt->bind(':id', $id);
+            if (isset($name)) $stmt->bind(':name', $name);
+            if (isset($email)) $stmt->bind(':email', $email);
 
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException('exec ' . json_encode(oci_error($stmt)));
+            $users = $stmt->execute(OCI_DEFAULT)->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query taken exams', $e);
+        }
 
-        while (oci_fetch($stmt)) {
+        return $this->fetchUsers($users);
+    }
+    //endregion
+
+    private function fetchUsers(array $users): array {
+        $res = array();
+
+        foreach ($users as $user) {
             $res[] = new User(
-                oci_result($stmt, 'ID'),
-                oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'EMAIL'),
-                oci_result($stmt, 'PASSWORD'),
-                oci_result($stmt, 'BIRTH_DATE')
-            );
+                $user['ID'],
+                $user['NAME'],
+                $user['EMAIL'],
+                $user['PASSWORD'],
+                $user['BIRTH_DATE']);
         }
 
         return $res;
     }
-    //endregion
 }
