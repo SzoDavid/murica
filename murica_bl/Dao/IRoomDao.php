@@ -32,10 +32,10 @@ interface IRoomDao {
     /**
      * @throws DataAccessException
      */
-    public function getRoomIdWithMostMathSubjects();
+    public function getRoomIdWithMostMathSubjects(): IRoom;
     /**
      * @throws DataAccessException
      */
-    public function getRoomIdWithMostInfoSubjects();
+    public function getRoomIdWithMostInfoSubjects(): IRoom;
 
 }

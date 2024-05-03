@@ -77,7 +77,7 @@ const string2html = (string) => {
     return string.replace(/&/g, '&amp;')
         .replace(/>/g, '&gt;')
         .replace(/</g, '&lt;')
-        .replace(/\n/g, '<br>');
+        .replace(/\\n/g, '<br>');
 }
 
 class Button {
@@ -323,7 +323,8 @@ class SelfPage {
                 dateTime: 'Date Time'
             };
 
-            const messagesTable= new DropDownTable(tableColumns, response._embedded.message, (record) => { return messagesDetails(record, this.contentElement)}).build();
+            this.contentElement.append($('<h2>').text('Messages'));
+            const messagesTable= new DropDownTable(tableColumns, response._embedded.message, (record) => { return this.messagesDetails(record, this.contentElement)}).build();
             this.contentElement.append(messagesTable);
         });
 
@@ -361,34 +362,20 @@ class SelfPage {
         });
     }
 
-}
-/*
-function messages(contentElement) {
-    requestInvoker.executePost('messages/all', { token: tokenObj.token }).then((response) => {
-        console.log(response);
-        const tableColumns = {
-            subject: 'subject',
-            dateTime: 'dateTime'
-        };
+    messagesDetails(record, contentElement) {
+        let container = $('<div>');
 
-        const messagesTable= new DropDownTable(tableColumns, response._embedded, (record) => { return messagesDetails(record, this.contentElement)}).build();
-        contentElement.append(messagesTable);
-    });
-}
-*/
-function messagesDetails(record, contentElement) {
-    let container = $('<div>');
+        let table = $("<table>").addClass("editTable");
+        table.append(
+            $("<tr>").append(
+                $("<td>").text(record.content)
+            )
+        );
 
-    let table = $("<table>").addClass("editTable");
-    table.append(
-        $("<tr>").append(
-            $("<td>").text(record.content)
-        )
-    );
+        container.append(table);
 
-    container.append(table);
+        container.append($('<div>').prop('id', 'edit-subject-error').addClass('hidden error'));
 
-    container.append($('<div>').prop('id', 'edit-subject-error').addClass('hidden error'));
-
-    return container;
+        return container;
+    }
 }

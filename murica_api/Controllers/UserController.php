@@ -152,10 +152,12 @@ class UserController extends Controller {
             /* @var $teacher ICourseTeach */
             foreach ($teachers as $teacher) {
                 $userEntities[] = (new EntityModel($this->router, $teacher->getUser(), true))
+                    ->linkTo('removeTeacher', CourseController::class, 'removeTeacherFromCourse')
                     ->withSelfRef(UserController::class, 'getUserById', [$teacher->getUser()->getId()]);
             }
 
             return (new CollectionModel($this->router, $userEntities, 'teachers', true))
+                ->linkTo('assignTeacher', CourseController::class, 'addTeacherToCourse')
                 ->withSelfRef(UserController::class, 'getTeachersByCourse');
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,

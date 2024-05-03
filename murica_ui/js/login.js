@@ -1,9 +1,11 @@
-const apiUrl = 'http://localhost/murica_api/';
 const requestInvoker = new RequestInvoker(apiUrl);
 
 $(() => {
-    if (localStorage.getItem('token'))
-        window.location.href = 'index.php';
+    let tokenObj = JSON.parse(localStorage.getItem('token'));
+
+    if (tokenObj && new Date(tokenObj.expires_at) > new Date()) {
+        window.location.href = 'login.php';
+    }
 
     $('#login_form').on('submit', () => {
         let data = $('#login_form :input');
