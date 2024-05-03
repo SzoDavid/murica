@@ -457,7 +457,7 @@ class CourseController extends Controller {
             $teachCourse = $this->courseTeachDao->create(new CourseTeach($users[0],
                                                                          $courses[0]));
 
-            return (new EntityModel($this->router, $teachCourse[0], true))
+            return (new EntityModel($this->router, $teachCourse, true))
                 ->linkTo('allCourses', CourseController::class, 'allCourses')
                 ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId',[],['id' => $courses[0]->getId(),'subjectId' => $courses[0]->getSubject()->getId()]);
         } catch (DataAccessException|ValidationException|ModelException $e) {
@@ -483,8 +483,8 @@ class CourseController extends Controller {
         try {
             $teachCourses = $this->courseTeachDao->findByCrit(new CourseTeach(new User($requestData['teacherId']), new Course(new Subject($requestData['subjectId'], $requestData['id']))));
 
-            if (empty($users)) {
-                return new ErrorModel($this->router, 404, 'Failed to remove teacher from course', "Teacher not found user with id '{$requestData['teacherId']}' for course {$requestData['subjectId']}-{$requestData['id']}");
+            if (empty($teachCourses)) {
+                return new ErrorModel($this->router, 404, 'Failed to remove teacher from course', "Teacher not found with id '{$requestData['teacherId']}' for course {$requestData['subjectId']}-{$requestData['id']}");
             }
 
             $this->courseTeachDao->delete($teachCourses[0]);
@@ -493,6 +493,7 @@ class CourseController extends Controller {
             return new ErrorModel($this->router, 500, 'Failed to remove teacher from course', $e->getTraceMessages());
         }
     }
+
     public function calculateAverages(string $uri, array $requestData): IModel {
          if (!isset($requestData['programmeName']))
             return new ErrorModel($this->router, 400, 'Failed to register Course', 'Parameter "programmeName" is not provided in uri');

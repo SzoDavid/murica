@@ -1,4 +1,3 @@
-const apiUrl = 'http://localhost/murica_api/';
 const requestInvoker = new RequestInvoker(apiUrl);
 let tokenObj;
 
@@ -317,7 +316,6 @@ function removeCourse(course, contentElement) {
 //endregion
 
 //region Teachers
-
 function buildTeachers(contentElement, container, record) {
     container.append($('<h2>').text('Teachers'));
 
@@ -356,18 +354,50 @@ function buildTeachers(contentElement, container, record) {
             alert('Something unexpected happened. Please try again later!');
         }
 
-        bindClickListener(assignTeacherButton, () => { saveNewCourse(record, contentElement, response._links.add.href) })
+        bindClickListener(assignTeacherButton, () => { assignTeacher(record, contentElement, response._links.assignTeacher.href) })
 
         const tableColumns = {
             id: 'Id',
-            capacity: 'Capacity',
-            schedule: 'Schedule',
-            term: 'Term',
+            name: 'Name',
         };
 
-        const subjectsTable= new DropDownTable(tableColumns, response._embedded.teachers,
-            (courseRecord) => { return courseDetails(courseRecord, contentElement) }).build();
-        container.append(subjectsTable);
+        const teachersTable= new DropDownTable(tableColumns, response._embedded.teachers,
+            (teacherRecord) => { return buildTeacherDetails(contentElement, teacherRecord, record) }).build();
+        container.append(teachersTable);
+    });
+}
+
+function assignTeacher(record, contentElement, saveUrl) {
+    $('#assign-teacher-error').addClass('hidden');
+
+    requestInvoker.executePost(saveUrl, {
+        token: tokenObj.token,
+        id: record.id,
+        subjectId: record.subject.id,
+        teacherId: $('#assign-teacher-select :selected').val()
+    }).then((response) => {
+        if (response._success) subjects(contentElement);
+        else $('#assign-teacher-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
+
+function buildTeacherDetails(contentElement, record, course) {
+    let container = $('<div>');
+
+    container.append($('<div>').prop('id', 'remove-teacher-error').addClass('hidden error'));
+    container.append(new Button('Remove', () => { removeTeacher(contentElement, record, course) }).build());
+
+    return container;
+}
+
+function removeTeacher(contentElement, record, course) {
+    $('#remove-teacher-error').addClass('hidden');
+
+    console.log(record);
+
+    requestInvoker.executePost(record._links.removeTeacher.href, { token: tokenObj.token, id: course.id, subjectId: course.subject.id, teacherId: record.id }).then((response) => {
+        if (response._success) subjects(contentElement);
+        else $('#remove-teacher-error').html(string2html(response.error.details)).removeClass('hidden');
     });
 }
 
@@ -503,37 +533,6 @@ function users(contentElement) {
 
     $('#navbar .active').removeClass('active');
     $('#navbar-users').addClass('active');
-
-    contentElement.append($('<h2>').text('Statistics'));
-
-    let table = $("<table>").addClass("editTable");
-    let cell_math = $("<td>").attr('id', 'math-count');
-    let cell_inf = $("<td>").attr('id', 'inf-count');
-
-    table.append(
-        $("<tr>").append(
-            $("<th>").text("All Math students:"),
-            cell_math
-        ),
-        $("<tr>").append(
-            $("<th>").text("All Inf students:"),
-            cell_inf
-        )
-    );
-
-    requestInvoker.executePost('user/mathCount', {
-        token: tokenObj.token
-    }).then((response) => {
-        $('#math-count').text(response.value);
-    });
-
-    requestInvoker.executePost('user/infCount', {
-        token: tokenObj.token
-    }).then((response) => {
-        $('#inf-count').text(response.value);
-    });
-
-    contentElement.append(table);
 
     let newUserButton = new Button('New user').build();
     contentElement.append(newUserButton);
@@ -741,7 +740,7 @@ function setAdminRole(user, value, contentElement, links) {
     $('#edit-user-error').addClass('hidden');
 
     requestInvoker.executePost(value ? links.setAdmin.href : links.unsetAdmin.href, { token: tokenObj.token }).then((response) => {
-        if (response._success) rooms(contentElement);
+        if (response._success) users(contentElement);
         else $('#edit-user-error').html(string2html(response.error.details)).removeClass('hidden');
     });
 }
@@ -813,16 +812,11 @@ function rooms(contentElement) {
         )
     );
 
-    requestInvoker.executePost('room/mostMath', {
+    requestInvoker.executePost('room/stats', {
         token: tokenObj.token
     }).then((response) => {
-        $('#most-math').text(response.id);
-    });
-
-    requestInvoker.executePost('room/mostInf', {
-        token: tokenObj.token
-    }).then((response) => {
-        $('#most-inf').text(response.id);
+        $('#most-math').text(response.mostMath);
+        $('#most-inf').text(response.mostInf);
     });
 
     contentElement.append(table);

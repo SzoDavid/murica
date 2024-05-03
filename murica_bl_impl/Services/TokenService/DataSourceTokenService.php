@@ -42,10 +42,13 @@ class DataSourceTokenService implements ITokenService {
     public function verifyToken(string $token): IToken|false {
         $tokenDto = $this->tokenDao->findByToken($token);
 
-        if ($tokenDto && strtotime($tokenDto->getExpiresAt()) > time()) {
+        if (!$tokenDto) return false;
+
+        if (strtotime($tokenDto->getExpiresAt()) > time()) {
             return $tokenDto;
         }
 
+        $this->removeToken($token);
         return false;
     }
 

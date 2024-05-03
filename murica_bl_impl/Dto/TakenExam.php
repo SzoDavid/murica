@@ -57,8 +57,8 @@ class TakenExam extends Entity implements ITakenExam {
     public function validate(): bool {
         $errors = "";
         // TODO refactor validation to return false if no issues was found or a string with all the issues
-        if (empty($this->student) || $this->student->validate()) $errors .= '\nStudent is empty or invalid';
-        if (empty($this->exam) || $this->exam->validate()) $errors .= '\nExam is empty or invalid';
+        $this->student->validate();
+        $this->exam->validate();
 
         if (!empty($errors)) throw new ValidationException(ltrim($errors, '\n'));
 

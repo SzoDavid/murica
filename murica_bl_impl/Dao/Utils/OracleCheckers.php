@@ -14,12 +14,15 @@ class OracleCheckers {
      * @throws DataAccessException
      */
     public static function checkIfUserExists(IUser $user, OracleDataSourceConfigService $configService, OracleDataSource $dataSource): bool {
-        $sql = "SELECT * FROM {${$configService->getTableOwner()}}.{${TableDefinition::USER_TABLE}} WHERE %s = :id";
+        $sql = sprintf("SELECT * FROM %s.%s WHERE %s = :id",
+                       $configService->getTableOwner(),
+                       TableDefinition::USER_TABLE,
+                       TableDefinition::USER_TABLE_FIELD_ID);
 
         $id = $user->getId();
 
         try {
-            return empty($dataSource->getConnection()
+            return !empty($dataSource->getConnection()
                 ->query($sql)
                 ->bind(':id', $id)
                 ->execute(OCI_DEFAULT)
