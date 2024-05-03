@@ -55,7 +55,7 @@ const init = (requestInvoker, context) => {
 
     bindClickListener($('#navbar-logout'), () => {
         requestInvoker.executePost(tokenObj._links.logout.href, { token: tokenObj.token}).then(() => {
-            localStorage.removeItem('token');
+            localStorage.clear();
             window.location.href = 'login.php';
         });
     });

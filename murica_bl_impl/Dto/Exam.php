@@ -144,8 +144,7 @@ class Exam extends Entity implements IExam {
     public function jsonSerialize(): array {
         return [
             'subject' => $this->subject->jsonSerialize(),
-            'subjectName' => $this->subject->getName(),
-            'subjectId' => $this->subject->getId(),
+            'subjectName' => $this->subject->getName() . '[' . $this->subject->getId() . ']',
             'id' => $this->id,
             'startTime' => $this->startTime,
             'endTime' => $this->endTime,
