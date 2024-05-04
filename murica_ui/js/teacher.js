@@ -120,6 +120,9 @@ function exams(contentElement) {
     $('#navbar .active').removeClass('active');
     $('#navbar-exams').addClass('active');
 
+    let newExamButton = new Button('New exam').build();
+    contentElement.append(newExamButton);
+
     requestInvoker.executePost('exam/teachExams', { token: tokenObj.token }).then((response) => {
         if (!response._success) {
             console.error(response.error);
@@ -127,16 +130,122 @@ function exams(contentElement) {
             return;
         }
 
+        bindClickListener(newExamButton, () => { newExam(contentElement, response._links.new.href); });
+
         const tableColumns = {
             id: 'Id',
             subjectName: 'Subject',
-            startTerm: 'Start',
-            endTerm: 'End',
+            startTime: 'Start',
+            endTime: 'End',
             roomId: 'Room',
         };
 
-        const coursesTable= new Table(tableColumns, response._embedded.courses).build();
+        const coursesTable= new Table(tableColumns, response._embedded.exams).build();
         contentElement.append(coursesTable);
+    });
+}
+
+function newExam(contentElement, saveUrl) {
+    contentElement.empty();
+
+    contentElement.append($('<h1>').text('New exam'));
+
+    let table = $("<table>").addClass("editTable");
+    table.append(
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "exam-details-id").text("Id:")),
+            $("<td>").append($("<input>").attr({id: 'exam-details-id', type: 'text', maxlength: 6, required: true}))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "exam-details-start-time").text("Start time:")),
+            $("<td>").append($("<input>").attr({ id: "exam-details-start-time", type: "datetime-local", required: true }))
+        ),
+        $("<tr>").append(
+            $("<th>").append($("<label>").attr("for", "exam-details-end-time").text("End time:")),
+            $("<td>").append($("<input>").attr({ id: "exam-details-end-time", type: "time", required: true }))
+        ),
+        $('<tr>').append(
+            $("<th>").append($("<label>").attr("for", "exam-details-room").text("Room:")),
+            $('<select>').attr('id', 'exam-details-room')
+        ),
+        $('<tr>').append(
+            $("<th>").append($("<label>").attr("for", "exam-details-subject").text("Subject:")),
+            $('<select>').attr('id', 'exam-details-subject')
+        ),
+        $('<tr>').append(
+            $("<th>").append($("<label>").attr("for", "exam-details-teacher").text("Teacher:")),
+            $('<select>').attr('id', 'exam-details-teacher')
+        ),
+    );
+
+    contentElement.append(table);
+
+    requestInvoker.executePost('room/all', { token: tokenObj.token }).then((responseRoom) => {
+        if (!responseRoom._success) {
+            console.error(responseRoom.error);
+            alert('Something unexpected happened. Please try again later!');
+        }
+
+        let roomSelector = $('#exam-details-room');
+
+        $.each(responseRoom._embedded.rooms, (index, room) => {
+            roomSelector.append($('<option>').prop('value', room.id).text(room.id + ' (' + room.capacity + ')'));
+        });
+
+        requestInvoker.executePost('subject/byTeacher', { token: tokenObj.token }).then((responseSubject) => {
+            if (!responseSubject._success) {
+                console.error(responseSubject.error);
+                alert('Something unexpected happened. Please try again later!');
+                return;
+            }
+
+            let subjectSelector = $('#exam-details-subject');
+
+            $.each(responseSubject._embedded.subjects, (index, subject) => {
+                subjectSelector.append($('<option>').prop('value', subject.id).text(subject.id));
+            });
+
+            bindClickListener(subjectSelector, () => {
+                requestInvoker.executePost(responseSubject._links.teachers.href, { token: tokenObj.token, subjectId: $('#exam-details-subject :selected').val() }).then((responseTeacher) => {
+                    if (!responseTeacher._success) {
+                        console.error(responseTeacher.error);
+                        alert('Something unexpected happened. Please try again later!');
+                    }
+
+                    let teacherSelector = $('#exam-details-teacher');
+
+                    teacherSelector.empty();
+                    $.each(responseTeacher._embedded.teachers, (index, teacher) => {
+                        teacherSelector.append($('<option>').prop('value', teacher.id).text(teacher.name + ' (' + teacher.id + ')'));
+                    });
+                });
+            });
+        });
+    });
+
+    contentElement.append($('<div>').prop('id', 'new-exam-error').addClass('hidden error'));
+    contentElement.append(new Button('Save', () => { saveNewExam(contentElement, saveUrl) }).build());
+    contentElement.append(new Button('Cancel', () => { exams(contentElement); }).build());
+}
+
+function saveNewExam(contentElement, saveUrl) {
+    $('#new-exam-error').addClass('hidden');
+
+    let startTime = $('#exam-details-start-time').val().split('T');
+    let endTime = $('#exam-details-end-time').val()
+
+    requestInvoker.executePost(saveUrl, {
+        token: tokenObj.token,
+        id: $('#exam-details-id').val(),
+        startTime: `${startTime[0]} ${startTime[1]}`,
+        endTime: `${startTime[0]} ${endTime}`,
+        subjectId: $('#exam-details-subject :selected').val(),
+        roomId: $('#exam-details-room :selected').val(),
+        teacherId: $('#exam-details-teacher :selected').val(),
+    }).then((response) => {
+        console.log(response);
+        if (response._success) exams(contentElement);
+        else $('#new-exam-error').html(string2html(response.error.details)).removeClass('hidden');
     });
 }
 //endregion

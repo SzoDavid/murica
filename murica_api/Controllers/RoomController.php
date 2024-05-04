@@ -45,13 +45,6 @@ class RoomController extends Controller {
      */
     public function allRooms(string $uri, array $requestData): IModel {
         try {
-            if (!$this->checkIfAdmin($requestData, $this->adminDao))
-                return new ErrorModel($this->router, 403, 'Failed to query rooms', 'Access is forbidden');
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query rooms', $e->getTraceMessages());
-        }
-
-        try {
             $rooms = $this->roomDao->findAll();
 
             $roomEntities = array();

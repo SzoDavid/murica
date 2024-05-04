@@ -62,7 +62,7 @@ try {
     $userController = new UserController($router, $userDao, $adminDao, $courseTeachDao, $takenCourseDao);
     $programmeController = new ProgrammeController($router, $programmeDao, $adminDao);
     $roomController = new RoomController($router, $roomDao, $adminDao);
-    $subjectController = new SubjectController($router, $subjectDao, $adminDao);
+    $subjectController = new SubjectController($router, $subjectDao, $adminDao, $courseTeachDao);
     $examController = new ExamController($router, $examDao, $subjectDao, $roomDao, $takenExamDao, $studentDao, $adminDao,$userDao);
     $messageController = new MessageController($router, $messageDao);
     $roleController = new RoleController($router, $userDao, $adminDao, $studentDao, $programmeDao, $courseTeachDao);

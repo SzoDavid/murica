@@ -46,6 +46,7 @@ class UserController extends Controller {
             ->registerEndpoint('allUsers', 'all', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getUserById', '', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getTeachersByCourse', 'teachers', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getTeachersBySubject', 'teachersBySubject', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getStudentsByCourse', 'students', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('createUser', 'new', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('updateUser', 'update', EndpointRoute::VISIBILITY_PRIVATE)
@@ -138,13 +139,6 @@ class UserController extends Controller {
     }
 
     public function getTeachersByCourse(string $uri, array $requestData): IModel {
-        try {
-            if (!$this->checkIfAdmin($requestData, $this->adminDao))
-                return new ErrorModel($this->router, 403, 'Failed to query teachers', 'Access is forbidden');
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to query teachers', $e->getTraceMessages());
-        }
-
         if (!isset($requestData['subjectId']))
             return new ErrorModel($this->router, 400, 'Failed to query teachers', 'Parameter "subjectId" is not provided');
         if (!isset($requestData['courseId']))
@@ -165,6 +159,39 @@ class UserController extends Controller {
             return (new CollectionModel($this->router, $userEntities, 'teachers', true))
                 ->linkTo('assignTeacher', CourseController::class, 'addTeacherToCourse')
                 ->withSelfRef(UserController::class, 'getTeachersByCourse');
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router,
+                                  500,
+                                  'Failed to query users',
+                                  $e->getTraceMessages());
+        }
+    }
+
+    public function getTeachersBySubject(string $uri, array $requestData): IModel {
+        if (!isset($requestData['subjectId']))
+            return new ErrorModel($this->router, 400, 'Failed to query teachers', 'Parameter "subjectId" is not provided');
+
+        try {
+            $courseTeachers = $this->courseTeachDao->findByCrit((new CourseTeach())
+                                                              ->setCourse((new Course())
+                                                                              ->setSubject(new Subject($requestData['subjectId']))));
+
+            // TODO: investigate why all teachers are returned
+            $teachers = [];
+            /* @var $courseTeacher ICourseTeach */
+            foreach ($courseTeachers as $courseTeacher) {
+                if (!in_array($courseTeacher->getUser(), $teachers))
+                    $teachers[] = $courseTeacher->getUser();
+            }
+
+            $userEntities = array();
+            foreach ($teachers as $teacher) {
+                $userEntities[] = (new EntityModel($this->router, $teacher, true))
+                    ->withSelfRef(UserController::class, 'getUserById', [$teacher->getId()]);
+            }
+
+            return (new CollectionModel($this->router, $userEntities, 'teachers', true))
+                ->withSelfRef(UserController::class, 'getTeachersBySubject');
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router,
                                   500,

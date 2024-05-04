@@ -68,7 +68,8 @@ class OracleExamDao implements IExamDao {
             throw new DataAccessException('Failed to create exam', $e);
         }
 
-        return $this->findByCrit(new Exam($model->getSubject(), $model->getId()))[0];
+        //TODO return $this->findByCrit(new Exam(new Subject($subjectId), $model->getId()))[0];
+        return $model;
     }
 
     /**
@@ -145,7 +146,7 @@ class OracleExamDao implements IExamDao {
         $res = array();
 
         $sql = sprintf("SELECT EXAM.%s AS EXAM_ID, EXAM.%s AS SUBJECT_ID, SUB. %s AS SUBJECT_NAME, SUB.%s AS SUBJECT_APPROVAL,
-                                SUB.%s AS CREDIT, SUB.%s AS TYPE, TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS START_TIME,
+                                SUB.%s AS SUBJECT_CREDIT, SUB.%s AS SUBJECT_TYPE, TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS START_TIME,
                                 TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS END_TIME, EXAM.%s AS TEACHER_ID, 
                                 USR.%s AS TEACHER_NAME, USR.%s AS EMAIL, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE,
                                 EXAM.%s AS ROOM_ID, ROOM.%s AS CAPACITY 
@@ -201,7 +202,7 @@ class OracleExamDao implements IExamDao {
         $crits = array();
 
         $sql = sprintf("SELECT EXAM.%s AS EXAM_ID, EXAM.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS SUBJECT_APPROVAL,
-                                SUB.%s AS CREDIT, SUB.%s AS TYPE, TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS START_TIME,
+                                SUB.%s AS SUBJECT_CREDIT, SUB.%s AS SUBJECT_TYPE, TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS START_TIME,
                                 TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS END_TIME, EXAM.%s AS TEACHER_ID, 
                                 USR.%s AS TEACHER_NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE,
                                 EXAM.%s AS ROOM_ID, ROOM.%s AS CAPACITY 

@@ -825,9 +825,14 @@ function rooms(contentElement) {
     contentElement.append(newRoomButton);
 
     requestInvoker.executePost('room/all', { token: tokenObj.token }).then((response) => {
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+            return;
+        }
+
         bindClickListener(newRoomButton, () => { newRoom(contentElement, response._links.createRoom.href); });
 
-        console.log(response);
         const tableColumns = {
             id: 'Id',
             capacity: 'Capacity'

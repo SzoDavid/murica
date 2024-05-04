@@ -120,16 +120,16 @@ class Exam extends Entity implements IExam {
         $this->room->validate();
         if (empty($this->id) || strlen($this->id) > 6) $errors .= '\nID is empty or longer than 6 characters!';
         if (!empty($this->startTime)) {
-            $dateTime = DateTime::createFromFormat('YYYY-MM-DD HH24:MI', $this->startTime);
+            $dateTime = DateTime::createFromFormat('Y-m-d H:i', $this->startTime);
 
-            if (!$dateTime || $dateTime->format('YYYY-MM-DD HH24:MI') !== $this->startTime) $errors .= '\nStart time is invalid!';
+            if (!$dateTime || $dateTime->format('Y-m-d H:i') !== $this->startTime) $errors .= '\nStart time format is invalid!';
         } else {
             $errors .= '\nStart time is invalid!';
         }
         if (!empty($this->endTime)) {
-            $dateTime = DateTime::createFromFormat('YYYY-MM-DD HH24:MI', $this->endTime);
+            $dateTime = DateTime::createFromFormat('Y-m-d H:i', $this->endTime);
 
-            if (!$dateTime || $dateTime->format('YYYY-MM-DD HH24:MI') !== $this->endTime) $errors .= '\nEnd time is invalid!';
+            if (!$dateTime || $dateTime->format('Y-m-d H:i') !== $this->endTime) $errors .= '\nEnd time format is invalid!';
         } else {
             $errors .= '\nEnd time is invalid!';
         }
@@ -144,7 +144,7 @@ class Exam extends Entity implements IExam {
     public function jsonSerialize(): array {
         return [
             'subject' => $this->subject->jsonSerialize(),
-            'subjectName' => $this->subject->getName() . '[' . $this->subject->getId() . ']',
+            'subjectName' => $this->subject->getName() . ' [' . $this->subject->getId() . ']',
             'id' => $this->id,
             'startTime' => $this->startTime,
             'endTime' => $this->endTime,

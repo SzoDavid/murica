@@ -44,7 +44,6 @@ function takenCourses(contentElement) {
 
     contentElement.append($('<h1>').text('Taken courses'));
 
-    // TODO: add student data to request arguments
     requestInvoker.executePost('course/taken', {
         token: tokenObj.token,
         programmeName: studentObj.programme.name,

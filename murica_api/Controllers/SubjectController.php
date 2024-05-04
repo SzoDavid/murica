@@ -4,12 +4,16 @@ namespace murica_api\Controllers;
 
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\IAdminDao;
+use murica_bl\Dao\ICourseTeachDao;
 use murica_bl\Dao\ISubjectDao;
 use murica_bl\Dto\Exceptions\ValidationException;
+use murica_bl\Dto\ICourseTeach;
 use murica_bl\Dto\ISubject;
+use murica_bl\Dto\IUser;
 use murica_bl\Models\Exceptions\ModelException;
 use murica_bl\Models\IModel;
 use murica_bl\Router\IRouter;
+use murica_bl_impl\Dto\CourseTeach;
 use murica_bl_impl\Dto\Subject;
 use murica_bl_impl\Models\CollectionModel;
 use murica_bl_impl\Models\EntityModel;
@@ -21,17 +25,20 @@ class SubjectController extends Controller {
     //region Properties
     private ISubjectDao $subjectDao;
     private IAdminDao $adminDao;
+    private ICourseTeachDao $courseTeachDao;
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router, ISubjectDao $subjectDao, IAdminDao $adminDao) {
+    public function __construct(IRouter $router, ISubjectDao $subjectDao, IAdminDao $adminDao, ICourseTeachDao $courseTeachDao) {
         parent::__construct($router);
         $this->subjectDao = $subjectDao;
         $this->adminDao = $adminDao;
+        $this->courseTeachDao = $courseTeachDao;
 
         $this->router->registerController($this, 'subject')
             ->registerEndpoint('allSubjects', 'all', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getSubjectById', '', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getSubjectByTeacher', 'byTeacher', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('createSubject', 'new', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('updateSubject', 'update', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('deleteSubject', 'delete', EndpointRoute::VISIBILITY_PRIVATE);
@@ -96,6 +103,34 @@ class SubjectController extends Controller {
                                   500,
                                   'Failed to query subject',
                                   $e->getTraceMessages());
+        }
+    }
+
+    public function getSubjectByTeacher(string $uri, array $requestData): IModel {
+        /* @var $user IUser */
+        $user = $requestData['token']->getUser();
+
+        try {
+            $teachCourses = $this->courseTeachDao->findByCrit((new CourseTeach($user)));
+
+            $subjects = [];
+            /* @var $teachCourse ICourseTeach */
+            foreach ($teachCourses as $teachCourse) {
+                if (!in_array($teachCourse->getCourse()->getSubject(), $subjects))
+                    $subjects[] = $teachCourse->getCourse()->getSubject();
+            }
+
+            $subjectEntities = [];
+            foreach ($subjects as $subject) {
+                $subjectEntities[] = (new EntityModel($this->router, $subject, true))
+                    ->withSelfRef(SubjectController::class, 'getSubjectById', [$subject->getId()]);
+            }
+
+            return (new CollectionModel($this->router, $subjectEntities, 'subjects', true))
+                ->linkTo('teachers', UserController::class, 'getTeachersBySubject')
+                ->withSelfRef(SubjectController::class, 'getSubjectByTeacher');
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to query subjects', $e->getTraceMessages());
         }
     }
 
