@@ -55,7 +55,7 @@ const init = (requestInvoker, context) => {
 
     bindClickListener($('#navbar-logout'), () => {
         requestInvoker.executePost(tokenObj._links.logout.href, { token: tokenObj.token}).then(() => {
-            localStorage.removeItem('token');
+            localStorage.clear();
             window.location.href = 'login.php';
         });
     });
@@ -314,23 +314,18 @@ class SelfPage {
             $('#self-details-birth').val(response.birth_date);
 
             bindClickListener(updateButton, () => { this.updateSelf(response) });
+
+            requestInvoker.executePost('message/all', { token: tokenObj.token }).then((response) => {
+                const tableColumns = {
+                    subject: 'Subject',
+                    dateTime: 'Date'
+                };
+
+                this.contentElement.append($('<h2>').text('Messages'));
+                const messagesTable= new DropDownTable(tableColumns, response._embedded.message, (record) => { return this.messagesDetails(record, this.contentElement)}).build();
+                this.contentElement.append(messagesTable);
+            });
         });
-
-        requestInvoker.executePost('message/all', { token: tokenObj.token }).then((response) => {
-            console.log(response);
-            const tableColumns = {
-                subject: 'subject',
-                dateTime: 'Date Time'
-            };
-
-            this.contentElement.append($('<h2>').text('Messages'));
-            const messagesTable= new DropDownTable(tableColumns, response._embedded.message, (record) => { return this.messagesDetails(record, this.contentElement)}).build();
-            this.contentElement.append(messagesTable);
-        });
-
-        //messages(this.contentElement);
-
-
     }
 
     updateSelf(record) {

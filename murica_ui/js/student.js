@@ -44,13 +44,11 @@ function takenCourses(contentElement) {
 
     contentElement.append($('<h1>').text('Taken courses'));
 
-    // TODO: add student data to request arguments
     requestInvoker.executePost('course/taken', {
         token: tokenObj.token,
         programmeName: studentObj.programme.name,
         programmeType: studentObj.programme.type
     }).then((response) => {
-        console.log(response);
         const tableColumns = {
             id: 'Id',
             name: 'Name',
@@ -105,8 +103,6 @@ function courseRegistration(contentElement) {
     contentElement.append($('<h1>').text('Register courses'));
 
     requestInvoker.executePost('subject/all', { token: tokenObj.token }).then((response) => {
-
-        console.log(response);
         const tableColumns = {
             id: 'Id',
             name: 'Name',
@@ -124,7 +120,6 @@ function subjectDetails(record, contentElement) {
     let container = $('<div>');
 
     requestInvoker.executePost(record._links.courses.href, { token: tokenObj.token }).then((response) => {
-        console.log(response);
         const tableColumns = {
             id: 'Id',
             capacity: 'Capacity',
@@ -185,7 +180,6 @@ function takenExams(contentElement) {
         programmeName: studentObj.programme.name,
         programmeType: studentObj.programme.type
     }).then((response) => {
-        console.log(response);
         const tableColumns = {
             id: 'Id',
             name: 'Name',

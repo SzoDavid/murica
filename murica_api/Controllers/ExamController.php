@@ -54,7 +54,7 @@ class ExamController extends Controller {
         $this->userDao = $userDao;
 
         $this->router->registerController($this, 'exam')
-            ->registerEndpoint('allExam', 'all', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('allExams', 'all', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getExamByIdAndSubjectId', '', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('createExam', 'new', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('updateExam', 'update', EndpointRoute::VISIBILITY_PRIVATE)
@@ -169,10 +169,13 @@ class ExamController extends Controller {
             /* @var $exam ITakenExam */
             foreach ($exams as $exam) {
                 $examsEntities[] = (new EntityModel($this->router, $exam, true))
-                    ->withSelfRef(ExamController::class, 'getExamByTeacher');
+                    ->linkTo('update', ExamController::class, 'updateExam')
+                    ->linkTo('delete', ExamController::class, 'deleteExam')
+                    ->withSelfRef(ExamController::class, 'getExamByIdAndSubjectId');
             }
 
             return (new CollectionModel($this->router, $examsEntities, 'exams', true))
+                ->linkTo('new', ExamController::class, 'createExam')
                 ->withSelfRef(ExamController::class, 'getExamsByTeacher');
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to query exams', $e->getTraceMessages());
@@ -180,13 +183,7 @@ class ExamController extends Controller {
     }
 
     public function createExam(string $uri, array $requestData): IModel {
-        try {
-            if (!$this->checkIfAdmin($requestData, $this->adminDao))
-                return new ErrorModel($this->router, 403, 'Failed to create course', 'Access is forbidden');
-        } catch (DataAccessException $e) {
-            return new ErrorModel($this->router, 500, 'Failed to create exam', $e->getTraceMessages());
-        }
-
+        // TODO: validate if user is teacher at given subject
         if (!isset($requestData['id']))
             return new ErrorModel($this->router, 400, 'Failed to create exam', 'Parameter "id" is not provided in uri');
         if (!isset($requestData['subjectId']))
@@ -219,16 +216,16 @@ class ExamController extends Controller {
                 return new ErrorModel($this->router, 404, 'Failed to create exam', "User not found with id '{$requestData['teacherId']}'");
             }
 
-            $exams = $this->examDao->create(new Exam($subjects[0],
+            $exam = $this->examDao->create(new Exam($subjects[0],
                                                      $requestData['id'],
                                                      $requestData['startTime'],
                                                      $requestData['endTime'],
                                                      $teachers[0],
                                                      $rooms[0]));
 
-            return (new EntityModel($this->router, $exams[0], true))
+            return (new EntityModel($this->router, $exam, true))
                 ->linkTo('allExams', ExamController::class, 'allExams')
-                ->withSelfRef(ExamController::class, 'getExamByIdAndSubjectId', [], ['id' => $exams[0]->getId(), 'subjectId' => $exams[0]->getSubject()->getId()]);
+                ->withSelfRef(ExamController::class, 'getExamByIdAndSubjectId', [], ['id' => $exam->getId(), 'subjectId' => $exam->getSubject()->getId()]);
 
         } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create exam', $e->getTraceMessages());

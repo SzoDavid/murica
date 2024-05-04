@@ -71,6 +71,12 @@ class CourseTeach extends Entity implements ICourseTeach {
         return [
             'user' => $this->user->jsonSerialize(),
             'course' => $this->course->jsonSerialize(),
+            'name' => $this->course->getSubject()->getName(),
+            'id' => $this->course->getSubject()->getId() . '-' . $this->course->getId(),
+            'capacity' => $this->course->getCapacity(),
+            'schedule' => $this->course->getSchedule(),
+            'term' => $this->course->getTerm(),
+            'room' => $this->course->getRoom()->getId()
         ];
     }
     //endregion
