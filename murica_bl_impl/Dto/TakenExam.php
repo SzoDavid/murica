@@ -77,7 +77,10 @@ class TakenExam extends Entity implements ITakenExam {
             'examId' => $this->exam->getId(),
             'startTime' => $this->exam->getStartTime(),
             'endTime' => $this->exam->getEndTime(),
-            'roomId' => $this->exam->getRoom()->getId()
+            'roomId' => $this->exam->getRoom()->getId(),
+            'userId' => $this->student->getUser()->getId(),
+            'userName' => $this->student->getUser()->getName(),
+            'userProgramme' => $this->student->getProgramme()->getName() . '/' . $this->student->getProgramme()->getType()
         ];
     }
     //endregion

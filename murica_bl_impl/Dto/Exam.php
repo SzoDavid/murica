@@ -118,7 +118,7 @@ class Exam extends Entity implements IExam {
         $this->subject->validate();
         $this->teacher->validate();
         $this->room->validate();
-        if (empty($this->id) || strlen($this->id) > 6) $errors .= '\nID is empty or longer than 6 characters!';
+        if (empty($this->id) || strlen($this->id) !== 6) $errors .= '\nID must contain 6 characters!';
         if (!empty($this->startTime)) {
             $dateTime = DateTime::createFromFormat('Y-m-d H:i', $this->startTime);
 
@@ -143,13 +143,13 @@ class Exam extends Entity implements IExam {
      */
     public function jsonSerialize(): array {
         return [
-            'subject' => $this->subject->jsonSerialize(),
+            'subject' => $this->subject,
             'subjectName' => $this->subject->getName() . ' [' . $this->subject->getId() . ']',
             'id' => $this->id,
             'startTime' => $this->startTime,
             'endTime' => $this->endTime,
-            'teacher' => $this->teacher->jsonSerialize(),
-            'room' => $this->room->jsonSerialize(),
+            'teacher' => $this->teacher,
+            'room' => $this->room,
             'roomId' => $this->room->getId()
         ];
     }
