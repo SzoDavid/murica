@@ -68,7 +68,8 @@ class OracleTakenExamDao implements ITakenExamDao {
             throw new DataAccessException('Failed to create taken exam', $e);
         }
 
-        return $this->findByCrit(new TakenExam($model->getStudent(), $model->getExam()))[0];
+        return $model;
+        //return $this->findByCrit(new TakenExam($model->getStudent(), $model->getExam()))[0];
     }
 
     /**
@@ -114,7 +115,7 @@ class OracleTakenExamDao implements ITakenExamDao {
         $sql = sprintf("SELECT TKN.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS USER_EMAIL, USR.%s AS USER_PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS USER_BIRTH_DATE, 
                                TKN.%s AS PROGRAMME_NAME, TKN.%s AS PROGRAMME_TYPE, PRG.%s AS NO_TERMS,
                                STD.%s AS START_TERM, TKN.%s AS EXAM_ID, TKN.%s AS SUBJECT_ID,
-                               EXAM.%s AS START_TIME, EXAM.%s AS END_TIME, EXAM.%s AS TEACHER_ID,
+                               TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS START_TIME, TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS END_TIME, EXAM.%s AS TEACHER_ID,
                                TCHR.%s AS TEACHER_NAME, TCHR.%s AS TEACHER_EMAIL, TCHR.%s AS TEACHER_PASSWORD, TO_CHAR(TCHR.%s,'YYYY-MM-DD') AS TEACHER_BIRTH_DATE,
                                SUB.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS SUBJECT_TYPE, EXAM.%s AS ROOM_ID, ROOM.%s AS CAPACITY
                                FROM %s.%s USR, %s.%s EXAM, %s.%s TKN, %s.%s STD,
@@ -208,7 +209,7 @@ class OracleTakenExamDao implements ITakenExamDao {
         $sql = sprintf("SELECT TKN.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS USER_EMAIL, USR.%s AS USER_PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS USER_BIRTH_DATE, 
                                TKN.%s AS PROGRAMME_NAME, TKN.%s AS PROGRAMME_TYPE, PRG.%s AS NO_TERMS,
                                STD.%s AS START_TERM, TKN.%s AS EXAM_ID, TKN.%s AS SUBJECT_ID,
-                               EXAM.%s AS START_TIME, EXAM.%s AS END_TIME, EXAM.%s AS TEACHER_ID,
+                               TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS START_TIME, TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS END_TIME, EXAM.%s AS TEACHER_ID,
                                TCHR.%s AS TEACHER_NAME, TCHR.%s AS TEACHER_EMAIL, TCHR.%s AS TEACHER_PASSWORD, TO_CHAR(TCHR.%s,'YYYY-MM-DD') AS TEACHER_BIRTH_DATE,
                                SUB.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS SUBJECT_TYPE, EXAM.%s AS ROOM_ID, ROOM.%s AS CAPACITY
                                FROM %s.%s USR, %s.%s EXAM, %s.%s TKN, %s.%s STD,
@@ -320,7 +321,7 @@ class OracleTakenExamDao implements ITakenExamDao {
                         $exam['USER_NAME'],
                         $exam['USER_EMAIL'],
                         $exam['USER_PASSWORD'],
-                        $exam['BIRTH_DATE']),
+                        $exam['USER_BIRTH_DATE']),
                     new Programme(
                         $exam['PROGRAMME_NAME'],
                         $exam['PROGRAMME_TYPE'],
@@ -341,10 +342,10 @@ class OracleTakenExamDao implements ITakenExamDao {
                         $exam['TEACHER_NAME'],
                         $exam['TEACHER_EMAIL'],
                         $exam['TEACHER_PASSWORD'],
-                        $exam['BIRTH_DATE']),
+                        $exam['TEACHER_BIRTH_DATE']),
                     new Room(
                         $exam['ROOM_ID'],
-                        $exam['ROOM_CAPACITY'])
+                        $exam['CAPACITY'])
                 ));
         }
 

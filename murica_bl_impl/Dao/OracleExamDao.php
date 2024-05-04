@@ -68,8 +68,7 @@ class OracleExamDao implements IExamDao {
             throw new DataAccessException('Failed to create exam', $e);
         }
 
-        //TODO return $this->findByCrit(new Exam(new Subject($subjectId), $model->getId()))[0];
-        return $model;
+        return $this->findByCrit(new Exam(new Subject($subjectId), $model->getId()))[0];
     }
 
     /**

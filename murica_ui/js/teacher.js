@@ -140,8 +140,8 @@ function exams(contentElement) {
             roomId: 'Room',
         };
 
-        const coursesTable= new DropDownTable(tableColumns, response._embedded.exams, (record) => {return examDetails(record, contentElement)}).build();
-        contentElement.append(coursesTable);
+        const examsTable= new DropDownTable(tableColumns, response._embedded.exams, (record) => {return examDetails(record, contentElement)}).build();
+        contentElement.append(examsTable);
     });
 }
 
@@ -311,7 +311,7 @@ function examDetails(record, contentElement) {
     container.append(new Button('Save', () => { updateExam(record, contentElement) }).build());
     container.append(new Button('Remove', () => { removeExam(record, contentElement) }).build());
 
-    requestInvoker.executePost('user/byExam', { token: tokenObj.token, courseId: course.course.id, subjectId: course.course.subject.id }).then((response) => {
+    requestInvoker.executePost('user/byExam', { token: tokenObj.token, examId: record.id, subjectId: record.subject.id }).then((response) => {
         if (!response._success) {
             console.error(response.error);
             alert('Something unexpected happened. Please try again later!');
@@ -322,14 +322,11 @@ function examDetails(record, contentElement) {
             userId: 'Id',
             userName: 'Name',
             userProgramme: 'Programme',
-            grade: 'Grade'
         };
 
-        if (course.course.subject.approval) tableColumns.approvedVisual = 'Approved';
-
-        const studentsTable = new DropDownTable(tableColumns, response._embedded.students, (record) => {return courseStudentDetails(record, contentElement)}).build();
+        const studentsTable = new Table(tableColumns, response._embedded.students).build();
         container.append(studentsTable);
-    })
+    });
 
     return container;
 }
@@ -339,8 +336,6 @@ function updateExam(record, contentElement) {
 
     let startTime = $('#exam-details-start-time').val().split('T');
     let endTime = $('#exam-details-end-time').val()
-
-    // TODO: faszért fos
 
     requestInvoker.executePost(record._links.update.href, {
         token: tokenObj.token,
@@ -358,8 +353,6 @@ function updateExam(record, contentElement) {
 
 function removeExam(record, contentElement) {
     $('#edit-exam-error').addClass('hidden');
-
-    // TODO: faszért fos
 
     requestInvoker.executePost(record._links.delete.href, { token: tokenObj.token, id: record.id, subjectId: record.subject.id }).then((response) => {
         if (response._success) exams(contentElement);

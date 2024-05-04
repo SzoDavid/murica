@@ -110,6 +110,7 @@ class TakenCourse extends Entity implements ITakenCourse {
             'roomId' => $this->course->getRoom()->getId(),
             'grade' => $this->grade,
             'approved' => $this->approved,
+            'credit' => $this->course->getSubject()->getCredit(),
             'approvedVisual' => $this->approved ? '✓' : 'x',
             'userId' => $this->student->getUser()->getId(),
             'userName' => $this->student->getUser()->getName(),

@@ -377,15 +377,15 @@ class CourseController extends Controller {
             $takeCourses = $this->takenCourseDao->findByCrit(new TakenCourse($students[0], $courses[0]));
 
             if (!empty($takeCourses)) {
-                return new ErrorModel($this->router, 404, 'Failed to register course', "Found registered with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
+                return new ErrorModel($this->router, 404, 'Failed to register course', "Already registered");
             }
 
-            $takeCourses = $this->takenCourseDao->create(new TakenCourse($students[0],
+            $takenCourse = $this->takenCourseDao->create(new TakenCourse($students[0],
                                                                          $courses[0],
                                                                          null,
                                                                          false));
 
-            return (new EntityModel($this->router, $takeCourses[0], true))
+            return (new EntityModel($this->router, $takenCourse, true))
                 ->linkTo('allCourses', CourseController::class, 'allCourses')
                 ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [], ['id' => $courses[0]->getId(),'subjectId' => $courses[0]->getSubject()->getId()]);
         } catch (DataAccessException|ValidationException|ModelException $e) {
@@ -421,7 +421,7 @@ class CourseController extends Controller {
                 return new ErrorModel($this->router, 404, 'Failed to unregister course', "Course not registered with id '{$requestData['subjectId']}-{$requestData['id']}' for user '{$user->getId()}'");
             }
 
-            $this->courseDao->delete($takenCourses[0]);
+            $this->takenCourseDao->delete($takenCourses[0]);
             return new MessageModel($this->router, ['message' => 'Course unregister successfully'], true);
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to unregister course', $e->getTraceMessages());
