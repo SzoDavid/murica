@@ -144,42 +144,50 @@ class OracleExamDao implements IExamDao {
     public function findAll(): array {
         $res = array();
 
-        $sql = sprintf("SELECT EXAM.%s AS EXAM_ID, EXAM.%s AS SUBJECT_ID, SUB. %s AS SUBJECT_NAME, SUB.%s AS SUBJECT_APPROVAL,
-                                SUB.%s AS SUBJECT_CREDIT, SUB.%s AS SUBJECT_TYPE, TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS START_TIME,
-                                TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS END_TIME, EXAM.%s AS TEACHER_ID, 
-                                USR.%s AS TEACHER_NAME, USR.%s AS EMAIL, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE,
-                                EXAM.%s AS ROOM_ID, ROOM.%s AS CAPACITY 
-                                FROM %s.%s USR, %s.%s EXAM, %s.%s SUB, %s.%s ROOM
-                                WHERE EXAM.%s = SUB.%s AND EXAM.%s = USR.%s AND EXAM.%s = ROOM.%s",
-                       TableDefinition::EXAM_TABLE_FIELD_ID,
-                       TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_NAME,
-                       TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,
-                       TableDefinition::SUBJECT_TABLE_FIELD_CREDIT,
-                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-                       TableDefinition::EXAM_TABLE_FIELD_START_TIME,
-                       TableDefinition::EXAM_TABLE_FIELD_END_TIME,
-                       TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID,
-                       TableDefinition::USER_TABLE_FIELD_NAME,
-                       TableDefinition::USER_TABLE_FIELD_EMAIL,
-                       TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
-                       TableDefinition::EXAM_TABLE_FIELD_ROOM_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::USER_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::EXAM_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::SUBJECT_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::ROOM_TABLE,
-                       TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID,
-                       TableDefinition::USER_TABLE_FIELD_ID,
-                       TableDefinition::EXAM_TABLE_FIELD_ROOM_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_ID
-        );
+        $sql = "SELECT
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_ID . " AS EXAM_ID,
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID . " AS SUBJECT_ID,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . " AS SUBJECT_NAME,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . " AS SUBJECT_APPROVAL,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . " AS SUBJECT_CREDIT,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . " AS SUBJECT_TYPE,
+            TO_CHAR(EXAM." . TableDefinition::EXAM_TABLE_FIELD_START_TIME . ",'YYYY-MM-DD HH:MI') AS START_TIME,
+            TO_CHAR(EXAM." . TableDefinition::EXAM_TABLE_FIELD_END_TIME . ",'YYYY-MM-DD HH:MI') AS END_TIME,
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID . " AS TEACHER_ID,
+            USR." . TableDefinition::USER_TABLE_FIELD_NAME . " AS TEACHER_NAME,
+            USR." . TableDefinition::USER_TABLE_FIELD_EMAIL . " AS EMAIL,
+            USR." . TableDefinition::USER_TABLE_FIELD_PASSWORD . " AS PASSWORD,
+            TO_CHAR(USR." . TableDefinition::USER_TABLE_FIELD_BIRTH_DATE . ",'YYYY-MM-DD') AS BIRTH_DATE,
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_ROOM_ID . " AS ROOM_ID,
+            ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY . " AS CAPACITY, 
+            COUNT(TKN_EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID. ") AS NO_STUDENTS
+        FROM
+            " . $this->configService->getTableOwner() . "." . TableDefinition::USER_TABLE . " USR
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::EXAM_TABLE . " EXAM
+            ON EXAM." . TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID . " = USR." . TableDefinition::USER_TABLE_FIELD_ID . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::SUBJECT_TABLE . " SUB
+            ON EXAM." . TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID . " = SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::ROOM_TABLE . " ROOM
+            ON EXAM." . TableDefinition::EXAM_TABLE_FIELD_ROOM_ID . " = ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . "
+            LEFT JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::TAKEN_EXAM_TABLE . " TKN_EXAM
+            ON TKN_EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_SUBJECT_ID . " = SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID . " AND 
+            TKN_EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID . " = EXAM." . TableDefinition::EXAM_TABLE_FIELD_ID . "
+        GROUP BY
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_ID . ",
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . ",
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_START_TIME . ",
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_END_TIME . ",
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_NAME . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_EMAIL . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_PASSWORD . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_BIRTH_DATE . ",
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_ROOM_ID . ",
+            ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY;
 
         try {
             $exams = $this->dataSource->getConnection()
@@ -200,43 +208,34 @@ class OracleExamDao implements IExamDao {
     public function findByCrit(IExam $model): array {
         $crits = array();
 
-        $sql = sprintf("SELECT EXAM.%s AS EXAM_ID, EXAM.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS SUBJECT_APPROVAL,
-                                SUB.%s AS SUBJECT_CREDIT, SUB.%s AS SUBJECT_TYPE, TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS START_TIME,
-                                TO_CHAR(EXAM.%s,'YYYY-MM-DD HH:MI') AS END_TIME, EXAM.%s AS TEACHER_ID, 
-                                USR.%s AS TEACHER_NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE,
-                                EXAM.%s AS ROOM_ID, ROOM.%s AS CAPACITY 
-                                FROM %s.%s USR, %s.%s EXAM, %s.%s SUB, %s.%s ROOM
-                                WHERE EXAM.%s = SUB.%s AND EXAM.%s = USR.%s AND EXAM.%s = ROOM.%s",
-                       TableDefinition::EXAM_TABLE_FIELD_ID,
-                       TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_NAME,
-                       TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,
-                       TableDefinition::SUBJECT_TABLE_FIELD_CREDIT,
-                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-                       TableDefinition::EXAM_TABLE_FIELD_START_TIME,
-                       TableDefinition::EXAM_TABLE_FIELD_END_TIME,
-                       TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID,
-                       TableDefinition::USER_TABLE_FIELD_NAME,
-                       TableDefinition::USER_TABLE_FIELD_EMAIL,
-                       TableDefinition::USER_TABLE_FIELD_PASSWORD,
-                       TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
-                       TableDefinition::EXAM_TABLE_FIELD_ROOM_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::USER_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::EXAM_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::SUBJECT_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::ROOM_TABLE,
-                       TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID,
-                       TableDefinition::USER_TABLE_FIELD_ID,
-                       TableDefinition::EXAM_TABLE_FIELD_ROOM_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_ID
-        );
+        $sql = "SELECT
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_ID . " AS EXAM_ID,
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID . " AS SUBJECT_ID,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . " AS SUBJECT_NAME,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . " AS SUBJECT_APPROVAL,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . " AS SUBJECT_CREDIT,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . " AS SUBJECT_TYPE,
+            TO_CHAR(EXAM." . TableDefinition::EXAM_TABLE_FIELD_START_TIME . ",'YYYY-MM-DD HH:MI') AS START_TIME,
+            TO_CHAR(EXAM." . TableDefinition::EXAM_TABLE_FIELD_END_TIME . ",'YYYY-MM-DD HH:MI') AS END_TIME,
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID . " AS TEACHER_ID,
+            USR." . TableDefinition::USER_TABLE_FIELD_NAME . " AS TEACHER_NAME,
+            USR." . TableDefinition::USER_TABLE_FIELD_EMAIL . " AS EMAIL,
+            USR." . TableDefinition::USER_TABLE_FIELD_PASSWORD . " AS PASSWORD,
+            TO_CHAR(USR." . TableDefinition::USER_TABLE_FIELD_BIRTH_DATE . ",'YYYY-MM-DD') AS BIRTH_DATE,
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_ROOM_ID . " AS ROOM_ID,
+            ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY . " AS CAPACITY, 
+            COUNT(TKN_EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID . ") AS NO_STUDENTS
+        FROM
+            " . $this->configService->getTableOwner() . "." . TableDefinition::USER_TABLE . " USR
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::EXAM_TABLE . " EXAM
+            ON EXAM." . TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID . " = USR." . TableDefinition::USER_TABLE_FIELD_ID . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::SUBJECT_TABLE . " SUB
+            ON EXAM." . TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID . " = SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::ROOM_TABLE . " ROOM
+            ON EXAM." . TableDefinition::EXAM_TABLE_FIELD_ROOM_ID . " = ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . "
+            LEFT JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::TAKEN_EXAM_TABLE . " TKN_EXAM
+            ON TKN_EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_SUBJECT_ID . " = SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID . " AND 
+            TKN_EXAM." . TableDefinition::TAKEN_EXAM_TABLE_FIELD_EXAM_ID . " = EXAM." . TableDefinition::EXAM_TABLE_FIELD_ID;
 
         $subject = $model->getSubject();
         $id = $model->getId();
@@ -262,7 +261,24 @@ class OracleExamDao implements IExamDao {
         }
 
         if (!empty($crits))
-            $sql .= " AND " . implode(" AND ", $crits);
+            $sql .= " WHERE " . implode(" AND ", $crits);
+
+        $sql .= " GROUP BY
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_ID . ",
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . ",
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_START_TIME . ",
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_END_TIME . ",
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_TEACHER_ID . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_NAME . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_EMAIL . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_PASSWORD . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_BIRTH_DATE . ",
+            EXAM." . TableDefinition::EXAM_TABLE_FIELD_ROOM_ID . ",
+            ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY;
 
         try {
             $stmt = $this->dataSource->getConnection()->query($sql);
@@ -297,6 +313,7 @@ class OracleExamDao implements IExamDao {
                 $exam['EXAM_ID'],
                 $exam['START_TIME'],
                 $exam['END_TIME'],
+                $exam['NO_STUDENTS'],
                 new User(
                     $exam['TEACHER_ID'],
                     $exam['TEACHER_NAME'],

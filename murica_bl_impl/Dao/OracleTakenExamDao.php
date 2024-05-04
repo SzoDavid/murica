@@ -337,6 +337,7 @@ class OracleTakenExamDao implements ITakenExamDao {
                     $exam['EXAM_ID'],
                     $exam['START_TIME'],
                     $exam['END_TIME'],
+                    0,
                     new User(
                         $exam['TEACHER_ID'],
                         $exam['TEACHER_NAME'],

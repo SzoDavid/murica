@@ -203,7 +203,7 @@ function buildCourses(contentElement, container, record) {
         const tableColumns = {
             id: 'Id',
             capacity: 'Capacity',
-            noStudents: 'Number of students',
+            noStudents: 'Students',
             schedule: 'Schedule',
             term: 'Term',
         };
