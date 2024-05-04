@@ -17,16 +17,18 @@ class Course extends Entity implements ICourse {
     private ?string $schedule;
     private ?string $term;
     private ?IRoom $room;
+    private ?int $numberOfParticipants;
     //endregion
 
     //region Ctor
-    public function __construct(?ISubject $subject=null, ?string $id=null, ?string $capacity=null, ?string $schedule=null, ?string $term=null, ?IRoom $room=null) {
+    public function __construct(?ISubject $subject=null, ?string $id=null, ?string $capacity=null, ?string $schedule=null, ?string $term=null, ?IRoom $room=null, ?int $numberOfParticipants=null) {
         $this->subject = $subject;
         $this->id = isset($id) ? trim($id) : null;
         $this->capacity = $capacity;
         $this->schedule = isset($schedule) ? trim($schedule) : null;
         $this->term = isset($term) ? trim($term) : null;
         $this->room = $room;
+        $this->numberOfParticipants = $numberOfParticipants;
     }
     //endregion
 
@@ -67,6 +69,10 @@ class Course extends Entity implements ICourse {
         return $this;
     }
 
+    public function getNumberOfParticipants(): ?int {
+        return $this->numberOfParticipants;
+    }
+
     #[Override]
     public function setSubject(ISubject $subject): ICourse {
         $this->subject = $subject;
@@ -94,6 +100,12 @@ class Course extends Entity implements ICourse {
     #[Override]
     public function setRoom(IRoom $room): ICourse {
         $this->room = $room;
+        return $this;
+    }
+
+    #[Override]
+    public function setNumberOfParticipants(?int $numberOfParticipants): ICourse {
+        $this->numberOfParticipants = $numberOfParticipants;
         return $this;
     }
     //endregion
@@ -129,7 +141,8 @@ class Course extends Entity implements ICourse {
             'capacity' => $this->capacity,
             'schedule' => $this->schedule,
             'term' => $this->term,
-            'room' => $this->room->jsonSerialize()
+            'room' => $this->room->jsonSerialize(),
+            'noParticipants' => $this->numberOfParticipants
         ];
     }
     //endregion

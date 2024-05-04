@@ -66,8 +66,9 @@ class OracleCourseDao implements ICourseDao {
         } catch (OciException $exception) {
             throw new DataAccessException('Failed to create Course', $exception);
         }
-
-        return $this->findByCrit(new Course($model->getSubject(), $model->getId()))[0];
+        // TODO: this returns nothing
+        //return $this->findByCrit(new Course($model->getSubject(), $model->getId()))[0];
+        return $model;
     }
 
     /**
@@ -146,28 +147,40 @@ class OracleCourseDao implements ICourseDao {
     public function findAll(): array {
         $res = array();
 
-        $sql = sprintf("SELECT SUB.%s AS SUBJECT_ID, SUB.%s AS NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, CRS.%s AS ID, CRS.%s AS CRS_CAPACITY, CRS.%s AS SCHEDULE, CRS.%s AS TERM, ROOM.%s AS ROOM_ID, ROOM.%s AS ROOM_CAPACITY FROM %s.%s SUB, %s.%s CRS, %s.%s ROOM WHERE CRS.%s = SUB.%s AND CRS.%s = ROOM.%s",
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_NAME,
-                       TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,
-                       TableDefinition::SUBJECT_TABLE_FIELD_CREDIT,
-                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-                       TableDefinition::COURSE_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_CAPACITY,
-                       TableDefinition::COURSE_TABLE_FIELD_SCHEDULE,
-                       TableDefinition::COURSE_TABLE_FIELD_TERM,
-                       TableDefinition::ROOM_TABLE_FIELD_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::SUBJECT_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::COURSE_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::ROOM_TABLE,
-                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_ID);
+        $sql = "SELECT 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID . " AS SUBJECT_ID, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . " AS NAME, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . " AS APPROVAL, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . " AS CREDIT, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . " AS TYPE, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . " AS ID, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_CAPACITY . " AS CRS_CAPACITY, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . " AS SCHEDULE, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_TERM . " AS TERM, 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . " AS ROOM_ID, 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY . " AS ROOM_CAPACITY,
+                    COUNT(TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID . ") AS NO_PARTICIPANTS 
+                FROM 
+                    " . $this->configService->getTableOwner() . "." . TableDefinition::SUBJECT_TABLE . " SUB
+                    JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::COURSE_TABLE . " CRS
+                    ON CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " = SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID ."
+                    JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::ROOM_TABLE . " ROOM
+                    ON CRS." . TableDefinition::COURSE_TABLE_FIELD_ROOM_ID . " = ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . "
+                    LEFT JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::TAKENCOURSE_TABLE . " TKN_CRS
+                    ON TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " AND 
+                    TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID . " = CRS. " . TableDefinition::COURSE_TABLE_FIELD_ID . "
+                GROUP BY
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_CAPACITY . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_TERM . ", 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . ", 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY;
 
         try {
             $courses = $this->dataSource->getConnection()
@@ -188,28 +201,28 @@ class OracleCourseDao implements ICourseDao {
     public function findByCrit(ICourse $model): array {
         $crits = array();
 
-        $sql = sprintf("SELECT SUB.%s AS SUBJECT_ID, SUB.%s AS NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, CRS.%s AS ID, CRS.%s AS CRS_CAPACITY, CRS.%s AS SCHEDULE, CRS.%s AS TERM, ROOM.%s AS ROOM_ID, ROOM.%s AS ROOM_CAPACITY FROM %s.%s SUB, %s.%s CRS, %s.%s ROOM WHERE CRS.%s = SUB.%s AND CRS.%s = ROOM.%s",
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_NAME,
-                       TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,
-                       TableDefinition::SUBJECT_TABLE_FIELD_CREDIT,
-                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-                       TableDefinition::COURSE_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_CAPACITY,
-                       TableDefinition::COURSE_TABLE_FIELD_SCHEDULE,
-                       TableDefinition::COURSE_TABLE_FIELD_TERM,
-                       TableDefinition::ROOM_TABLE_FIELD_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::SUBJECT_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::COURSE_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::ROOM_TABLE,
-                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_ID);
+        $sql = "SELECT 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID . " AS SUBJECT_ID, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . " AS NAME, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . " AS APPROVAL, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . " AS CREDIT, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . " AS TYPE, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . " AS ID, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_CAPACITY . " AS CRS_CAPACITY, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . " AS SCHEDULE, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_TERM . " AS TERM, 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . " AS ROOM_ID, 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY . " AS ROOM_CAPACITY,
+                    COUNT(TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID . ") AS NO_PARTICIPANTS 
+                FROM 
+                    " . $this->configService->getTableOwner() . "." . TableDefinition::SUBJECT_TABLE . " SUB
+                    JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::COURSE_TABLE . " CRS
+                    ON CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " = SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID ."
+                    JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::ROOM_TABLE . " ROOM
+                    ON CRS." . TableDefinition::COURSE_TABLE_FIELD_ROOM_ID . " = ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . "
+                    LEFT JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::TAKENCOURSE_TABLE . " TKN_CRS
+                    ON TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " AND 
+                    TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID . " = CRS. " . TableDefinition::COURSE_TABLE_FIELD_ID;
 
         $id = $model->getId();
         $schedule = $model->getSchedule();
@@ -230,7 +243,20 @@ class OracleCourseDao implements ICourseDao {
         }
 
         if (!empty($crits))
-            $sql .= ' AND ' . implode(' AND ', $crits);
+            $sql .= ' WHERE ' . implode(' AND ', $crits);
+
+        $sql .= " GROUP BY
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_CAPACITY . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_TERM . ", 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . ", 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY;
 
         try {
             $stmt = $this->dataSource->getConnection()->query($sql);
@@ -267,7 +293,8 @@ class OracleCourseDao implements ICourseDao {
                 $course['TERM'],
                 new Room(
                     $course['ROOM_ID'],
-                    $course['ROOM_CAPACITY'])
+                    $course['ROOM_CAPACITY']),
+                $course['NO_PARTICIPANTS']
             );
         }
 
