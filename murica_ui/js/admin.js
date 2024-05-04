@@ -271,13 +271,13 @@ function courseDetails(course, contentElement) {
         $.each(response._embedded.rooms, (index, room) => {
             roomSelector.append($('<option>').prop({value: room.id, selected: room.id === course.room.id}).text(room.id + ' (' + room.capacity + ')'));
         });
+
+        buildTeachers(contentElement, container, course);
     });
 
     container.append($('<div>').prop('id', 'edit-course-error').addClass('hidden error'));
     container.append(new Button('Save', () => { updateCourse(course, contentElement) }).build());
     container.append(new Button('Remove', () => { removeCourse(course, contentElement) }).build());
-
-    buildTeachers(contentElement, container, course);
 
     return container;
 }

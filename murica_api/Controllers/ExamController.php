@@ -8,10 +8,12 @@ use murica_bl\Dao\IExamDao;
 use murica_bl\Dao\IRoomDao;
 use murica_bl\Dao\IStudentDao;
 use murica_bl\Dao\ISubjectDao;
+use murica_bl\Dao\ITakenCourseDao;
 use murica_bl\Dao\ITakenExamDao;
 use murica_bl\Dao\IUserDao;
 use murica_bl\Dto\Exceptions\ValidationException;
 use murica_bl\Dto\IExam;
+use murica_bl\Dto\ITakenCourse;
 use murica_bl\Dto\ITakenExam;
 use murica_bl\Dto\IUser;
 use murica_bl\Models\Exceptions\ModelException;
@@ -22,6 +24,7 @@ use murica_bl_impl\Dto\Programme;
 use murica_bl_impl\Dto\Room;
 use murica_bl_impl\Dto\Student;
 use murica_bl_impl\Dto\Subject;
+use murica_bl_impl\Dto\TakenCourse;
 use murica_bl_impl\Dto\TakenExam;
 use murica_bl_impl\Dto\User;
 use murica_bl_impl\Models\CollectionModel;
@@ -36,6 +39,7 @@ class ExamController extends Controller {
     private ISubjectDao $subjectDao;
     private IRoomDao $roomDao;
     private ITakenExamDao $takenExamDao;
+    private ITakenCourseDao $takenCourseDao;
     private IStudentDao $studentDao;
     private IAdminDao $adminDao;
     private IUserDao $userDao;
@@ -43,7 +47,7 @@ class ExamController extends Controller {
     //endregion
 
     //region Ctor
-    public function __construct(IRouter $router, IExamDao $examDao, ISubjectDao $subjectDao, IRoomDao $roomDao, ITakenExamDao $takenExamDao, IStudentDao $studentDao, IAdminDao $adminDao, IUserDao $userDao) {
+    public function __construct(IRouter $router, IExamDao $examDao, ISubjectDao $subjectDao, IRoomDao $roomDao, ITakenExamDao $takenExamDao, IStudentDao $studentDao, IAdminDao $adminDao, IUserDao $userDao, ITakenCourseDao $takenCourseDao) {
         parent::__construct($router);
         $this->examDao = $examDao;
         $this->subjectDao = $subjectDao;
@@ -52,6 +56,7 @@ class ExamController extends Controller {
         $this->studentDao = $studentDao;
         $this->adminDao = $adminDao;
         $this->userDao = $userDao;
+        $this->takenCourseDao = $takenCourseDao;
 
         $this->router->registerController($this, 'exam')
             ->registerEndpoint('allExams', 'all', EndpointRoute::VISIBILITY_PRIVATE)
@@ -60,6 +65,7 @@ class ExamController extends Controller {
             ->registerEndpoint('updateExam', 'update', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('deleteExam', 'delete', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getExamsByStudent', 'takenExams', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('getAvailableExamsByStudent', 'available', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('getExamsByTeacher', 'teachExams', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('registerExam', 'register', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('unregisterExam', 'unregister', EndpointRoute::VISIBILITY_PRIVATE);
@@ -124,9 +130,9 @@ class ExamController extends Controller {
 
     public function getExamsByStudent(string $uri, array $requestData): IModel {
         if (!isset($requestData['programmeName']))
-            return new ErrorModel($this->router, 400, 'Failed to query taken exams', 'Parameter "programmeName" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to query taken exams', 'Parameter "programmeName" is not provided');
         if (!isset($requestData['programmeType']))
-            return new ErrorModel($this->router, 400, 'Failed to query taken exams', 'Parameter "programmeType" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to query taken exams', 'Parameter "programmeType" is not provided');
 
         /* @var $user IUser */
         $user = $requestData['token']->getUser();
@@ -144,17 +150,63 @@ class ExamController extends Controller {
             /* @var $takenExam ITakenExam */
             foreach ($takenExams as $takenExam) {
                 $takenExamsEntities[] = (new EntityModel($this->router, $takenExam, true))
+                    ->linkTo('unregister', ExamController::class, 'unregisterExam')
                     ->withSelfRef(ExamController::class, 'getExamsByStudent', [], [
                         'id' => $takenExam->getExam()->getId(),
                         'subjectId' => $takenExam->getExam()->getSubject()->getId()]);
             }
 
             return (new CollectionModel($this->router, $takenExamsEntities, 'takenExams', true))
-                ->withSelfRef(CourseController::class, 'getExamsByStudent', [], [
+                ->withSelfRef(ExamController::class, 'getExamsByStudent', [], [
                     'programmeName' => $requestData['programmeName'],
                     'programmeType' => $requestData['programmeType']]);
         } catch (DataAccessException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to query taken exams', $e->getTraceMessages());
+        }
+    }
+
+    public function getAvailableExamsByStudent(string $uri, array $requestData): IModel {
+        if (!isset($requestData['programmeName']))
+            return new ErrorModel($this->router, 400, 'Failed to query exams', 'Parameter "programmeName" is not provided in uri');
+        if (!isset($requestData['programmeType']))
+            return new ErrorModel($this->router, 400, 'Failed to query exams', 'Parameter "programmeType" is not provided in uri');
+
+        /* @var $user IUser */
+        $user = $requestData['token']->getUser();
+
+        try {
+            $students = $this->studentDao->findByCrit(new Student($user, new Programme($requestData['programmeName'], $requestData['programmeType'])));
+
+            if (empty($students)) {
+                return new ErrorModel($this->router, 403, 'Failed to query exams', "Access is forbidden");
+            }
+
+            $takenCourses = $this->takenCourseDao->findByCrit(new TakenCourse($students[0]));
+
+            $subjects = [];
+            /* @var $takenCourse ITakenCourse */
+            foreach ($takenCourses as $takenCourse) {
+                if (!in_array($takenCourse->getCourse()->getSubject(), $subjects))
+                    $subjects[] = $takenCourse->getCourse()->getSubject();
+            }
+
+            $examsEntities = [];
+
+            foreach ($subjects as $subject) {
+                $exams = $this->examDao->findByCrit(new Exam($subject));
+
+                /* @var $exam IExam */
+                foreach ($exams as $exam) {
+                    $examsEntities[] = (new EntityModel($this->router, $exam, true))
+                        ->linkTo('register', ExamController::class, 'registerExam')
+                        ->withSelfRef(ExamController::class, 'getExamByIdAndSubjectId');
+                }
+            }
+
+            return (new CollectionModel($this->router, $examsEntities, 'exams', true))
+                ->withSelfRef(ExamController::class, 'getAvailableExamsByStudent');
+        } catch (DataAccessException|ModelException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to query exams', $e->getTraceMessages());
         }
     }
 
@@ -271,7 +323,7 @@ class ExamController extends Controller {
                 return new ErrorModel($this->router, 404, 'Failed to update exam', "Already not found subject with id '{$requestData['subjectId']}'");
             }
 
-            $this->examDao->create(new Exam($subjects[0],
+            $this->examDao->update(new Exam($subjects[0],
                                             $requestData['id'],
                                             $requestData['startTime'],
                                             $requestData['endTime'],
@@ -318,13 +370,13 @@ class ExamController extends Controller {
 
     public function registerExam(string $uri, array $requestData): IModel {
         if (!isset($requestData['id']))
-            return new ErrorModel($this->router, 400, 'Failed to register Exam', 'Parameter "id" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to register Exam', 'Parameter "id" is not provided');
         if (!isset($requestData['subjectId']))
-            return new ErrorModel($this->router, 400, 'Failed to register Exam', 'Parameter "subjectId" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to register Exam', 'Parameter "subjectId" is not provided');
         if (!isset($requestData['programmeName']))
-            return new ErrorModel($this->router, 400, 'Failed to register Exam', 'Parameter "programmeName" is not provided in uri');
-        if (!isset($requestData['programmeTame']))
-            return new ErrorModel($this->router, 400, 'Failed to register Exam', 'Parameter "programmeType" is not provided in uri');
+            return new ErrorModel($this->router, 400, 'Failed to register Exam', 'Parameter "programmeName" is not provided');
+        if (!isset($requestData['programmeType']))
+            return new ErrorModel($this->router, 400, 'Failed to register Exam', 'Parameter "programmeType" is not provided');
 
         /* @var $user IUser */
         $user = $requestData['token']->getUser();
@@ -342,6 +394,7 @@ class ExamController extends Controller {
                 return new ErrorModel($this->router, 403, 'Failed to register exam', 'Access is forbidden');
             }
 
+
             $exams = $this->examDao->findByCrit(new Exam($subjects[0], $requestData['id']));
 
             if (empty($exams)) {
@@ -351,18 +404,17 @@ class ExamController extends Controller {
             $takeExams = $this->takenExamDao->findByCrit(new TakenExam($students[0], $exams[0]));
 
             if (!empty($takeExams)) {
-                return new ErrorModel($this->router, 404, 'Failed to register exam', "Found registered with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
+                return new ErrorModel($this->router, 404, 'Failed to register exam', "Already registered");
             }
 
-            $takeExams = $this->takenExamDao->create(new TakenExam(
+            $takeExam = $this->takenExamDao->create(new TakenExam(
                                                          $students[0],
                                                          $exams[0]
                                                      ));
 
-
-            return (new EntityModel($this->router, $takeExams[0], true))
+            return (new EntityModel($this->router, $takeExam, true))
                 ->linkTo('allExams', ExamController::class, 'allExams')
-                ->withSelfRef(ExamController::class, 'getExamByIdAndSubjectId', [], ['id' => $exams[0]->getId(), 'subjectId' => $exams[0]->getSubjectId()]);
+                ->withSelfRef(ExamController::class, 'getExamByIdAndSubjectId', [], ['id' => $exams[0]->getId(), 'subjectId' => $subjects[0]->getId()]);
         } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to register exam', $e->getTraceMessages());
         }
@@ -375,7 +427,7 @@ class ExamController extends Controller {
             return new ErrorModel($this->router, 400, 'Failed to unregister Exam', 'Parameter "subjectId" is not provided in uri');
         if (!isset($requestData['programmeName']))
             return new ErrorModel($this->router, 400, 'Failed to unregister Exam', 'Parameter "programmeName" is not provided in uri');
-        if (!isset($requestData['programmeTame']))
+        if (!isset($requestData['programmeType']))
             return new ErrorModel($this->router, 400, 'Failed to unregister Exam', 'Parameter "programmeType" is not provided in uri');
 
         /* @var $user IUser */
@@ -394,7 +446,7 @@ class ExamController extends Controller {
                 return new ErrorModel($this->router, 403, 'Failed to unregistered exam', 'Access is forbidden');
             }
 
-            $exams = $this->examDao->findByCrit(new Exam(new Subject($subjects[0], $requestData['id'])));
+            $exams = $this->examDao->findByCrit(new Exam($subjects[0], $requestData['id']));
 
             if (empty($exams)) {
                 return new ErrorModel($this->router, 404, 'Failed to unregister exam', "Course not found with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
@@ -402,8 +454,8 @@ class ExamController extends Controller {
 
             $takeExams = $this->takenExamDao->findByCrit(new TakenExam($students[0], $exams[0]));
 
-            if (empty(!$takeExams)) {
-                return new ErrorModel($this->router, 404, 'Failed to unregister exam', "Not found registered with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
+            if (empty($takeExams)) {
+                return new ErrorModel($this->router, 404, 'Failed to unregister exam', "Registered exam not found with id '{$requestData['id']}' and subjectId '{$requestData['subjectId']}'");
             }
 
             $this->takenExamDao->delete($takeExams[0]);
