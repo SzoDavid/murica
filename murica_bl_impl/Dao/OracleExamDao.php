@@ -250,7 +250,7 @@ class OracleExamDao implements IExamDao {
             $crits[] = " EXAM." . TableDefinition::EXAM_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
             $subjectId = $subject->getId();
         }
-        if (isset($id)) $crits[] = " EXAM." . TableDefinition::EXAM_TABLE_FIELD_ID . " LIKE :id";
+        if (isset($id)) $crits[] = " EXAM." . TableDefinition::EXAM_TABLE_FIELD_ID . " = :id";
         if (isset($startTime)) $crits[] = " EXAM." . TableDefinition::EXAM_TABLE_FIELD_START_TIME . " LIKE :startTime";
         if (isset($endTime)) $crits[] = " EXAM." . TableDefinition::EXAM_TABLE_FIELD_END_TIME . " LIKE :endTime";
         if (isset($teacher) && $teacher->getId() !== null) {
@@ -274,7 +274,6 @@ class OracleExamDao implements IExamDao {
             if (isset($endTime)) $stmt->bind(':endTime', $endTime);
             if (isset($teacherId)) $stmt->bind(':teacherId', $teacherId);
             if (isset($roomId)) $stmt->bind(':roomId', $roomId);
-
 
             $exams = $stmt->execute(OCI_DEFAULT)->result();
         } catch (OciException $e) {

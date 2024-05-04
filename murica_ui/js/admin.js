@@ -16,7 +16,6 @@ function subjects(contentElement) {
     requestInvoker.executePost('subject/all', { token: tokenObj.token }).then((response) => {
         bindClickListener(newSubjectButton, () => { newSubject(contentElement, response._links.createSubject.href); });
 
-        console.log(response);
         const tableColumns = {
             id: 'Id',
             name: 'Name',
@@ -76,7 +75,6 @@ function saveNewSubject(contentElement, saveUrl) {
         credit: $('#subject-details-credit').val(),
         type: $('#subject-details-type').val()
     }).then((response) => {
-        console.log(response);
         if (response._success) subjects(contentElement);
         else $('#new-subject-error').html(string2html(response.error.details)).removeClass('hidden');
     });
@@ -218,8 +216,6 @@ function buildCourses(contentElement, container, record) {
 function saveNewCourse(record, contentElement, saveUrl) {
     $('#new-course-error').addClass('hidden');
 
-    console.log(record);
-
     requestInvoker.executePost(saveUrl, {
         token: tokenObj.token,
         subjectId: record.id,
@@ -229,7 +225,6 @@ function saveNewCourse(record, contentElement, saveUrl) {
         term: $('#new-course-term').val(),
         roomId: $('#new-course-room :selected').val()
     }).then((response) => {
-        console.log(response);
         if (response._success) subjects(contentElement);
         else $('#new-course-error').html(string2html(response.error.details)).removeClass('hidden');
     });
@@ -247,17 +242,17 @@ function courseDetails(course, contentElement) {
         $("<tr>").append(
             $("<th>").append($("<label>").attr("for", "edit-course-capacity").text("Capacity:")),
             $("<td>").append($("<input>")
-                .attr({id: "new-course-capacity", type: "number", min: 1, max: 999, value: course.capacity, required: true }))
+                .attr({id: "edit-course-capacity", type: "number", min: 1, max: 999, value: course.capacity, required: true }))
         ),
         $("<tr>").append(
             $("<th>").append($("<label>").attr("for", "edit-course-schedule").text("Schedule:")),
             $("<td>").append($("<input>")
-                .attr({ id: "new-course-schedule", type: "text", maxlength: 13, value: course.schedule, required: true }))
+                .attr({ id: "edit-course-schedule", type: "text", maxlength: 13, value: course.schedule, required: true }))
         ),
         $("<tr>").append(
             $("<th>").append($("<label>").attr("for", "edit-course-term").text("Term:")),
             $("<td>").append($("<input>")
-                .attr({ id: "new-course-term", type: "text", maxlength: 9, value: course.term, required: true }))
+                .attr({ id: "edit-course-term", type: "text", maxlength: 9, value: course.term, required: true }))
         )
     );
     const roomSelector = $('<select>').attr('id', 'edit-course-room');
@@ -393,8 +388,6 @@ function buildTeacherDetails(contentElement, record, course) {
 function removeTeacher(contentElement, record, course) {
     $('#remove-teacher-error').addClass('hidden');
 
-    console.log(record);
-
     requestInvoker.executePost(record._links.removeTeacher.href, { token: tokenObj.token, id: course.id, subjectId: course.subject.id, teacherId: record.id }).then((response) => {
         if (response._success) subjects(contentElement);
         else $('#remove-teacher-error').html(string2html(response.error.details)).removeClass('hidden');
@@ -419,7 +412,6 @@ function programmes(contentElement) {
     requestInvoker.executePost('programme/all', { token: tokenObj.token }).then((response) => {
         bindClickListener(newProgrammeButton, () => { newProgramme(contentElement, response._links.createProgramme.href); });
 
-        console.log(response);
         const tableColumns = {
             name: 'Name',
             type: 'Type',
@@ -468,7 +460,6 @@ function saveNewProgramme(contentElement, saveUrl) {
         type: $('#programme-details-type').val(),
         noTerms: $('#programme-details-noTerms').val(),
     }).then((response) => {
-        console.log(response);
         if (response._success) programmes(contentElement);
         else $('#new-programme-error').html(string2html(response.error.details)).removeClass('hidden');
     });
@@ -540,7 +531,6 @@ function users(contentElement) {
     requestInvoker.executePost('user/all', { token: tokenObj.token }).then((response) => {
         bindClickListener(newUserButton, () => { newUser(contentElement, response._links.createUser.href); });
 
-        console.log(response);
         const tableColumns = {
             id: 'Code',
             name: 'Name',
@@ -608,7 +598,6 @@ function saveNewUser(contentElement, saveUrl) {
         birth_date: $('#user-details-birth').val(),
         password: $('#user-details-password').val()
     }).then((response) => {
-        console.log(response);
         if (response._success) users(contentElement);
         else $('#new-user-error').html(string2html(response.error.details)).removeClass('hidden');
     });
@@ -681,8 +670,6 @@ function buildRoles(contentElement, container, user) {
             console.error(response.error);
             alert('Something unexpected happened. Please try again later!');
         }
-
-        console.log(response);
 
         container.append(new Button(response.isAdmin ? 'Remove admin role' : 'Make admin',
             () => {setAdminRole(user, !response.isAdmin, contentElement, response._links)}).build());
@@ -874,7 +861,6 @@ function saveNewRoom(contentElement, saveUrl) {
         id: $('#room-details-id').val(),
         capacity: $('#room-details-capacity').val(),
     }).then((response) => {
-        console.log(response);
         if (response._success) rooms(contentElement);
         else $('#new-room-error').html(string2html(response.error.details)).removeClass('hidden');
     });

@@ -169,6 +169,8 @@ class ExamController extends Controller {
             /* @var $exam ITakenExam */
             foreach ($exams as $exam) {
                 $examsEntities[] = (new EntityModel($this->router, $exam, true))
+                    ->linkTo('update', ExamController::class, 'updateExam')
+                    ->linkTo('delete', ExamController::class, 'deleteExam')
                     ->withSelfRef(ExamController::class, 'getExamByIdAndSubjectId');
             }
 

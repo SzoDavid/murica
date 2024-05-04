@@ -316,7 +316,6 @@ class SelfPage {
             bindClickListener(updateButton, () => { this.updateSelf(response) });
 
             requestInvoker.executePost('message/all', { token: tokenObj.token }).then((response) => {
-                console.log(response);
                 const tableColumns = {
                     subject: 'Subject',
                     dateTime: 'Date'
