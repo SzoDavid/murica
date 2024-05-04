@@ -76,7 +76,8 @@ class CourseTeach extends Entity implements ICourseTeach {
             'capacity' => $this->course->getCapacity(),
             'schedule' => $this->course->getSchedule(),
             'term' => $this->course->getTerm(),
-            'room' => $this->course->getRoom()->getId()
+            'room' => $this->course->getRoom()->getId(),
+            'noStudents' => $this->course->getNumberOfStudents()
         ];
     }
     //endregion

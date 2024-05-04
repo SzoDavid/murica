@@ -17,18 +17,18 @@ class Course extends Entity implements ICourse {
     private ?string $schedule;
     private ?string $term;
     private ?IRoom $room;
-    private ?int $numberOfParticipants;
+    private ?int $noStudents;
     //endregion
 
     //region Ctor
-    public function __construct(?ISubject $subject=null, ?string $id=null, ?string $capacity=null, ?string $schedule=null, ?string $term=null, ?IRoom $room=null, ?int $numberOfParticipants=null) {
+    public function __construct(?ISubject $subject=null, ?string $id=null, ?string $capacity=null, ?string $schedule=null, ?string $term=null, ?IRoom $room=null, ?int $noStudents=null) {
         $this->subject = $subject;
         $this->id = isset($id) ? trim($id) : null;
         $this->capacity = $capacity;
         $this->schedule = isset($schedule) ? trim($schedule) : null;
         $this->term = isset($term) ? trim($term) : null;
         $this->room = $room;
-        $this->numberOfParticipants = $numberOfParticipants;
+        $this->noStudents = $noStudents;
     }
     //endregion
 
@@ -69,8 +69,8 @@ class Course extends Entity implements ICourse {
         return $this;
     }
 
-    public function getNumberOfParticipants(): ?int {
-        return $this->numberOfParticipants;
+    public function getNumberOfStudents(): ?int {
+        return $this->noStudents;
     }
 
     #[Override]
@@ -104,8 +104,8 @@ class Course extends Entity implements ICourse {
     }
 
     #[Override]
-    public function setNumberOfParticipants(?int $numberOfParticipants): ICourse {
-        $this->numberOfParticipants = $numberOfParticipants;
+    public function setNumberOfStudents(?int $noStudents): ICourse {
+        $this->noStudents = $noStudents;
         return $this;
     }
     //endregion
@@ -142,7 +142,7 @@ class Course extends Entity implements ICourse {
             'schedule' => $this->schedule,
             'term' => $this->term,
             'room' => $this->room->jsonSerialize(),
-            'noParticipants' => $this->numberOfParticipants
+            'noStudents' => $this->noStudents
         ];
     }
     //endregion

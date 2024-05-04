@@ -21,6 +21,7 @@ function courses(contentElement) {
             id: 'Id',
             name: 'Name',
             capacity: 'Capacity',
+            noStudents: 'Number of Students',
             schedule: 'Schedule',
             term: 'Term',
             room: 'Room'

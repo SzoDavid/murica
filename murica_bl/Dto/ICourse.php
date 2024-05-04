@@ -11,14 +11,14 @@ interface ICourse {
     public function getSchedule(): ?string;
     public function getTerm(): ?string;
     public function getRoom(): ?IRoom;
-    public function getNumberOfParticipants(): ?int;
+    public function getNumberOfStudents(): ?int;
     public function setId(string $id): ICourse;
     public function setSubject(ISubject $subject): ICourse;
     public function setCapacity(int $capacity): ICourse;
     public function setSchedule(string $schedule): ICourse;
     public function setTerm(string $term): ICourse;
     public function setRoom(IRoom $room): ICourse;
-    public function setNumberOfParticipants(?int $numberOfParticipants): ICourse;
+    public function setNumberOfStudents(?int $noStudents): ICourse;
     /**
      * @throws ValidationException
      */

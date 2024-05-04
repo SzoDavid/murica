@@ -114,7 +114,8 @@ class TakenCourse extends Entity implements ITakenCourse {
             'approvedVisual' => $this->approved ? '✓' : 'x',
             'userId' => $this->student->getUser()->getId(),
             'userName' => $this->student->getUser()->getName(),
-            'userProgramme' => $this->student->getProgramme()->getName() . '/' . $this->student->getProgramme()->getType()
+            'userProgramme' => $this->student->getProgramme()->getName() . '/' . $this->student->getProgramme()->getType(),
+            'noStudents' => $this->course->getNumberOfStudents()
         ];
     }
     //endregion
