@@ -68,6 +68,7 @@ class CourseController extends Controller {
             ->registerEndpoint('deleteCourse', 'delete', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('registerCourse', 'register', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('unregisterCourse', 'unregister', EndpointRoute::VISIBILITY_PRIVATE)
+            ->registerEndpoint('updateCourseResults', 'updateResults', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('addTeacherToCourse', 'add', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('calculateAverages', 'averages', EndpointRoute::VISIBILITY_PRIVATE)
             ->registerEndpoint('removeTeacherFromCourse', 'remove', EndpointRoute::VISIBILITY_PRIVATE);
@@ -218,6 +219,7 @@ class CourseController extends Controller {
             /* @var $teachCourse ICourseTeach */
             foreach ($teachCourses as $teachCourse) {
                 $coursesEntities[] = (new EntityModel($this->router, $teachCourse, true))
+                    ->linkTo('students', UserController::class, 'getStudentsByCourse')
                     ->withSelfRef(CourseController::class, 'getCourseByTeacher');
             }
 
@@ -411,18 +413,54 @@ class CourseController extends Controller {
                 return new ErrorModel($this->router, 403, 'Failed to unregister course', "Access is forbidden");
             }
 
-            $takeCourses = $this->takenCourseDao->findByCrit(new TakenCourse($students[0],
+            $takenCourses = $this->takenCourseDao->findByCrit(new TakenCourse($students[0],
                                                                              new Course(new Subject($requestData['subjectId']),
                                                                                         $requestData['id'])));
 
-            if (empty($takeCourses)) {
+            if (empty($takenCourses)) {
                 return new ErrorModel($this->router, 404, 'Failed to unregister course', "Course not registered with id '{$requestData['subjectId']}-{$requestData['id']}' for user '{$user->getId()}'");
             }
 
-            $this->courseDao->delete($takeCourses[0]);
+            $this->courseDao->delete($takenCourses[0]);
             return new MessageModel($this->router, ['message' => 'Course unregister successfully'], true);
         } catch (DataAccessException $e) {
             return new ErrorModel($this->router, 500, 'Failed to unregister course', $e->getTraceMessages());
+        }
+    }
+
+    public function updateCourseResults(string $uri, array $requestData): IModel {
+        // Todo: check if user is teacher
+        if (!isset($requestData['courseId']))
+            return new ErrorModel($this->router, 400, 'Failed to update course results', 'Parameter "courseId" is not provided in uri');
+        if (!isset($requestData['subjectId']))
+            return new ErrorModel($this->router, 400, 'Failed to update course results', 'Parameter "subjectId" is not provided in uri');
+        if (!isset($requestData['studentId']))
+            return new ErrorModel($this->router, 400, 'Failed to update course results', 'Parameter "studentId" is not provided in uri');
+        if (!isset($requestData['programmeName']))
+            return new ErrorModel($this->router, 400, 'Failed to update course results', 'Parameter "programmeName" is not provided in uri');
+        if (!isset($requestData['programmeType']))
+            return new ErrorModel($this->router, 400, 'Failed to update course results', 'Parameter "programmeType" is not provided in uri');
+
+        try {
+            $takenCourses = $this->takenCourseDao->findByCrit(new TakenCourse(new Student(new User($requestData['studentId']), new Programme($requestData['programmeName'], $requestData['programmeType'])),
+                                                                             new Course(new Subject($requestData['subjectId']),
+                                                                                        $requestData['courseId'])));
+
+            if (empty($takenCourses)) {
+                return new ErrorModel($this->router, 404, 'Failed to update course results', "No course is registered with id '{$requestData['subjectId']}-{$requestData['id']}' for user '{$requestData['studentId']}'");
+            }
+
+            /* @var $takenCourse ITakenCourse */
+            $takenCourse = $takenCourses[0];
+
+            if (isset($requestData['approved'])) $takenCourse->setApproved($requestData['approved'] === 'true');
+            if (isset($requestData['grade'])) $takenCourse->setGrade($requestData['grade']);
+
+            $this->takenCourseDao->update($takenCourse);
+
+            return new MessageModel($this->router, ['message' => 'Course results updated successfully'], true);
+        } catch (DataAccessException|ValidationException $e) {
+            return new ErrorModel($this->router, 500, 'Failed to update course results', $e->getTraceMessages());
         }
     }
 
