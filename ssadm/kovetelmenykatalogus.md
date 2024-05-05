@@ -35,16 +35,6 @@ Egy felhasználó lehet oktató is, ha van olyan kurzus ahol oktatóként van me
 
 Egy felhasználó lehet admin is, ekkor hozhat létre tárgyakat, kurzusokat és rendelhet hozzájuk oktatókat, szakokat, tantervet és szerkesztheti azokat. Ő vehet fel további felhasználókat is, valamint módosíthatja az adataikat.
 
-#### Üzenet
-
-- Szerző
-- Címzett
-- Tágy
-- Tartalom
-- Idő
-
-Adminok és oktatók küldhetnek üzeneteket, adminok mindenkinek, oktatók pedig csak az általuk oktatott hallgatóknak.
-
 #### Tárgy
 
 - Kód
@@ -78,28 +68,6 @@ Egy tárgy több kurzust foglal össze. Egy tárgyhoz tartozó kurzust csak akko
 - Időpont
 - Vizsgáztató(k)
 - Férőhely
-
-#### Időszak
-
-Például kurzus felvételi időszak, szorgalmi időszak, vizsga időszak, szünet. A felhasználók minden időszakban más-más funkciókat érhetnek el. Van kezdetük és végül.
-
-### Időszakok
-
-#### Kurzus felvételi időszak
-
-Hallgatók tudnak felvenni és leadni kurzust, ha a felvételi követelményhez hozzáadott tárgyak teljesítve vannak. A felvételnél rangsorolva vannak tanterv (milyen közel van az ajánlott félév) és az átlag alapján. 
-
-Oktatók, ha jóváhagyásos a kurzus, jóváhagyhatják a felvételeket.
-
-#### Szorgalmi időszak
-
-Amennyiben a kurzus gyakorlat, az oktatónak a szorgalmi időszak végéig értékelnie kell a hallgató teljesítményét.
-
-#### Vizsgaidőszak
-
-Az oktató hirdethet meg vizsgákat, majd az egyes vizsgák után a résztvett hallgatóknak írhat be érdemjegyet. 
-
-Hallgató felvehet vizsgákat.
 
 ## Nem funkcionális követelmények
 

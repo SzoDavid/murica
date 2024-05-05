@@ -1,32 +1,11 @@
-<mxfile host="Electron" modified="2024-03-06T18:49:42.919Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/23.1.5 Chrome/120.0.6099.109 Electron/28.2.5 Safari/537.36" etag="hp1Vah4Pf2QQAvKohgjw" version="23.1.5" type="device">
+<mxfile host="Electron" modified="2024-04-29T22:35:18.892Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/23.1.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="qTXtnxrEfd82_2CoOB-1" version="23.1.5" type="device">
   <diagram name="Page-1" id="wjbixc1uVG8kfwtZ6LRp">
-    <mxGraphModel dx="1434" dy="838" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1050" dy="629" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="EMPra91uAZbDpFP98Xx0-1" value="Oktató Főmenü" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="320" y="40" width="80" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-2" value="Üzenetek" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="110" y="120" width="80" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-3" value="Új üzenet" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="160" y="200" width="80" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-4" value="Üzenet elolvasása" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="60" y="200" width="80" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-5" value="" style="endArrow=none;html=1;rounded=0;edgeStyle=elbowEdgeStyle;elbow=vertical;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="EMPra91uAZbDpFP98Xx0-4" target="EMPra91uAZbDpFP98Xx0-2" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="110" y="200" as="sourcePoint" />
-            <mxPoint x="100" y="160" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-6" value="" style="endArrow=none;html=1;rounded=0;edgeStyle=elbowEdgeStyle;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;elbow=vertical;" parent="1" source="EMPra91uAZbDpFP98Xx0-3" target="EMPra91uAZbDpFP98Xx0-2" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="370" y="320" as="sourcePoint" />
-            <mxPoint x="420" y="270" as="targetPoint" />
-          </mxGeometry>
+          <mxGeometry x="425" y="38" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="EMPra91uAZbDpFP98Xx0-7" value="Kurzusok" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="320" y="120" width="80" height="40" as="geometry" />
@@ -70,12 +49,6 @@
             <mxPoint x="480" y="180" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-17" value="" style="endArrow=none;html=1;rounded=0;fontSize=12;elbow=vertical;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;edgeStyle=elbowEdgeStyle;" parent="1" source="EMPra91uAZbDpFP98Xx0-2" target="EMPra91uAZbDpFP98Xx0-1" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="400" y="230" as="sourcePoint" />
-            <mxPoint x="450" y="180" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="EMPra91uAZbDpFP98Xx0-18" value="" style="endArrow=none;html=1;rounded=0;fontSize=12;elbow=vertical;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;edgeStyle=elbowEdgeStyle;" parent="1" source="EMPra91uAZbDpFP98Xx0-7" target="EMPra91uAZbDpFP98Xx0-1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="400" y="230" as="sourcePoint" />
@@ -91,31 +64,22 @@
         <mxCell id="EMPra91uAZbDpFP98Xx0-21" value="MEN3" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="350" y="78" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-22" value="MEN3.1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="143" y="157" width="60" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-23" value="MEN3.2" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="EMPra91uAZbDpFP98Xx0-23" value="MEN3.1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="353" y="157" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-24" value="MEN3.3" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="EMPra91uAZbDpFP98Xx0-24" value="MEN3.2" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="553" y="157" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-25" value="DIAL28" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="90" y="233" width="60" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-26" value="DIAL29" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="190" y="233" width="60" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-27" value="DIAL30" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="EMPra91uAZbDpFP98Xx0-27" value="DIAL25" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="302" y="233" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-28" value="DIAL31" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="EMPra91uAZbDpFP98Xx0-28" value="DIAL26" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="402" y="233" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-29" value="DIAL32" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="EMPra91uAZbDpFP98Xx0-29" value="DIAL27" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="502" y="233" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="EMPra91uAZbDpFP98Xx0-30" value="DIAL33" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="EMPra91uAZbDpFP98Xx0-30" value="DIAL28" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="602" y="233" width="60" height="30" as="geometry" />
         </mxCell>
       </root>

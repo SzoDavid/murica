@@ -1,1 +1,441 @@
-<mxfile host="www.inf.u-szeged.hu" modified="2024-03-06T19:05:46.422Z" agent="5.0 (X11)" etag="SyjhtyhHGiWy19v6hXPm" version="20.8.20" type="device"><diagram name="Page-1" id="D4jjd653WhLHZPP0HxEm">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</diagram></mxfile>
+<mxfile host="Electron" modified="2024-04-29T22:06:38.513Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/23.1.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="OyDtxPnaj_rTvll_j5pH" version="23.1.5" type="device">
+  <diagram name="Page-1" id="D4jjd653WhLHZPP0HxEm">
+    <mxGraphModel dx="4279" dy="1573" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-33" value="Oktató&lt;br&gt;" style="shape=stencil(tZRtjoMgEIZPw98GJR6gYXfvQe10nZQCAbYft99RNKlW7GajiTGZeeXhnZGBCRka5YCVvGHig5VlwTm9Kb5NYhUc1DElr8qjOmhISojenuGGx9gz0DTgMbaq+GR8T9+0j5C1NYYgaE0YKU86wRQaWsvvCdZv/xhFjvgXiOB7kynLyq+/Y3fVNuBiI79j7OB+db/rgceOi61+3Grg4v9YISmTO9xCHlR9/vb2xxxnzYDW6AK8OfLTeZzO66ynzM5CnqyHBUsn1DqN9UITnWoH/kUY5Iu9PtVUzRY1jx4IGk22K9UioSs+44+uvFxl3bKX1nTZdE12iV8=);whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-1560" y="1010" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-42" value="Felhasználó" style="shape=stencil(tZRtjoMgEIZPw98GJR6gYXfvQe10nZQCAbYft99RNKlW7GajiTGZeeXhnZGBCRka5YCVvGHig5VlwTm9Kb5NYhUc1DElr8qjOmhISojenuGGx9gz0DTgMbaq+GR8T9+0j5C1NYYgaE0YKU86wRQaWsvvCdZv/xhFjvgXiOB7kynLyq+/Y3fVNuBiI79j7OB+db/rgceOi61+3Grg4v9YISmTO9xCHlR9/vb2xxxnzYDW6AK8OfLTeZzO66ynzM5CnqyHBUsn1DqN9UITnWoH/kUY5Iu9PtVUzRY1jx4IGk22K9UioSs+44+uvFxl3bKX1nTZdE12iV8=);whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-1560" y="1190" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-43" value="Felhasználó kód, jelszó" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;" parent="1" source="yPqAMtaEenO2p8fV_E_8-42" target="yPqAMtaEenO2p8fV_E_8-212" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-970" y="1330" as="sourcePoint" />
+            <mxPoint x="-1280.0000000000002" y="1230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-45" value="Felhasználók" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=33;container=1;collapsible=0;autosize=0;flipH=0;" parent="1" vertex="1">
+          <mxGeometry x="-1040" y="1215" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-46" value="L12" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;allowArrows=0;connectable=0;" parent="yPqAMtaEenO2p8fV_E_8-45" vertex="1">
+          <mxGeometry width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-50" value="&lt;br&gt;" style="endArrow=classic;startArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=-0.012;entryY=0.472;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-212" target="yPqAMtaEenO2p8fV_E_8-45" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1120.0000000000002" y="1228.5080645161297" as="sourcePoint" />
+            <mxPoint x="-890" y="1330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-55" value="Felhasználó kezelése" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.process;align=center;container=1;collapsible=0;spacingTop=30;" parent="1" vertex="1">
+          <mxGeometry x="-1250" y="785" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-56" value="5" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;connectable=0;allowArrows=0;pointerEvents=1;" parent="yPqAMtaEenO2p8fV_E_8-55" vertex="1">
+          <mxGeometry width="35" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-57" value="Felhasználók" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;connectable=0;allowArrows=0;rotatable=0;cloneable=0;deletable=0;spacingLeft=6;autosize=1;resizeWidth=0;" parent="yPqAMtaEenO2p8fV_E_8-55" vertex="1">
+          <mxGeometry x="35" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-58" value="Hallgató, Admin adatai , Szak Név" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=-0.025;entryY=0.517;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-189" target="yPqAMtaEenO2p8fV_E_8-55" edge="1">
+          <mxGeometry x="0.0156" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1710" y="450.00000000000045" as="sourcePoint" />
+            <mxPoint x="-1260" y="840" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-59" value="Termek kezelése" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.process;align=center;container=1;collapsible=0;spacingTop=30;" parent="1" vertex="1">
+          <mxGeometry x="-1250" y="590" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-60" value="3" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;connectable=0;allowArrows=0;pointerEvents=1;" parent="yPqAMtaEenO2p8fV_E_8-59" vertex="1">
+          <mxGeometry width="35" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-61" value="Teremek" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;connectable=0;allowArrows=0;rotatable=0;cloneable=0;deletable=0;spacingLeft=6;autosize=1;resizeWidth=0;" parent="yPqAMtaEenO2p8fV_E_8-59" vertex="1">
+          <mxGeometry x="35" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-62" value="terem adatai" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=0.01;entryY=0.63;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-192" target="yPqAMtaEenO2p8fV_E_8-59" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1650" y="550" as="sourcePoint" />
+            <mxPoint x="-950" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-75" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=0.004;entryY=0.583;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-59" target="yPqAMtaEenO2p8fV_E_8-228" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1300" y="686" as="sourcePoint" />
+            <mxPoint x="-1000" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-92" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=-0.018;entryY=0.483;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-55" target="yPqAMtaEenO2p8fV_E_8-234" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1320" y="825" as="sourcePoint" />
+            <mxPoint x="-1020" y="808.6363636363635" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-93" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=-0.018;entryY=0.506;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-55" target="yPqAMtaEenO2p8fV_E_8-232" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1320" y="825" as="sourcePoint" />
+            <mxPoint x="-1016.28" y="852.77" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-98" value="kurzus adatai, Felhasználó Kód,&lt;br&gt;Tárgy kód" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=0.005;entryY=0.544;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-193" target="yPqAMtaEenO2p8fV_E_8-103" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1708.5714285714284" y="690" as="sourcePoint" />
+            <mxPoint x="-1250" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-99" value="Kurzus" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID2;align=left;spacingLeft=38;container=1;collapsible=0;flipH=0;" parent="1" vertex="1">
+          <mxGeometry x="-1040" y="460" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-100" value="L2" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;connectable=0;allowArrows=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;" parent="yPqAMtaEenO2p8fV_E_8-99" vertex="1">
+          <mxGeometry x="5" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-102" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=0.003;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-103" target="yPqAMtaEenO2p8fV_E_8-99" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1100" y="450" as="sourcePoint" />
+            <mxPoint x="-1190" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-103" value="Kurzus kezelése" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.process;align=center;container=1;collapsible=0;spacingTop=30;" parent="1" vertex="1">
+          <mxGeometry x="-1250" y="390" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-104" value="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;connectable=0;allowArrows=0;pointerEvents=1;" parent="yPqAMtaEenO2p8fV_E_8-103" vertex="1">
+          <mxGeometry width="35" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-105" value="Tárgyak" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;connectable=0;allowArrows=0;rotatable=0;cloneable=0;deletable=0;spacingLeft=6;autosize=1;resizeWidth=0;" parent="yPqAMtaEenO2p8fV_E_8-103" vertex="1">
+          <mxGeometry x="35" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-106" value="Vizsgák kezelése" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.process;align=center;container=1;collapsible=0;spacingTop=30;" parent="1" vertex="1">
+          <mxGeometry x="-1250" y="980" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-107" value="6" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;connectable=0;allowArrows=0;pointerEvents=1;" parent="yPqAMtaEenO2p8fV_E_8-106" vertex="1">
+          <mxGeometry width="35" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-108" value="Vizsgák" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;connectable=0;allowArrows=0;rotatable=0;cloneable=0;deletable=0;spacingLeft=6;autosize=1;resizeWidth=0;" parent="yPqAMtaEenO2p8fV_E_8-106" vertex="1">
+          <mxGeometry x="35" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-109" value="vizsgák adatai,Terem Kód,&lt;br&gt;Tárgy kód" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;exitX=0.983;exitY=0.408;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-33" target="yPqAMtaEenO2p8fV_E_8-106" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1315" y="1090" as="sourcePoint" />
+            <mxPoint x="-1195" y="1090" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-112" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=0.01;entryY=0.561;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-106" target="yPqAMtaEenO2p8fV_E_8-242" edge="1">
+          <mxGeometry x="-0.4656" y="30" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1315" y="1090" as="sourcePoint" />
+            <mxPoint x="-1044.1999999999998" y="1038.5" as="targetPoint" />
+            <mxPoint y="-1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-120" value="Kurzust oktat" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=33;container=1;collapsible=0;autosize=0;flipH=0;" parent="1" vertex="1">
+          <mxGeometry x="-1040" y="410" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-121" value="L1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;allowArrows=0;connectable=0;" parent="yPqAMtaEenO2p8fV_E_8-120" vertex="1">
+          <mxGeometry width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-122" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=-0.002;entryY=0.392;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-103" target="yPqAMtaEenO2p8fV_E_8-120" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1510" y="530" as="sourcePoint" />
+            <mxPoint x="-950" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-151" value="Felhasználó kód,Vizsga kód" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-197" target="yPqAMtaEenO2p8fV_E_8-511" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1519.1999999999998" y="1470.7200000000003" as="sourcePoint" />
+            <mxPoint x="-1250" y="1400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-152" value="Felhasználó kód, Kurzus kód" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;" parent="1" source="yPqAMtaEenO2p8fV_E_8-202" target="yPqAMtaEenO2p8fV_E_8-505" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1520.0000000000002" y="1574" as="sourcePoint" />
+            <mxPoint x="-1240" y="1579" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-153" value="Felvett kurzus" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID2;align=left;spacingLeft=38;container=1;collapsible=0;flipH=0;" parent="1" vertex="1">
+          <mxGeometry x="-1030" y="1519" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-154" value="L14" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;connectable=0;allowArrows=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;" parent="yPqAMtaEenO2p8fV_E_8-153" vertex="1">
+          <mxGeometry x="5" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-157" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=0.004;entryY=0.506;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-511" target="yPqAMtaEenO2p8fV_E_8-238" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1090" y="1372.5199264255057" as="sourcePoint" />
+            <mxPoint x="-1018.2" y="1373.7399999999998" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-158" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=-0.001;entryY=0.45;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-505" target="yPqAMtaEenO2p8fV_E_8-153" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1080" y="1550.358176778565" as="sourcePoint" />
+            <mxPoint x="-1220" y="1424" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-172" value="Üzenet olvasása" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.process2;align=center;container=1;collapsible=0;spacingTop=30;" parent="1" vertex="1">
+          <mxGeometry x="-1245" y="1680" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-173" value="10" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;connectable=0;allowArrows=0;editable=1;movable=0;resizable=0;rotatable=0;deletable=0;locked=0;cloneable=0;" parent="yPqAMtaEenO2p8fV_E_8-172" vertex="1">
+          <mxGeometry width="35" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-174" value="Üzenetek" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;autosize=1;connectable=0;allowArrows=0;movable=0;resizable=0;rotatable=0;deletable=0;cloneable=0;spacingLeft=6;fontStyle=0;html=1;" parent="yPqAMtaEenO2p8fV_E_8-172" vertex="1">
+          <mxGeometry x="35" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-175" value="Üzenet&amp;nbsp; információi" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;exitX=-0.02;exitY=0.598;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-172" target="yPqAMtaEenO2p8fV_E_8-206" edge="1">
+          <mxGeometry x="-0.0008" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1320" y="1730" as="sourcePoint" />
+            <mxPoint x="-1540" y="1560" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-178" value="" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;exitX=0.004;exitY=0.539;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-244" target="yPqAMtaEenO2p8fV_E_8-172" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1320" y="1730" as="sourcePoint" />
+            <mxPoint x="-1200" y="1730" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-182" value="Kurzus iformációk" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;edgeStyle=orthogonalEdgeStyle;" parent="1" source="yPqAMtaEenO2p8fV_E_8-505" target="yPqAMtaEenO2p8fV_E_8-202" edge="1">
+          <mxGeometry x="0.3256" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1240" y="1554" as="sourcePoint" />
+            <mxPoint x="-1460" y="1537.0759371996155" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-1310" y="1554" />
+              <mxPoint x="-1310" y="1514" />
+              <mxPoint x="-1500" y="1514" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-183" value="Vizsga információk" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;edgeStyle=orthogonalEdgeStyle;" parent="1" target="yPqAMtaEenO2p8fV_E_8-197" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1250" y="1370" as="sourcePoint" />
+            <mxPoint x="-1496.28" y="1475.7600000000002" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-1345" y="1370" />
+              <mxPoint x="-1345" y="1340" />
+              <mxPoint x="-1500" y="1340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-184" value="Kurzus információk" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;edgeStyle=orthogonalEdgeStyle;" parent="1" source="yPqAMtaEenO2p8fV_E_8-103" target="yPqAMtaEenO2p8fV_E_8-193" edge="1">
+          <mxGeometry x="0.328" y="-2" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1330" y="570" as="sourcePoint" />
+            <mxPoint x="-1700.2799999999997" y="690.72" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-1327" y="420" />
+              <mxPoint x="-1327" y="400" />
+              <mxPoint x="-1465" y="400" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-186" value="Terem információk" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;exitX=-0.014;exitY=0.206;exitDx=0;exitDy=0;exitPerimeter=0;edgeStyle=orthogonalEdgeStyle;" parent="1" source="yPqAMtaEenO2p8fV_E_8-59" target="yPqAMtaEenO2p8fV_E_8-192" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1330" y="640" as="sourcePoint" />
+            <mxPoint x="-1490" y="580" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-1327" y="615" />
+              <mxPoint x="-1327" y="600" />
+              <mxPoint x="-1465" y="600" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-189" value="Admin" style="shape=stencil(tZRtjoMgEIZPw98GJR6gYXfvQe10nZQCAbYft99RNKlW7GajiTGZeeXhnZGBCRka5YCVvGHig5VlwTm9Kb5NYhUc1DElr8qjOmhISojenuGGx9gz0DTgMbaq+GR8T9+0j5C1NYYgaE0YKU86wRQaWsvvCdZv/xhFjvgXiOB7kynLyq+/Y3fVNuBiI79j7OB+db/rgceOi61+3Grg4v9YISmTO9xCHlR9/vb2xxxnzYDW6AK8OfLTeZzO66ynzM5CnqyHBUsn1DqN9UITnWoH/kUY5Iu9PtVUzRY1jx4IGk22K9UioSs+44+uvFxl3bKX1nTZdE12iV8=);whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-1570" y="805" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-192" value="Admin" style="shape=stencil(tZRtjoMgEIZPw98GJR6gYXfvQe10nZQCAbYft99RNKlW7GajiTGZeeXhnZGBCRka5YCVvGHig5VlwTm9Kb5NYhUc1DElr8qjOmhISojenuGGx9gz0DTgMbaq+GR8T9+0j5C1NYYgaE0YKU86wRQaWsvvCdZv/xhFjvgXiOB7kynLyq+/Y3fVNuBiI79j7OB+db/rgceOi61+3Grg4v9YISmTO9xCHlR9/vb2xxxnzYDW6AK8OfLTeZzO66ynzM5CnqyHBUsn1DqN9UITnWoH/kUY5Iu9PtVUzRY1jx4IGk22K9UioSs+44+uvFxl3bKX1nTZdE12iV8=);whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-1525" y="630" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-193" value="Admin" style="shape=stencil(tZRtjoMgEIZPw98GJR6gYXfvQe10nZQCAbYft99RNKlW7GajiTGZeeXhnZGBCRka5YCVvGHig5VlwTm9Kb5NYhUc1DElr8qjOmhISojenuGGx9gz0DTgMbaq+GR8T9+0j5C1NYYgaE0YKU86wRQaWsvvCdZv/xhFjvgXiOB7kynLyq+/Y3fVNuBiI79j7OB+db/rgceOi61+3Grg4v9YISmTO9xCHlR9/vb2xxxnzYDW6AK8OfLTeZzO66ynzM5CnqyHBUsn1DqN9UITnWoH/kUY5Iu9PtVUzRY1jx4IGk22K9UioSs+44+uvFxl3bKX1nTZdE12iV8=);whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-1525" y="420" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-195" value="Hallgató, Felhasználó és Admin információi" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;edgeStyle=orthogonalEdgeStyle;exitX=-0.006;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-55" target="yPqAMtaEenO2p8fV_E_8-189" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1280" y="790" as="sourcePoint" />
+            <mxPoint x="-1210" y="800" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-1251" y="813" />
+              <mxPoint x="-1370" y="813" />
+              <mxPoint x="-1370" y="780" />
+              <mxPoint x="-1510" y="780" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-196" value="Vizsgák információi&amp;nbsp;" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;edgeStyle=orthogonalEdgeStyle;" parent="1" source="yPqAMtaEenO2p8fV_E_8-106" target="yPqAMtaEenO2p8fV_E_8-33" edge="1">
+          <mxGeometry x="0.3609" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1330" y="830" as="sourcePoint" />
+            <mxPoint x="-1210" y="830" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-1350" y="1000" />
+              <mxPoint x="-1350" y="980" />
+              <mxPoint x="-1510" y="980" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-197" value="Hallgató" style="shape=stencil(tZRtjoMgEIZPw98GJR6gYXfvQe10nZQCAbYft99RNKlW7GajiTGZeeXhnZGBCRka5YCVvGHig5VlwTm9Kb5NYhUc1DElr8qjOmhISojenuGGx9gz0DTgMbaq+GR8T9+0j5C1NYYgaE0YKU86wRQaWsvvCdZv/xhFjvgXiOB7kynLyq+/Y3fVNuBiI79j7OB+db/rgceOi61+3Grg4v9YISmTO9xCHlR9/vb2xxxnzYDW6AK8OfLTeZzO66ynzM5CnqyHBUsn1DqN9UITnWoH/kUY5Iu9PtVUzRY1jx4IGk22K9UioSs+44+uvFxl3bKX1nTZdE12iV8=);whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-1560" y="1360" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-198" value="Vizsga" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID2;align=left;spacingLeft=38;container=1;collapsible=0;flipH=0;" parent="1" vertex="1">
+          <mxGeometry x="-1040" y="1430" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-199" value="L11" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;connectable=0;allowArrows=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;" parent="yPqAMtaEenO2p8fV_E_8-198" vertex="1">
+          <mxGeometry x="5" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-200" value="" style="endArrow=none;startArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=0.006;entryY=0.425;entryDx=0;entryDy=0;entryPerimeter=0;startFill=1;endFill=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-511" target="yPqAMtaEenO2p8fV_E_8-198" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1090" y="1426.1627906976746" as="sourcePoint" />
+            <mxPoint x="-1210" y="1270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-202" value="Hallgató" style="shape=stencil(tZRtjoMgEIZPw98GJR6gYXfvQe10nZQCAbYft99RNKlW7GajiTGZeeXhnZGBCRka5YCVvGHig5VlwTm9Kb5NYhUc1DElr8qjOmhISojenuGGx9gz0DTgMbaq+GR8T9+0j5C1NYYgaE0YKU86wRQaWsvvCdZv/xhFjvgXiOB7kynLyq+/Y3fVNuBiI79j7OB+db/rgceOi61+3Grg4v9YISmTO9xCHlR9/vb2xxxnzYDW6AK8OfLTeZzO66ynzM5CnqyHBUsn1DqN9UITnWoH/kUY5Iu9PtVUzRY1jx4IGk22K9UioSs+44+uvFxl3bKX1nTZdE12iV8=);whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-1560" y="1539" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-203" value="Kurzus" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID2;align=left;spacingLeft=38;container=1;collapsible=0;flipH=0;" parent="1" vertex="1">
+          <mxGeometry x="-1030" y="1608" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-204" value="L2" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;connectable=0;allowArrows=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;" parent="yPqAMtaEenO2p8fV_E_8-203" vertex="1">
+          <mxGeometry x="5" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-205" value="" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;exitX=-0.01;exitY=0.558;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-203" target="yPqAMtaEenO2p8fV_E_8-505" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1320" y="1604" as="sourcePoint" />
+            <mxPoint x="-1080" y="1607.4099378881988" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-206" value="Felhasználó" style="shape=stencil(tZRtjoMgEIZPw98GJR6gYXfvQe10nZQCAbYft99RNKlW7GajiTGZeeXhnZGBCRka5YCVvGHig5VlwTm9Kb5NYhUc1DElr8qjOmhISojenuGGx9gz0DTgMbaq+GR8T9+0j5C1NYYgaE0YKU86wRQaWsvvCdZv/xhFjvgXiOB7kynLyq+/Y3fVNuBiI79j7OB+db/rgceOi61+3Grg4v9YISmTO9xCHlR9/vb2xxxnzYDW6AK8OfLTeZzO66ynzM5CnqyHBUsn1DqN9UITnWoH/kUY5Iu9PtVUzRY1jx4IGk22K9UioSs+44+uvFxl3bKX1nTZdE12iV8=);whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-1560" y="1710" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-209" value="Felhasználók" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=33;container=1;collapsible=0;autosize=0;" parent="1" vertex="1">
+          <mxGeometry x="-1040" y="875" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-210" value="L10" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;allowArrows=0;connectable=0;" parent="yPqAMtaEenO2p8fV_E_8-209" vertex="1">
+          <mxGeometry width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-212" value="Bejelentkezés" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.process2;align=center;container=1;collapsible=0;spacingTop=30;" parent="1" vertex="1">
+          <mxGeometry x="-1250" y="1170" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-213" value="7" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;connectable=0;allowArrows=0;editable=1;movable=0;resizable=0;rotatable=0;deletable=0;locked=0;cloneable=0;" parent="yPqAMtaEenO2p8fV_E_8-212" vertex="1">
+          <mxGeometry width="35" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-214" value="Bejelentkezés" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;autosize=1;connectable=0;allowArrows=0;movable=0;resizable=0;rotatable=0;deletable=0;cloneable=0;spacingLeft=6;fontStyle=0;html=1;" parent="yPqAMtaEenO2p8fV_E_8-212" vertex="1">
+          <mxGeometry x="35" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-215" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=0.005;entryY=0.388;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-55" target="yPqAMtaEenO2p8fV_E_8-209" edge="1">
+          <mxGeometry x="-0.8063" y="4" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1100" y="910" as="sourcePoint" />
+            <mxPoint x="-1250" y="1000" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-228" value="Terem" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=33;container=1;collapsible=0;autosize=0;" parent="1" vertex="1">
+          <mxGeometry x="-1040" y="635" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-229" value="L6" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;allowArrows=0;connectable=0;" parent="yPqAMtaEenO2p8fV_E_8-228" vertex="1">
+          <mxGeometry width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-232" value="Admin" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=33;container=1;collapsible=0;autosize=0;" parent="1" vertex="1">
+          <mxGeometry x="-1040" y="830" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-233" value="L9" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;allowArrows=0;connectable=0;" parent="yPqAMtaEenO2p8fV_E_8-232" vertex="1">
+          <mxGeometry width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-234" value="Hallgató" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=33;container=1;collapsible=0;autosize=0;" parent="1" vertex="1">
+          <mxGeometry x="-1040" y="785" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-235" value="L8" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;allowArrows=0;connectable=0;" parent="yPqAMtaEenO2p8fV_E_8-234" vertex="1">
+          <mxGeometry width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-238" value="Felvett vizsga" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID;align=left;spacingLeft=33;container=1;collapsible=0;autosize=0;" parent="1" vertex="1">
+          <mxGeometry x="-1040" y="1340" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-239" value="L13" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;allowArrows=0;connectable=0;" parent="yPqAMtaEenO2p8fV_E_8-238" vertex="1">
+          <mxGeometry width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-242" value="Vizsga" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID2;align=left;spacingLeft=38;container=1;collapsible=0;flipH=0;" parent="1" vertex="1">
+          <mxGeometry x="-1040" y="1025" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-243" value="L11" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;connectable=0;allowArrows=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;" parent="yPqAMtaEenO2p8fV_E_8-242" vertex="1">
+          <mxGeometry x="5" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-244" value="Üzenet" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID2;align=left;spacingLeft=38;container=1;collapsible=0;flipH=0;" parent="1" vertex="1">
+          <mxGeometry x="-1020" y="1725" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-245" value="L15" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;connectable=0;allowArrows=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;" parent="yPqAMtaEenO2p8fV_E_8-244" vertex="1">
+          <mxGeometry x="5" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-493" value="Felhasználó kód, Kurzus kód" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;" parent="1" source="yPqAMtaEenO2p8fV_E_8-498" target="yPqAMtaEenO2p8fV_E_8-514" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1530.0000000000002" y="1899.9499999999998" as="sourcePoint" />
+            <mxPoint x="-1250" y="1904.9499999999998" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-494" value="Felvett kurzus" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID2;align=left;spacingLeft=38;container=1;collapsible=0;flipH=0;" parent="1" vertex="1">
+          <mxGeometry x="-1040" y="1844.9499999999998" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-495" value="L14" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;connectable=0;allowArrows=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;" parent="yPqAMtaEenO2p8fV_E_8-494" vertex="1">
+          <mxGeometry x="5" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-496" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;verticalAlign=bottom;entryX=-0.001;entryY=0.45;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-514" target="yPqAMtaEenO2p8fV_E_8-494" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1090" y="1876.3081767785643" as="sourcePoint" />
+            <mxPoint x="-1230" y="1749.9499999999998" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-497" value="Kurzus iformációk" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;edgeStyle=orthogonalEdgeStyle;" parent="1" source="yPqAMtaEenO2p8fV_E_8-514" target="yPqAMtaEenO2p8fV_E_8-498" edge="1">
+          <mxGeometry x="0.3256" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1250" y="1880" as="sourcePoint" />
+            <mxPoint x="-1470" y="1863.0259371996153" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-1320" y="1880" />
+              <mxPoint x="-1320" y="1840" />
+              <mxPoint x="-1510" y="1840" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-498" value="Oktató" style="shape=stencil(tZRtjoMgEIZPw98GJR6gYXfvQe10nZQCAbYft99RNKlW7GajiTGZeeXhnZGBCRka5YCVvGHig5VlwTm9Kb5NYhUc1DElr8qjOmhISojenuGGx9gz0DTgMbaq+GR8T9+0j5C1NYYgaE0YKU86wRQaWsvvCdZv/xhFjvgXiOB7kynLyq+/Y3fVNuBiI79j7OB+db/rgceOi61+3Grg4v9YISmTO9xCHlR9/vb2xxxnzYDW6AK8OfLTeZzO66ynzM5CnqyHBUsn1DqN9UITnWoH/kUY5Iu9PtVUzRY1jx4IGk22K9UioSs+44+uvFxl3bKX1nTZdE12iV8=);whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-1570" y="1864.9499999999998" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-499" value="Kurzus" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.dataStoreID2;align=left;spacingLeft=38;container=1;collapsible=0;flipH=0;" parent="1" vertex="1">
+          <mxGeometry x="-1040" y="1933.9499999999998" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-500" value="L2" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;connectable=0;allowArrows=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;" parent="yPqAMtaEenO2p8fV_E_8-499" vertex="1">
+          <mxGeometry x="5" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-501" value="" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;exitX=-0.01;exitY=0.558;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="yPqAMtaEenO2p8fV_E_8-499" target="yPqAMtaEenO2p8fV_E_8-514" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-1330" y="1929.9499999999998" as="sourcePoint" />
+            <mxPoint x="-1090" y="1933.3599378881981" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-1070" y="1940" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-505" value="Kurzus felvétel" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.process;align=center;container=1;collapsible=0;spacingTop=30;" parent="1" vertex="1">
+          <mxGeometry x="-1250" y="1518" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-506" value="9" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;connectable=0;allowArrows=0;pointerEvents=1;" parent="yPqAMtaEenO2p8fV_E_8-505" vertex="1">
+          <mxGeometry width="35" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-507" value="Kurzusok" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;connectable=0;allowArrows=0;rotatable=0;cloneable=0;deletable=0;spacingLeft=6;autosize=1;resizeWidth=0;" parent="yPqAMtaEenO2p8fV_E_8-505" vertex="1">
+          <mxGeometry x="35" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-511" value="Vizsga felvétel" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.process;align=center;container=1;collapsible=0;spacingTop=30;" parent="1" vertex="1">
+          <mxGeometry x="-1250" y="1340" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-512" value="8" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;connectable=0;allowArrows=0;pointerEvents=1;" parent="yPqAMtaEenO2p8fV_E_8-511" vertex="1">
+          <mxGeometry width="35" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-513" value="Vizsgák" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;connectable=0;allowArrows=0;rotatable=0;cloneable=0;deletable=0;spacingLeft=6;autosize=1;resizeWidth=0;" parent="yPqAMtaEenO2p8fV_E_8-511" vertex="1">
+          <mxGeometry x="35" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-514" value="Érdemjegy beírása" style="html=1;dashed=0;whitespace=wrap;shape=mxgraph.dfd.process;align=center;container=1;collapsible=0;spacingTop=30;" parent="1" vertex="1">
+          <mxGeometry x="-1250" y="1844.9499999999998" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-515" value="12" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;rotatable=0;cloneable=0;deletable=0;connectable=0;allowArrows=0;pointerEvents=1;" parent="yPqAMtaEenO2p8fV_E_8-514" vertex="1">
+          <mxGeometry width="35" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yPqAMtaEenO2p8fV_E_8-516" value="Kurzusok" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;movable=0;resizable=0;connectable=0;allowArrows=0;rotatable=0;cloneable=0;deletable=0;spacingLeft=6;autosize=1;resizeWidth=0;" parent="yPqAMtaEenO2p8fV_E_8-514" vertex="1">
+          <mxGeometry x="35" width="80" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,20 +1,14 @@
-Időszak(<u>kód</u>, kezdésIdőpont, végIdőpont, időszakTípus)
-
 Felhasználó(<u>kód</u>, születésiIdő, név, jelszó, email)
 
 Admin(*<u>kód</u>*)
 
 Hallgató(*<u>kód</u>*, <u>kezdésÉve</u>)
 
-Üzenet(<u>kód</u>, tartalom, időpont, tárgy, *Felhasználó.címzettKód*, *Felhasználó.feladóKód*)
-
 Szak(<u>név</u>, típus, időtartam)
 
 MilyenSzakon(<u>*Hallgató.kód*</u>, *<u>kezdésÉve</u>*, <u>*Szak.név*</u>)
 
 Tárgy(<u>kód</u>, név, jóváhagyásos, kredit, típus, előfeltételKód, melyik, mihez)
-
-Tanterv(<u>*Szak.név*</u>, <u>*Tárgy.kód*</u>, típus, ajánlottFélév)
 
 Terem(<u>kód</u>, férőhely)
 
