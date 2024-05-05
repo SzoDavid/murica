@@ -8,6 +8,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script>
+        const apiUrl = 'http://localhost:8012/murica_api/';
+    </script>
     <script src="lib/jquery-3.7.1.min.js"></script>
     <script src="js/common.js"></script>
     <?php

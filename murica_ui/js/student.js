@@ -1,9 +1,7 @@
-const apiUrl = 'http://localhost/murica_api/';
 const requestInvoker = new RequestInvoker(apiUrl);
 let tokenObj;
 
 //region Taken courses
-
 function takenCourses(contentElement) {
     contentElement.empty();
 
@@ -13,60 +11,29 @@ function takenCourses(contentElement) {
     $('#navbar-taken-courses').addClass('active');
     $('#navbar-courses').addClass('active');
 
-    contentElement.append($('<h2>').text('Statistics'));
-
-    let table = $("<table>").addClass("editTable");
-    let cell_ki = $("<td>").attr('id', 'calc-ki');
-    let cell_kki = $("<td>").attr('id', 'calc-kki');
-
-    table.append(
-        $("<tr>").append(
-            $("<th>").text("Credit index:"),
-            cell_ki
-        ),
-        $("<tr>").append(
-            $("<th>").text("Korigalt Credit index:"),
-            cell_kki
-        )
-    );
-
-    let studentObj = JSON.parse(localStorage.getItem('studentVals'));
-
-    requestInvoker.executePost('course/ki', {
-        token: tokenObj.token,
-        programmeName: studentObj.programme.name,
-        programmeType: studentObj.programme.type
-    }).then((response) => {
-        $('#calc-ki').text(response.value);
-    });
-
-    requestInvoker.executePost('course/kki', {
-        token: tokenObj.token,
-        programmeName: studentObj.programme.name,
-        programmeType: studentObj.programme.type
-    }).then((response) => {
-        $('#calc-kki').text(response.value);
-    });
-
-    contentElement.append(table);
-
-
-
     contentElement.append($('<h1>').text('Taken courses'));
 
-    // TODO: add student data to request arguments
+    let studentObj = JSON.parse(localStorage.getItem('studentVals'));
     requestInvoker.executePost('course/taken', {
         token: tokenObj.token,
         programmeName: studentObj.programme.name,
         programmeType: studentObj.programme.type
     }).then((response) => {
-        console.log(response);
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+            return;
+        }
+
         const tableColumns = {
             id: 'Id',
             name: 'Name',
+            capacity: 'Capacity',
+            noStudents: 'Students',
             term: 'Term',
             schedule: 'Schedule',
-            credit: 'Credit',
+            grade: 'Grade',
+            credit: 'Credit'
         };
 
         const coursesTable= new DropDownTable(tableColumns, response._embedded.takenCourses,
@@ -96,13 +63,13 @@ function removeTakenCourse(record, contentElement) {
         programmeName: studentObj.programme.name,
         programmeType: studentObj.programme.type
     }).then((response) => {
-        if (response._success) subjects(contentElement);
+        if (response._success) takenCourses(contentElement);
         else $('#drop-course-error').html(string2html(response.error.details)).removeClass('hidden');
     });
 }
-
 //endregion
 
+//region Course registration
 function courseRegistration(contentElement) {
     contentElement.empty();
 
@@ -112,11 +79,15 @@ function courseRegistration(contentElement) {
     $('#navbar-course-registration').addClass('active');
     $('#navbar-courses').addClass('active');
 
-    contentElement.append($('<h1>').text('Register courses'));
+    contentElement.append($('<h1>').text('Course registration'));
 
     requestInvoker.executePost('subject/all', { token: tokenObj.token }).then((response) => {
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+            return;
+        }
 
-        console.log(response);
         const tableColumns = {
             id: 'Id',
             name: 'Name',
@@ -134,10 +105,16 @@ function subjectDetails(record, contentElement) {
     let container = $('<div>');
 
     requestInvoker.executePost(record._links.courses.href, { token: tokenObj.token }).then((response) => {
-        console.log(response);
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+            return;
+        }
+
         const tableColumns = {
             id: 'Id',
             capacity: 'Capacity',
+            noStudents: 'Students',
             schedule: 'Schedule',
             term: 'Term',
         };
@@ -171,11 +148,13 @@ function addTakenCourse(record, contentElement) {
         programmeName: studentObj.programme.name,
         programmeType: studentObj.programme.type
     }).then((response) => {
-        if (response._success) subjects(contentElement);
-        else $('#drop-course-error').html(string2html(response.error.details)).removeClass('hidden');
+        if (response._success) takenCourses(contentElement);
+        else $('#register-course-error').html(string2html(response.error.details)).removeClass('hidden');
     });
 }
+//endregion
 
+//region Taken exams
 function takenExams(contentElement) {
     contentElement.empty();
 
@@ -189,27 +168,60 @@ function takenExams(contentElement) {
 
     let studentObj = JSON.parse(localStorage.getItem('studentVals'));
 
-    // TODO: finish it, the whole thing bruv
     requestInvoker.executePost('exam/takenExams', {
         token: tokenObj.token,
         programmeName: studentObj.programme.name,
         programmeType: studentObj.programme.type
     }).then((response) => {
-        console.log(response);
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+            return;
+        }
+
         const tableColumns = {
-            id: 'Id',
-            name: 'Name',
-            term: 'Term',
-            schedule: 'Schedule',
-            credit: 'Credit',
+            examId: 'Id',
+            subjectName: 'Name',
+            startTime: 'Start',
+            endTime: 'End',
+            roomId: 'Term',
+            capacity: 'Capacity',
+            noStudents: 'Students'
         };
 
-        const coursesTable= new DropDownTable(tableColumns, response._embedded.takenCourses,
-            (record) => { return takenCourseDetails(record, contentElement)}).build();
-        contentElement.append(coursesTable);
+        const examTable= new DropDownTable(tableColumns, response._embedded.takenExams,
+            (record) => { return takenExamDetails(record, contentElement)}).build();
+        contentElement.append(examTable);
     });
 }
 
+function takenExamDetails(record, contentElement) {
+    let container = $('<div>');
+
+    container.append($('<div>').prop('id', 'drop-exam-error').addClass('hidden error'));
+    container.append(new Button('Drop exam', () => { removeTakenExam(record, contentElement) }).build());
+
+    return container;
+}
+
+function removeTakenExam(record, contentElement) {
+    $('#drop-exam-error').addClass('hidden');
+
+    let studentObj = JSON.parse(localStorage.getItem('studentVals'));
+    requestInvoker.executePost(record._links.unregister.href, {
+        token: tokenObj.token,
+        id: record.examId,
+        subjectId: record.subjectId,
+        programmeName: studentObj.programme.name,
+        programmeType: studentObj.programme.type
+    }).then((response) => {
+        if (response._success) takenExams(contentElement);
+        else $('#drop-exam-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
+//endregion
+
+//region Exam registration
 function examRegistration(contentElement) {
     contentElement.empty();
 
@@ -219,10 +231,100 @@ function examRegistration(contentElement) {
     $('#navbar-exam-registration').addClass('active');
     $('#navbar-exams').addClass('active');
 
+    contentElement.append($('<h1>').text('Exam registration'));
+
+    let studentObj = JSON.parse(localStorage.getItem('studentVals'));
+    requestInvoker.executePost('exam/available', {
+        token: tokenObj.token,
+        programmeName: studentObj.programme.name,
+        programmeType: studentObj.programme.type
+    }).then((response) => {
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+            return;
+        }
+
+        const tableColumns = {
+            id: 'Id',
+            subjectName: 'Name',
+            startTime: 'Start',
+            endTime: 'End',
+            roomId: 'Term',
+            capacity: 'Capacity',
+            noStudents: 'Students'
+        };
+
+        const examsTable= new DropDownTable(tableColumns, response._embedded.exams,
+            (record) => { return examDetails(record, contentElement)}).build();
+        contentElement.append(examsTable);
+    });
 }
+
+function examDetails(record, contentElement) {
+    let container = $('<div>');
+
+    container.append($('<div>').prop('id', 'register-exam-error').addClass('hidden error'));
+    container.append(new Button('Register', () => { registerExam(record, contentElement) }).build());
+
+    return container;
+}
+
+function registerExam(record, contentElement) {
+    $('#register-exam-error').addClass('hidden');
+
+    let studentObj = JSON.parse(localStorage.getItem('studentVals'));
+
+    requestInvoker.executePost(record._links.register.href, {
+        token: tokenObj.token,
+        id: record.id,
+        subjectId: record.subject.id,
+        programmeName: studentObj.programme.name,
+        programmeType: studentObj.programme.type
+    }).then((response) => {
+        if (response._success) takenExams(contentElement);
+        else $('#register-exam-error').html(string2html(response.error.details)).removeClass('hidden');
+    });
+}
+//endregion
 
 function self(contentElement) {
     new SelfPage(contentElement, tokenObj._links.user.href, 'student').build();
+
+    contentElement.append($('<h2>').text('Statistics'));
+
+    let table = $("<table>").addClass("editTable");
+    let cell_ki = $("<td>").attr('id', 'calc-ki');
+    let cell_kki = $("<td>").attr('id', 'calc-kki');
+
+    table.append(
+        $("<tr>").append(
+            $("<th>").text("Credit Index:"),
+            cell_ki
+        ),
+        $("<tr>").append(
+            $("<th>").text("Corrected Credit Index:"),
+            cell_kki
+        )
+    );
+
+    let studentObj = JSON.parse(localStorage.getItem('studentVals'));
+
+    requestInvoker.executePost('course/averages', {
+        token: tokenObj.token,
+        programmeName: studentObj.programme.name,
+        programmeType: studentObj.programme.type
+    }).then((response) => {
+        if (!response._success) {
+            console.error(response.error);
+            alert('Something unexpected happened. Please try again later!');
+            return;
+        }
+
+        $('#calc-ki').text(Math.round((Number(response.ki.replaceAll(',', '.')) + Number.EPSILON) * 100) / 100);
+        $('#calc-kki').text(Math.round((Number(response.kki.replaceAll(',', '.')) + Number.EPSILON) * 100) / 100);
+    });
+    contentElement.append(table);
 }
 
 $(() => {

@@ -17,24 +17,18 @@ class Exam extends Entity implements IExam {
     private ?string $id;
     private ?string $startTime;
     private ?string $endTime;
+    private ?int $noStudents;
     private ?IUser $teacher;
     private ?IRoom $room;
     //endregion
 
     //region Ctor
-    /**
-     * @param ISubject|null $subject
-     * @param string|null $id
-     * @param string|null $startTime
-     * @param string|null $endTime
-     * @param IUser|null $teacher
-     * @param IRoom|null $room
-     */
-    public function __construct(ISubject $subject = null, string $id = null, string $startTime = null, string $endTime = null, IUser $teacher = null, IRoom $room = null) {
+    public function __construct(?ISubject $subject=null, ?string $id=null, ?string $startTime=null, ?string $endTime=null, ?int $noStudents=null, ?IUser $teacher=null, ?IRoom $room=null) {
         $this->subject = $subject;
         $this->id = isset($id) ? strtoupper(trim($id)) : null;
         $this->startTime = isset($startTime) ? trim($startTime) : null;
         $this->endTime = isset($endTime) ? trim($endTime) : null;
+        $this->noStudents = $noStudents;
         $this->teacher = $teacher;
         $this->room = $room;
     }
@@ -59,6 +53,11 @@ class Exam extends Entity implements IExam {
     #[Override]
     public function getEndTime(): ?string {
         return $this->endTime;
+    }
+
+    #[Override]
+    public function getNoStudents(): ?int {
+        return $this->noStudents;
     }
 
     #[Override]
@@ -98,6 +97,12 @@ class Exam extends Entity implements IExam {
     }
 
     #[Override]
+    public function setNoStudents(int $noStudents): IExam {
+        $this->noStudents = $noStudents;
+        return $this;
+    }
+
+    #[Override]
     public function setTeacher(IUser $teacher): IExam {
         $this->teacher = $teacher;
         return $this;
@@ -115,21 +120,21 @@ class Exam extends Entity implements IExam {
     public function validate(): bool {
         $errors = "";
         // TODO refactor validation to return false if no issues was found or a string with all the issues
-        if (empty($this->subject) || $this->subject->validate()) $errors .= '\nSubject is invalid!';
-        if (empty($this->id) || strlen($this->id) > 6) $errors .= '\nID is empty or longer than 6 characters!';
-        if (empty($this->teacher) || $this->teacher->validate()) $errors .= '\nTeacher is empty or invalid!';
-        if (empty($this->room) || $this->room->validate()) $errors .= '\nRoom is empty or invalid!';
+        $this->subject->validate();
+        $this->teacher->validate();
+        $this->room->validate();
+        if (empty($this->id) || strlen($this->id) !== 6) $errors .= '\nID must contain 6 characters!';
         if (!empty($this->startTime)) {
-            $dateTime = DateTime::createFromFormat('YYYY-MM-DD HH24:MI', $this->startTime);
+            $dateTime = DateTime::createFromFormat('Y-m-d H:i', $this->startTime);
 
-            if (!$dateTime || $dateTime->format('YYYY-MM-DD HH24:MI') !== $this->startTime) $errors .= '\nStart time is invalid!';
+            if (!$dateTime || $dateTime->format('Y-m-d H:i') !== $this->startTime) $errors .= '\nStart time format is invalid!';
         } else {
             $errors .= '\nStart time is invalid!';
         }
         if (!empty($this->endTime)) {
-            $dateTime = DateTime::createFromFormat('YYYY-MM-DD HH24:MI', $this->endTime);
+            $dateTime = DateTime::createFromFormat('Y-m-d H:i', $this->endTime);
 
-            if (!$dateTime || $dateTime->format('YYYY-MM-DD HH24:MI') !== $this->endTime) $errors .= '\nEnd time is invalid!';
+            if (!$dateTime || $dateTime->format('Y-m-d H:i') !== $this->endTime) $errors .= '\nEnd time format is invalid!';
         } else {
             $errors .= '\nEnd time is invalid!';
         }
@@ -143,15 +148,16 @@ class Exam extends Entity implements IExam {
      */
     public function jsonSerialize(): array {
         return [
-            'subject' => $this->subject->jsonSerialize(),
-            'subjectName' => $this->subject->getName(),
-            'subjectId' => $this->subject->getId(),
+            'subject' => $this->subject,
+            'subjectName' => $this->subject->getName() . ' [' . $this->subject->getId() . ']',
             'id' => $this->id,
             'startTime' => $this->startTime,
             'endTime' => $this->endTime,
-            'teacher' => $this->teacher->jsonSerialize(),
-            'room' => $this->room->jsonSerialize(),
-            'roomId' => $this->room->getId()
+            'teacher' => $this->teacher,
+            'capacity' => $this->room->getCapacity(),
+            'room' => $this->room,
+            'roomId' => $this->room->getId(),
+            'noStudents' => $this->noStudents
         ];
     }
     //endregion

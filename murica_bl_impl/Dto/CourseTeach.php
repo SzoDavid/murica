@@ -57,8 +57,8 @@ class CourseTeach extends Entity implements ICourseTeach {
     public function validate(): bool {
         $errors = "";
         // TODO refactor validation to return false if no issues was found or a string with all the issues
-        if (empty($this->user) || $this->user->validate()) $errors .= '\nUser is invalid!';
-        if (empty($this->course) || $this->course->validate()) $errors .= '\nCourse is invalid!';
+        $this->user->validate();
+        $this->course->validate();
         if (!empty($errors)) throw new ValidationException(ltrim($errors, '\n'));
 
         return true;
@@ -71,6 +71,13 @@ class CourseTeach extends Entity implements ICourseTeach {
         return [
             'user' => $this->user->jsonSerialize(),
             'course' => $this->course->jsonSerialize(),
+            'name' => $this->course->getSubject()->getName(),
+            'id' => $this->course->getSubject()->getId() . '-' . $this->course->getId(),
+            'capacity' => $this->course->getCapacity(),
+            'schedule' => $this->course->getSchedule(),
+            'term' => $this->course->getTerm(),
+            'room' => $this->course->getRoom()->getId(),
+            'noStudents' => $this->course->getNumberOfStudents()
         ];
     }
     //endregion

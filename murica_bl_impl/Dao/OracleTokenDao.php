@@ -5,6 +5,7 @@ namespace murica_bl_impl\Dao;
 use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\ITokenDao;
+use murica_bl\Orm\Exception\OciException;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\User;
 use murica_bl_impl\Dto\Token;
@@ -51,26 +52,25 @@ class OracleTokenDao implements ITokenDao {
             TableDefinition::TOKEN_TABLE_FIELD_TOKEN
         );
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_bind_by_name($stmt, ':token', $token, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_fetch($stmt)) return false;
+        try {
+            $tokenRecord = $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':token', $token)
+                ->execute(OCI_DEFAULT)
+                ->firstResult();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query tokens', $e);
+        }
 
         return new Token(
-            oci_result($stmt, 'TOKEN'),
+            $tokenRecord['TOKEN'],
             new User(
-                oci_result($stmt, 'ID'),
-                oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'EMAIL'),
-                oci_result($stmt, 'PASSWORD'),
-                oci_result($stmt, 'BIRTH_DATE')),
-            oci_result($stmt, 'EXPIRES_AT'));
+                $tokenRecord['ID'],
+                $tokenRecord['NAME'],
+                $tokenRecord['EMAIL'],
+                $tokenRecord['PASSWORD'],
+                $tokenRecord['BIRTH_DATE']),
+            $tokenRecord['EXPIRES_AT']);
     }
 
     /**
@@ -86,17 +86,19 @@ class OracleTokenDao implements ITokenDao {
                        TableDefinition::TOKEN_TABLE_FIELD_USER_ID,
                        TableDefinition::TOKEN_TABLE_FIELD_EXPIRES_AT);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $date = date('Y-m-d H:i', $expirationDate);
-        if (!oci_bind_by_name($stmt, ':token', $token, -1) ||
-            !oci_bind_by_name($stmt, ':userId', $userId, -1) ||
-            !oci_bind_by_name($stmt, ':expirationDate', $date, -1))
-                throw new DataAccessException(json_encode(oci_error($stmt)));
 
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':token', $token)
+                ->bind(':userId', $userId)
+                ->bind(':expirationDate', $date)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to register token', $e);
+        }
 
         return $this->findByToken($token);
     }
@@ -111,14 +113,15 @@ class OracleTokenDao implements ITokenDao {
                        TableDefinition::TOKEN_TABLE,
                        TableDefinition::TOKEN_TABLE_FIELD_TOKEN);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_bind_by_name($stmt, ':token', $token, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':token', $token)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to remove token', $e);
+        }
     }
     //endregion
 }

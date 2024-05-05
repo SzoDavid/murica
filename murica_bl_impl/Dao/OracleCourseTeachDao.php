@@ -6,6 +6,7 @@ use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\ICourseTeachDao;
 use murica_bl\Dto\ICourseTeach;
+use murica_bl\Orm\Exception\OciException;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Course;
 use murica_bl_impl\Dto\CourseTeach;
@@ -43,21 +44,21 @@ class OracleCourseTeachDao implements ICourseTeachDao {
                        TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID,
                        TableDefinition::COURSETEACH_TABLE_FIELD_SUBJECT_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $userId = $model->getUser()->getId();
         $courseId = $model->getCourse()->getId();
         $subjectId = $model->getCourse()->getSubject()->getId();
 
-
-        if (!oci_bind_by_name($stmt, ':userId', $userId, -1) ||
-            !oci_bind_by_name($stmt, ':courseId', $courseId, -1) ||
-            !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-                throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':userId', $userId)
+                ->bind(':courseId', $courseId)
+                ->bind(':subjectId', $subjectId)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to create courseTeach', $e);
+        }
 
         return $this->findByCrit(new CourseTeach($model->getUser(), $model->getCourse()))[0];
     }
@@ -74,20 +75,21 @@ class OracleCourseTeachDao implements ICourseTeachDao {
                        TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID,
                        TableDefinition::COURSETEACH_TABLE_FIELD_SUBJECT_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $userId = $model->getUser()->getId();
         $courseId = $model->getCourse()->getId();
         $subjectId = $model->getCourse()->getSubject()->getId();
 
-        if (!oci_bind_by_name($stmt, ':userId', $userId, -1) ||
-            !oci_bind_by_name($stmt, ':courseId', $courseId, -1) ||
-            !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':userId', $userId)
+                ->bind(':courseId', $courseId)
+                ->bind(':subjectId', $subjectId)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to delete courseTeach', $e);
+        }
     }
 
     /**
@@ -95,78 +97,66 @@ class OracleCourseTeachDao implements ICourseTeachDao {
      */
     #[Override]
     public function findAll(): array {
-        $res = array();
+        $sql = "SELECT 
+                    USR." . TableDefinition::USER_TABLE_FIELD_ID . " AS USER_ID, 
+                    USR." . TableDefinition::USER_TABLE_FIELD_NAME . " AS USER_NAME, 
+                    USR." . TableDefinition::USER_TABLE_FIELD_EMAIL . " AS EMAIL, 
+                    USR." . TableDefinition::USER_TABLE_FIELD_PASSWORD . " AS PASSWORD, 
+                    TO_CHAR(USR." . TableDefinition::USER_TABLE_FIELD_BIRTH_DATE . ",'YYYY-MM-DD') AS BIRTH_DATE, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID ." AS SUBJECT_ID, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . " AS SUBJECT_NAME, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . " AS APPROVAL, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . " AS CREDIT, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . " AS TYPE, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . " AS CRS_ID, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_CAPACITY . " AS CRS_CAPACITY, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . " AS SCHEDULE, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_TERM . " AS TERM, 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID ." AS ROOM_ID, 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY ." AS ROOM_CAPACITY, 
+                    COUNT(TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID .") AS NO_STUDENTS
+                FROM 
+                    " . $this->configService->getTableOwner() . "." . TableDefinition::USER_TABLE . " USR
+                    JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::COURSETEACH_TABLE . " CRS_TCH
+                    ON CRS_TCH." . TableDefinition::COURSETEACH_TABLE_FIELD_USER_ID . " = USR." . TableDefinition::USER_TABLE_FIELD_ID ."
+                    JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::COURSE_TABLE . " CRS
+                    ON CRS_TCH." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " AND
+                    CRS_TCH." . TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . "
+                    JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::SUBJECT_TABLE . " SUB
+                    ON CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " = SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID . "
+                    JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::ROOM_TABLE . " ROOM
+                    ON CRS." . TableDefinition::COURSE_TABLE_FIELD_ROOM_ID . " = ROOM." .TableDefinition::ROOM_TABLE_FIELD_ID . "
+                    LEFT JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::TAKENCOURSE_TABLE . " TKN_CRS 
+                    ON TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " AND 
+                    TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . "
+                GROUP BY
+                    USR." . TableDefinition::USER_TABLE_FIELD_ID . ", 
+                    USR." . TableDefinition::USER_TABLE_FIELD_NAME . ", 
+                    USR." . TableDefinition::USER_TABLE_FIELD_EMAIL . ", 
+                    USR." . TableDefinition::USER_TABLE_FIELD_PASSWORD . ", 
+                    USR." . TableDefinition::USER_TABLE_FIELD_BIRTH_DATE . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID .", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_CAPACITY . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_TERM . ", 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID .", 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY;
 
-        $sql = sprintf("SELECT USR.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE, SUB.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, CRS.%s AS CRS_ID, CRS.%s AS CRS_CAPACITY, CRS.%s AS SCHEDULE, CRS.%s AS TERM, ROOM.%s AS ROOM_ID, ROOM.%s AS ROOM_CAPACITY FROM %s.%s USR, %s.%s CRS, %s.%s SUB, %s.%s ROOM, %s.%s CRSTCH WHERE CRSTCH.%s = USR.%s AND CRSTCH.%s = CRS.%s AND CRSTCH.%s = SUB.%s AND CRS.%s = SUB.%s AND CRS.%s = ROOM.%s",
-           TableDefinition::USER_TABLE_FIELD_ID,
-                   TableDefinition::USER_TABLE_FIELD_NAME,
-                   TableDefinition::USER_TABLE_FIELD_EMAIL,
-                   TableDefinition::USER_TABLE_FIELD_PASSWORD,
-                   TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
-                   TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                   TableDefinition::SUBJECT_TABLE_FIELD_NAME,
-                   TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,
-                   TableDefinition::SUBJECT_TABLE_FIELD_CREDIT,
-                   TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-                   TableDefinition::COURSE_TABLE_FIELD_ID,
-                   TableDefinition::COURSE_TABLE_FIELD_CAPACITY,
-                   TableDefinition::COURSE_TABLE_FIELD_SCHEDULE,
-                   TableDefinition::COURSE_TABLE_FIELD_TERM,
-                   TableDefinition::ROOM_TABLE_FIELD_ID,
-                   TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
-                   $this->configService->getTableOwner(),
-                   TableDefinition::USER_TABLE,
-                   $this->configService->getTableOwner(),
-                   TableDefinition::COURSE_TABLE,
-                   $this->configService->getTableOwner(),
-                   TableDefinition::SUBJECT_TABLE,
-                   $this->configService->getTableOwner(),
-                   TableDefinition::ROOM_TABLE,
-                   $this->configService->getTableOwner(),
-                   TableDefinition::COURSETEACH_TABLE,
-                   TableDefinition::COURSETEACH_TABLE_FIELD_USER_ID,
-                   TableDefinition::USER_TABLE_FIELD_ID,
-                   TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID,
-                   TableDefinition::COURSE_TABLE_FIELD_ID,
-                   TableDefinition::COURSETEACH_TABLE_FIELD_SUBJECT_ID,
-                   TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                   TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
-                   TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                   TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
-                   TableDefinition::ROOM_TABLE_FIELD_ID
-        );
-
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        while (oci_fetch($stmt)) {
-            $res[] = new CourseTeach( new User(
-                oci_result($stmt, 'ID'),
-                oci_result($stmt, 'NAME'),
-                oci_result($stmt, 'EMAIL'),
-                oci_result($stmt, 'PASSWORD'),
-                oci_result($stmt, 'BIRTH_DATE')),
-                new Course(
-                    new Subject(
-                        oci_result($stmt, 'SUBJECT_ID'),
-                        oci_result($stmt, 'NAME'),
-                        oci_result($stmt, 'APPROVAL'),
-                        oci_result($stmt, 'CREDIT'),
-                        oci_result($stmt, 'TYPE')),
-                    oci_result($stmt, 'CRS_ID'),
-                    oci_result($stmt, 'CRS_CAPACITY'),
-                    oci_result($stmt, 'SCHEDULE'),
-                    oci_result($stmt, 'TERM'),
-                    new Room(
-                        oci_result($stmt, 'ROOM_ID'),
-                        oci_result($stmt, 'ROOM_CAPACITY')))
-            );
+        try {
+            $courseTeaches = $this->dataSource->getConnection()
+                ->query($sql)
+                ->execute(OCI_DEFAULT)
+                ->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query courseTeaches', $e);
         }
 
-        return $res;
+        return $this->fetchCourseTeaches($courseTeaches);
     }
 
     /**
@@ -174,104 +164,120 @@ class OracleCourseTeachDao implements ICourseTeachDao {
      */
     #[Override]
     public function findByCrit(ICourseTeach $model): array {
-        $res = array();
         $crits = array();
 
-        $sql = sprintf("SELECT USR.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE, SUB.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, CRS.%s AS CRS_ID, CRS.%s AS CRS_CAPACITY, CRS.%s AS SCHEDULE, CRS.%s AS TERM, ROOM.%s AS ROOM_ID, ROOM.%s AS ROOM_CAPACITY FROM %s.%s USR, %s.%s CRS, %s.%s SUB, %s.%s ROOM, %s.%s CRSTCH WHERE CRSTCH.%s = USR.%s AND CRSTCH.%s = CRS.%s AND CRSTCH.%s = SUB.%s AND CRS.%s = SUB.%s AND CRS.%s = ROOM.%s",
-                       TableDefinition::USER_TABLE_FIELD_ID,
-                       TableDefinition::USER_TABLE_FIELD_NAME,
-                       TableDefinition::USER_TABLE_FIELD_EMAIL,
-                       TableDefinition::USER_TABLE_FIELD_PASSWORD,
-                       TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_NAME,
-                       TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,
-                       TableDefinition::SUBJECT_TABLE_FIELD_CREDIT,
-                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-                       TableDefinition::COURSE_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_CAPACITY,
-                       TableDefinition::COURSE_TABLE_FIELD_SCHEDULE,
-                       TableDefinition::COURSE_TABLE_FIELD_TERM,
-                       TableDefinition::ROOM_TABLE_FIELD_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::USER_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::COURSE_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::SUBJECT_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::ROOM_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::COURSETEACH_TABLE,
-                       TableDefinition::COURSETEACH_TABLE_FIELD_USER_ID,
-                       TableDefinition::USER_TABLE_FIELD_ID,
-                       TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_ID,
-                       TableDefinition::COURSETEACH_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_ID
-        );
+        $sql = "SELECT 
+                    USR." . TableDefinition::USER_TABLE_FIELD_ID . " AS USER_ID, 
+                    USR." . TableDefinition::USER_TABLE_FIELD_NAME . " AS USER_NAME, 
+                    USR." . TableDefinition::USER_TABLE_FIELD_EMAIL . " AS EMAIL, 
+                    USR." . TableDefinition::USER_TABLE_FIELD_PASSWORD . " AS PASSWORD, 
+                    TO_CHAR(USR." . TableDefinition::USER_TABLE_FIELD_BIRTH_DATE . ",'YYYY-MM-DD') AS BIRTH_DATE, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID ." AS SUBJECT_ID, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . " AS SUBJECT_NAME, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . " AS APPROVAL, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . " AS CREDIT, 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . " AS TYPE, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . " AS CRS_ID, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_CAPACITY . " AS CRS_CAPACITY, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . " AS SCHEDULE, 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_TERM . " AS TERM, 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID ." AS ROOM_ID, 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY ." AS ROOM_CAPACITY, 
+                    COUNT(TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID .") AS NO_STUDENTS
+                FROM 
+                    " . $this->configService->getTableOwner() . "." . TableDefinition::USER_TABLE . " USR
+                    JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::COURSETEACH_TABLE . " CRS_TCH
+                    ON CRS_TCH." . TableDefinition::COURSETEACH_TABLE_FIELD_USER_ID . " = USR." . TableDefinition::USER_TABLE_FIELD_ID ."
+                    JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::COURSE_TABLE . " CRS
+                    ON CRS_TCH." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " AND
+                    CRS_TCH." . TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . "
+                    JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::SUBJECT_TABLE . " SUB
+                    ON CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " = SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID . "
+                    JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::ROOM_TABLE . " ROOM
+                    ON CRS." . TableDefinition::COURSE_TABLE_FIELD_ROOM_ID . " = ROOM." .TableDefinition::ROOM_TABLE_FIELD_ID . "
+                    LEFT JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::TAKENCOURSE_TABLE . " TKN_CRS 
+                    ON TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " AND 
+                    TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_ID;
 
         $user = $model->getUser();
         $course = $model->getCourse();
 
         if (isset($user) && $user->getId() !== null) {
-            $crits[] = 'CRSTCH.' . TableDefinition::COURSETEACH_TABLE_FIELD_USER_ID . " LIKE :userId";
+            $crits[] = 'CRS_TCH.' . TableDefinition::COURSETEACH_TABLE_FIELD_USER_ID . " LIKE :userId";
             $userId = $user->getId();
         }
         if (isset($course) && $course->getId() !== null && $course->getSubject() !== null && $course->getSubject()->getId() !== null) {
-            $crits[] = 'CRSTCH.' . TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID . " = :courseId";
-            $crits[] = 'CRSTCH.' . TableDefinition::COURSETEACH_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
+            $crits[] = 'CRS_TCH.' . TableDefinition::COURSETEACH_TABLE_FIELD_COURSE_ID . " = :courseId";
+            $crits[] = 'CRS_TCH.' . TableDefinition::COURSETEACH_TABLE_FIELD_SUBJECT_ID . " LIKE :subjectId";
             $courseId = $course->getId();
             $subjectId = $course->getSubject()->getId();
         }
 
         if (!empty($crits))
-            $sql .= " AND " . implode(" AND ", $crits);
+            $sql .= " WHERE " . implode(" AND ", $crits);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException('parse ' . json_encode(oci_error($stmt)));
+        $sql .=" GROUP BY
+                    USR." . TableDefinition::USER_TABLE_FIELD_ID . ", 
+                    USR." . TableDefinition::USER_TABLE_FIELD_NAME . ", 
+                    USR." . TableDefinition::USER_TABLE_FIELD_EMAIL . ", 
+                    USR." . TableDefinition::USER_TABLE_FIELD_PASSWORD . ", 
+                    USR." . TableDefinition::USER_TABLE_FIELD_BIRTH_DATE . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID .", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . ", 
+                    SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_CAPACITY . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . ", 
+                    CRS." . TableDefinition::COURSE_TABLE_FIELD_TERM . ", 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID .", 
+                    ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY;
 
-        if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
-            throw new DataAccessException('bind userId ' . json_encode(oci_error($stmt)));
-        if (isset($courseId) && !oci_bind_by_name($stmt, ':courseId', $courseId, -1))
-            throw new DataAccessException('bind courseId ' . json_encode(oci_error($stmt)));
-        if (isset($subjectId) && !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-            throw new DataAccessException('bind subjectId ' . json_encode(oci_error($stmt)));
+        try {
+            $stmt = $this->dataSource->getConnection()->query($sql);
 
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException('exec ' . json_encode(oci_error($stmt)));
+            if (isset($userId)) $stmt->bind(':userId', $userId);
+            if (isset($courseId)) $stmt->bind(':courseId', $courseId);
+            if (isset($subjectId)) $stmt->bind(':subjectId', $subjectId);
 
-        //TODO: investigate
-        while (oci_fetch($stmt)) {
-            $res[] = new CourseTeach( new User(
-                      oci_result($stmt, 'USER_ID'),
-                      oci_result($stmt, 'USER_NAME'),
-                      oci_result($stmt, 'EMAIL'),
-                      oci_result($stmt, 'PASSWORD'),
-                      oci_result($stmt, 'BIRTH_DATE')),
-                  new Course(
-                      new Subject(
-                          oci_result($stmt, 'SUBJECT_ID'),
-                          oci_result($stmt, 'SUBJECT_NAME'),
-                          oci_result($stmt, 'APPROVAL'),
-                          oci_result($stmt, 'CREDIT'),
-                          oci_result($stmt, 'TYPE')),
-                      oci_result($stmt, 'CRS_ID'),
-                      oci_result($stmt, 'CRS_CAPACITY'),
-                      oci_result($stmt, 'SCHEDULE'),
-                      oci_result($stmt, 'TERM'),
-                      new Room(
-                          oci_result($stmt, 'ROOM_ID'),
-                          oci_result($stmt, 'ROOM_CAPACITY')))
-            );
+            $courseTeaches = $stmt->execute(OCI_DEFAULT)->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query admins', $e);
+        }
+
+        return $this->fetchCourseTeaches($courseTeaches);
+    }
+    //endregion
+
+    private function fetchCourseTeaches(array $courseTeaches): array {
+        $res = array();
+
+        foreach ($courseTeaches as $courseTeach) {
+            $res[] = new CourseTeach(
+                new User(
+                    $courseTeach['USER_ID'],
+                    $courseTeach['USER_NAME'],
+                    $courseTeach['EMAIL'],
+                    $courseTeach['PASSWORD'],
+                    $courseTeach['BIRTH_DATE']),
+                new Course(
+                    new Subject(
+                        $courseTeach['SUBJECT_ID'],
+                        $courseTeach['SUBJECT_NAME'],
+                        $courseTeach['APPROVAL'],
+                        $courseTeach['CREDIT'],
+                        $courseTeach['TYPE']),
+                    $courseTeach['CRS_ID'],
+                    $courseTeach['CRS_CAPACITY'],
+                    $courseTeach['SCHEDULE'],
+                    $courseTeach['TERM'],
+                    new Room(
+                        $courseTeach['ROOM_ID'],
+                        $courseTeach['ROOM_CAPACITY']),
+                    $courseTeach['NO_STUDENTS']));
         }
 
         return $res;
     }
-    //endregion
 }

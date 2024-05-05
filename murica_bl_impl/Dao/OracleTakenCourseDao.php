@@ -6,6 +6,7 @@ use murica_bl\Constants\TableDefinition;
 use murica_bl\Dao\Exceptions\DataAccessException;
 use murica_bl\Dao\ITakenCourseDao;
 use murica_bl\Dto\ITakenCourse;
+use murica_bl\Orm\Exception\OciException;
 use murica_bl_impl\DataSource\OracleDataSource;
 use murica_bl_impl\Dto\Course;
 use murica_bl_impl\Dto\Programme;
@@ -49,9 +50,6 @@ class OracleTakenCourseDao implements ITakenCourseDao {
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_GRADE,
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_APPROVED);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $userId = $model->getStudent()->getUser()->getId();
         $programmeName = $model->getStudent()->getProgramme()->getName();
         $programmeType = $model->getStudent()->getProgramme()->getType();
@@ -60,17 +58,21 @@ class OracleTakenCourseDao implements ITakenCourseDao {
         $grade = $model->getGrade();
         $approved = $model->isApproved() ? 1 : 0;
 
-        if (!oci_bind_by_name($stmt, ':userId', $userId, -1) ||
-            !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1) ||
-            !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1) ||
-            !oci_bind_by_name($stmt, ':courseId', $courseId, -1) ||
-            !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1) ||
-            !oci_bind_by_name($stmt, ':grade', $grade, -1) ||
-            !oci_bind_by_name($stmt, ':approved', $approved, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':userId', $userId)
+                ->bind(':programmeName', $programmeName)
+                ->bind(':programmeType', $programmeType)
+                ->bind(':courseId', $courseId)
+                ->bind(':subjectId', $subjectId)
+                ->bind(':grade', $grade)
+                ->bind(':approved', $approved)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to create taken course', $e);
+        }
 
         return $this->findByCrit(new TakenCourse($model->getStudent(), $model->getCourse()))[0];
     }
@@ -93,9 +95,6 @@ class OracleTakenCourseDao implements ITakenCourseDao {
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID,
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $userId = $model->getStudent()->getUser()->getId();
         $programmeName = $model->getStudent()->getProgramme()->getName();
         $programmeType = $model->getStudent()->getProgramme()->getType();
@@ -104,17 +103,21 @@ class OracleTakenCourseDao implements ITakenCourseDao {
         $grade = $model->getGrade();
         $approved = $model->isApproved() ? 1 : 0;
 
-        if (!oci_bind_by_name($stmt, ':userId', $userId, -1) ||
-            !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1) ||
-            !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1) ||
-            !oci_bind_by_name($stmt, ':courseId', $courseId, -1) ||
-            !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1) ||
-            !oci_bind_by_name($stmt, ':grade', $grade, -1) ||
-            !oci_bind_by_name($stmt, ':approved', $approved, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':userId', $userId)
+                ->bind(':programmeName', $programmeName)
+                ->bind(':programmeType', $programmeType)
+                ->bind(':courseId', $courseId)
+                ->bind(':subjectId', $subjectId)
+                ->bind(':grade', $grade)
+                ->bind(':approved', $approved)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to update taken course', $e);
+        }
 
         return $this->findByCrit(new TakenCourse($model->getStudent(), $model->getCourse()))[0];
     }
@@ -133,24 +136,25 @@ class OracleTakenCourseDao implements ITakenCourseDao {
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID,
                        TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
         $userId = $model->getStudent()->getUser()->getId();
         $programmeName = $model->getStudent()->getProgramme()->getName();
         $programmeType = $model->getStudent()->getProgramme()->getType();
         $courseId = $model->getCourse()->getId();
         $subjectId = $model->getCourse()->getSubject()->getId();
 
-        if (!oci_bind_by_name($stmt, ':userId', $userId, -1) ||
-            !oci_bind_by_name($stmt, ':programmeName', $programmeName, -1) ||
-            !oci_bind_by_name($stmt, ':programmeType', $programmeType, -1) ||
-            !oci_bind_by_name($stmt, ':courseId', $courseId, -1) ||
-            !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
+        try {
+            $this->dataSource->getConnection()
+                ->query($sql)
+                ->bind(':userId', $userId)
+                ->bind(':programmeName', $programmeName)
+                ->bind(':programmeType', $programmeType)
+                ->bind(':courseId', $courseId)
+                ->bind(':subjectId', $subjectId)
+                ->execute(OCI_COMMIT_ON_SUCCESS)
+                ->free();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to delete taken course', $e);
+        }
     }
 
     /**
@@ -158,111 +162,85 @@ class OracleTakenCourseDao implements ITakenCourseDao {
      */
     #[Override]
     public function findAll(): array {
-        $res = array();
+        $sql = "SELECT
+            USR." . TableDefinition::USER_TABLE_FIELD_ID . " AS USER_ID,
+            USR." . TableDefinition::USER_TABLE_FIELD_NAME . " AS USER_NAME,
+            USR." . TableDefinition::USER_TABLE_FIELD_EMAIL . " AS EMAIL,
+            USR." . TableDefinition::USER_TABLE_FIELD_PASSWORD . " AS PASSWORD,
+            TO_CHAR(USR." . TableDefinition::USER_TABLE_FIELD_BIRTH_DATE . ", 'YYYY-MM-DD') AS BIRTH_DATE,
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_NAME . " AS PROGRAMME_NAME,
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_TYPE . " AS PROGRAMME_TYPE,
+            STD." . TableDefinition::STUDENT_TABLE_FIELD_START_TERM . " AS START_TERM,
+            PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS . " AS NO_TERMS,
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID . " AS SUBJECT_ID,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . " AS SUBJECT_NAME,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . " AS APPROVAL,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . " AS CREDIT,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . " AS TYPE,
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . " AS CRS_ID,
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_CAPACITY . " AS CRS_CAPACITY,
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . " AS SCHEDULE,
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_TERM . " AS TERM,
+            ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . " AS ROOM_ID,
+            ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY . " AS ROOM_CAPACITY,
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_GRADE . " AS GRADE,
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_APPROVED . " AS APPROVED,
+            COUNT(TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID . ") AS NO_STUDENTS
+        FROM
+            " . $this->configService->getTableOwner() . "." . TableDefinition::TAKENCOURSE_TABLE . " TKN
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::STUDENT_TABLE . " STD
+            ON TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_USER_ID . " = STD." . TableDefinition::STUDENT_TABLE_FIELD_USER_ID . "
+            AND TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_NAME . " = STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME . "
+            AND TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_TYPE . " = STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::USER_TABLE . " USR
+            ON STD." . TableDefinition::STUDENT_TABLE_FIELD_USER_ID . " = USR." . TableDefinition::USER_TABLE_FIELD_ID . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::PROGRAMME_TABLE . " PRG
+            ON STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME . " = PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NAME . "
+            AND STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE . " = PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_TYPE . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::COURSE_TABLE . " CRS
+            ON TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . "
+            AND TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::SUBJECT_TABLE . " SUB
+            ON CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " = SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::ROOM_TABLE . " ROOM
+            ON CRS." . TableDefinition::COURSE_TABLE_FIELD_ROOM_ID . " = ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . "
+            LEFT JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::TAKENCOURSE_TABLE . " TKN_CRS
+            ON TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " 
+            AND TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID . " = CRS. " . TableDefinition::COURSE_TABLE_FIELD_ID . "
+        GROUP BY
+            USR." . TableDefinition::USER_TABLE_FIELD_ID . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_NAME . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_EMAIL . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_PASSWORD . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_BIRTH_DATE . ",
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_NAME . ",
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_TYPE . ",
+            STD." . TableDefinition::STUDENT_TABLE_FIELD_START_TERM . ",
+            PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS . ",
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . ",
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . ",
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_CAPACITY . ",
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . ",
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_TERM . ",
+            ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . ",
+            ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY . ",
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_GRADE . ",
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_APPROVED;
 
-        $sql = sprintf("SELECT USR.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE,
-                                TKN.%s AS PROGRAMME_NAME, TKN.%s AS PROGRAMME_TYPE, STD.%s AS START_TERM, PRG.%s AS NO_TERMS,
-                                TKN.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, 
-                                CRS.%s AS CRS_ID, CRS.%s AS CRS_CAPACITY, CRS.%s AS SCHEDULE, CRS.%s AS TERM, ROOM.%s AS ROOM_ID, ROOM.%s AS ROOM_CAPACITY,
-                                TKN.%s AS GRADE, TKN.%s AS APPROVED FROM %s.%s USR, %s.%s STD, %s.%s SUB, %s.%s CRS, %s.%s ROOM, %s.%s TKN, %s.%s PRG WHERE TKN.%s = STD.%s AND TKN.%s = STD.%s AND TKN.%s = STD.%s AND TKN.%s = CRS.%s AND TKN.%s = CRS.%s AND CRS.%s = SUB.%s AND CRS.%s = ROOM.%s AND STD.%s = USR.%s AND STD.%s = PRG.%s AND STD.%s = PRG.%s",
-                       TableDefinition::USER_TABLE_FIELD_ID,
-                       TableDefinition::USER_TABLE_FIELD_NAME,
-                       TableDefinition::USER_TABLE_FIELD_EMAIL,
-                       TableDefinition::USER_TABLE_FIELD_PASSWORD,
-                       TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_NAME,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_TYPE,
-                       TableDefinition::STUDENT_TABLE_FIELD_START_TERM,
-                       TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_NAME,
-                       TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,
-                       TableDefinition::SUBJECT_TABLE_FIELD_CREDIT,
-                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-                       TableDefinition::COURSE_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_CAPACITY,
-                       TableDefinition::COURSE_TABLE_FIELD_SCHEDULE,
-                       TableDefinition::COURSE_TABLE_FIELD_TERM,
-                       TableDefinition::ROOM_TABLE_FIELD_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_GRADE,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_APPROVED,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::USER_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::STUDENT_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::SUBJECT_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::COURSE_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::ROOM_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::TAKENCOURSE_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::PROGRAMME_TABLE,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_USER_ID,
-                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_NAME,
-                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_TYPE,
-                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_ID,
-                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
-                       TableDefinition::USER_TABLE_FIELD_ID,
-                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
-                       TableDefinition::PROGRAMME_TABLE_FIELD_NAME,
-                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
-                       TableDefinition::PROGRAMME_TABLE_FIELD_TYPE);
-
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException(json_encode(oci_error($stmt)));
-
-        while (oci_fetch($stmt)) {
-            $res[] = new TakenCourse(
-                new Student(
-                    new User(
-                        oci_result($stmt, 'USER_ID'),
-                        oci_result($stmt, 'USER_NAME'),
-                        oci_result($stmt, 'EMAIL'),
-                        oci_result($stmt, 'PASSWORD'),
-                        oci_result($stmt, 'BIRTH_DATE')),
-                    new Programme(
-                        oci_result($stmt, 'PROGRAMME_NAME'),
-                        oci_result($stmt, 'PROGRAMME_TYPE'),
-                        oci_result($stmt, 'NO_TERMS')),
-                    oci_result($stmt, 'START_TERM')),
-                new Course(
-                    new Subject(
-                        oci_result($stmt, 'SUBJECT_ID'),
-                        oci_result($stmt, 'SUBJECT_NAME'),
-                        oci_result($stmt, 'APPROVAL'),
-                        oci_result($stmt, 'CREDIT'),
-                        oci_result($stmt, 'TYPE')),
-                    oci_result($stmt, 'CRS_ID'),
-                    oci_result($stmt, 'CRS_CAPACITY'),
-                    oci_result($stmt, 'SCHEDULE'),
-                    oci_result($stmt, 'TERM'),
-                    new Room(
-                        oci_result($stmt, 'ROOM_ID'),
-                        oci_result($stmt, 'ROOM_CAPACITY')
-                    )),
-                oci_result($stmt, 'GRADE'),
-                oci_result($stmt, 'APPROVED')
-            );
+        try {
+            $takenCourses = $this->dataSource->getConnection()
+                ->query($sql)
+                ->execute(OCI_DEFAULT)
+                ->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query taken courses', $e);
         }
 
-        return $res;
+        return $this->fetchTakenCourses($takenCourses);
     }
 
     /**
@@ -270,70 +248,51 @@ class OracleTakenCourseDao implements ITakenCourseDao {
      */
     #[Override]
     public function findByCrit(ITakenCourse $model): array {
-        $res = array();
-        $crits = array();
-
-        $sql = sprintf("SELECT USR.%s AS USER_ID, USR.%s AS USER_NAME, USR.%s AS EMAIL, USR.%s AS PASSWORD, TO_CHAR(USR.%s,'YYYY-MM-DD') AS BIRTH_DATE,
-                                TKN.%s AS PROGRAMME_NAME, TKN.%s AS PROGRAMME_TYPE, STD.%s AS START_TERM, PRG.%s AS NO_TERMS,
-                                TKN.%s AS SUBJECT_ID, SUB.%s AS SUBJECT_NAME, SUB.%s AS APPROVAL, SUB.%s AS CREDIT, SUB.%s AS TYPE, 
-                                CRS.%s AS CRS_ID, CRS.%s AS CRS_CAPACITY, CRS.%s AS SCHEDULE, CRS.%s AS TERM, ROOM.%s AS ROOM_ID, ROOM.%s AS ROOM_CAPACITY,
-                                TKN.%s AS GRADE, TKN.%s AS APPROVED FROM %s.%s USR, %s.%s STD, %s.%s SUB, %s.%s CRS, %s.%s ROOM, %s.%s TKN, %s.%s PRG WHERE TKN.%s = STD.%s AND TKN.%s = STD.%s AND TKN.%s = STD.%s AND TKN.%s = CRS.%s AND TKN.%s = CRS.%s AND CRS.%s = SUB.%s AND CRS.%s = ROOM.%s AND STD.%s = USR.%s AND STD.%s = PRG.%s AND STD.%s = PRG.%s",
-                       TableDefinition::USER_TABLE_FIELD_ID,
-                       TableDefinition::USER_TABLE_FIELD_NAME,
-                       TableDefinition::USER_TABLE_FIELD_EMAIL,
-                       TableDefinition::USER_TABLE_FIELD_PASSWORD,
-                       TableDefinition::USER_TABLE_FIELD_BIRTH_DATE,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_NAME,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_TYPE,
-                       TableDefinition::STUDENT_TABLE_FIELD_START_TERM,
-                       TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_NAME,
-                       TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL,
-                       TableDefinition::SUBJECT_TABLE_FIELD_CREDIT,
-                       TableDefinition::SUBJECT_TABLE_FIELD_TYPE,
-                       TableDefinition::COURSE_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_CAPACITY,
-                       TableDefinition::COURSE_TABLE_FIELD_SCHEDULE,
-                       TableDefinition::COURSE_TABLE_FIELD_TERM,
-                       TableDefinition::ROOM_TABLE_FIELD_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_CAPACITY,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_GRADE,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_APPROVED,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::USER_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::STUDENT_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::SUBJECT_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::COURSE_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::ROOM_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::TAKENCOURSE_TABLE,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::PROGRAMME_TABLE,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_USER_ID,
-                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_NAME,
-                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_TYPE,
-                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID,
-                       TableDefinition::SUBJECT_TABLE_FIELD_ID,
-                       TableDefinition::COURSE_TABLE_FIELD_ROOM_ID,
-                       TableDefinition::ROOM_TABLE_FIELD_ID,
-                       TableDefinition::STUDENT_TABLE_FIELD_USER_ID,
-                       TableDefinition::USER_TABLE_FIELD_ID,
-                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME,
-                       TableDefinition::PROGRAMME_TABLE_FIELD_NAME,
-                       TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE,
-                       TableDefinition::PROGRAMME_TABLE_FIELD_TYPE);
+        $sql = "SELECT
+            USR." . TableDefinition::USER_TABLE_FIELD_ID . " AS USER_ID,
+            USR." . TableDefinition::USER_TABLE_FIELD_NAME . " AS USER_NAME,
+            USR." . TableDefinition::USER_TABLE_FIELD_EMAIL . " AS EMAIL,
+            USR." . TableDefinition::USER_TABLE_FIELD_PASSWORD . " AS PASSWORD,
+            TO_CHAR(USR." . TableDefinition::USER_TABLE_FIELD_BIRTH_DATE . ", 'YYYY-MM-DD') AS BIRTH_DATE,
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_NAME . " AS PROGRAMME_NAME,
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_TYPE . " AS PROGRAMME_TYPE,
+            STD." . TableDefinition::STUDENT_TABLE_FIELD_START_TERM . " AS START_TERM,
+            PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS . " AS NO_TERMS,
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID . " AS SUBJECT_ID,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . " AS SUBJECT_NAME,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . " AS APPROVAL,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . " AS CREDIT,
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . " AS TYPE,
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . " AS CRS_ID,
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_CAPACITY . " AS CRS_CAPACITY,
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . " AS SCHEDULE,
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_TERM . " AS TERM,
+            ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . " AS ROOM_ID,
+            ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY . " AS ROOM_CAPACITY,
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_GRADE . " AS GRADE,
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_APPROVED . " AS APPROVED,
+            COUNT(TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID . ") AS NO_STUDENTS
+        FROM
+            " . $this->configService->getTableOwner() . "." . TableDefinition::TAKENCOURSE_TABLE . " TKN
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::STUDENT_TABLE . " STD
+            ON TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_USER_ID . " = STD." . TableDefinition::STUDENT_TABLE_FIELD_USER_ID . "
+            AND TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_NAME . " = STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME . "
+            AND TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_TYPE . " = STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::USER_TABLE . " USR
+            ON STD." . TableDefinition::STUDENT_TABLE_FIELD_USER_ID . " = USR." . TableDefinition::USER_TABLE_FIELD_ID . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::PROGRAMME_TABLE . " PRG
+            ON STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME . " = PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NAME . "
+            AND STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE . " = PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_TYPE . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::COURSE_TABLE . " CRS
+            ON TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . "
+            AND TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::SUBJECT_TABLE . " SUB
+            ON CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " = SUB." . TableDefinition::SUBJECT_TABLE_FIELD_ID . "
+            JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::ROOM_TABLE . " ROOM
+            ON CRS." . TableDefinition::COURSE_TABLE_FIELD_ROOM_ID . " = ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . "
+            LEFT JOIN " . $this->configService->getTableOwner() . "." . TableDefinition::TAKENCOURSE_TABLE . " TKN_CRS
+            ON TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID . " = CRS." . TableDefinition::COURSE_TABLE_FIELD_SUBJECT_ID . " 
+            AND TKN_CRS." . TableDefinition::TAKENCOURSE_TABLE_FIELD_COURSE_ID . " = CRS. " . TableDefinition::COURSE_TABLE_FIELD_ID;
 
         $user = $model->getStudent();
         $course = $model->getCourse();
@@ -350,56 +309,86 @@ class OracleTakenCourseDao implements ITakenCourseDao {
         }
 
         if (!empty($crits))
-            $sql .= " AND " . implode(" AND ", $crits);
+            $sql .= " WHERE " . implode(" AND ", $crits);
 
-        if (!$stmt = oci_parse($this->dataSource->getConnection(), $sql))
-            throw new DataAccessException('parse ' . json_encode(oci_error($stmt)));
+        $sql .= " GROUP BY
+            USR." . TableDefinition::USER_TABLE_FIELD_ID . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_NAME . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_EMAIL . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_PASSWORD . ",
+            USR." . TableDefinition::USER_TABLE_FIELD_BIRTH_DATE . ",
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_NAME . ",
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_PROGRAMME_TYPE . ",
+            STD." . TableDefinition::STUDENT_TABLE_FIELD_START_TERM . ",
+            PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS . ",
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_SUBJECT_ID . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_NAME . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_APPROVAL . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_CREDIT . ",
+            SUB." . TableDefinition::SUBJECT_TABLE_FIELD_TYPE . ",
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_ID . ",
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_CAPACITY . ",
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_SCHEDULE . ",
+            CRS." . TableDefinition::COURSE_TABLE_FIELD_TERM . ",
+            ROOM." . TableDefinition::ROOM_TABLE_FIELD_ID . ",
+            ROOM." . TableDefinition::ROOM_TABLE_FIELD_CAPACITY . ",
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_GRADE . ",
+            TKN." . TableDefinition::TAKENCOURSE_TABLE_FIELD_APPROVED;
 
-        if (isset($userId) && !oci_bind_by_name($stmt, ':userId', $userId, -1))
-            throw new DataAccessException('bind user id ' . json_encode(oci_error($stmt)));
-        if (isset($courseId) && !oci_bind_by_name($stmt, ':courseId', $courseId, -1))
-            throw new DataAccessException('bind course id ' . json_encode(oci_error($stmt)));
-        if (isset($subjectId) && !oci_bind_by_name($stmt, ':subjectId', $subjectId, -1))
-            throw new DataAccessException('bind subject id ' . json_encode(oci_error($stmt)));
+        try {
+            $stmt = $this->dataSource->getConnection()->query($sql);
 
-        if (!oci_execute($stmt, OCI_DEFAULT))
-            throw new DataAccessException('exec ' . json_encode(oci_error($stmt)));
+            if (isset($userId)) $stmt->bind(':userId', $userId);
+            if (isset($courseId)) $stmt->bind(':courseId', $courseId);
+            if (isset($subjectId)) $stmt->bind(':subjectId', $subjectId);
 
-        while (oci_fetch($stmt)) {
+            $takenCourses = $stmt->execute(OCI_DEFAULT)->result();
+        } catch (OciException $e) {
+            throw new DataAccessException('Failed to query subjects', $e);
+        }
+
+        return $this->fetchTakenCourses($takenCourses);
+    }
+    //endregion
+
+    private function fetchTakenCourses(array $takenCourses): array {
+        $res = array();
+
+        foreach ($takenCourses as $course) {
             $res[] = new TakenCourse(
                 new Student(
                     new User(
-                        oci_result($stmt, 'USER_ID'),
-                        oci_result($stmt, 'USER_NAME'),
-                        oci_result($stmt, 'EMAIL'),
-                        oci_result($stmt, 'PASSWORD'),
-                        oci_result($stmt, 'BIRTH_DATE')),
+                        $course['USER_ID'],
+                        $course['USER_NAME'],
+                        $course['EMAIL'],
+                        $course['PASSWORD'],
+                        $course['BIRTH_DATE']),
                     new Programme(
-                        oci_result($stmt, 'PROGRAMME_NAME'),
-                        oci_result($stmt, 'PROGRAMME_TYPE'),
-                        oci_result($stmt, 'NO_TERMS')),
-                    oci_result($stmt, 'START_TERM')),
+                        $course['PROGRAMME_NAME'],
+                        $course['PROGRAMME_TYPE'],
+                        $course['NO_TERMS']),
+                    $course['START_TERM']),
                 new Course(
                     new Subject(
-                        oci_result($stmt, 'SUBJECT_ID'),
-                        oci_result($stmt, 'SUBJECT_NAME'),
-                        oci_result($stmt, 'APPROVAL'),
-                        oci_result($stmt, 'CREDIT'),
-                        oci_result($stmt, 'TYPE')),
-                    oci_result($stmt, 'CRS_ID'),
-                    oci_result($stmt, 'CRS_CAPACITY'),
-                    oci_result($stmt, 'SCHEDULE'),
-                    oci_result($stmt, 'TERM'),
+                        $course['SUBJECT_ID'],
+                        $course['SUBJECT_NAME'],
+                        $course['APPROVAL'],
+                        $course['CREDIT'],
+                        $course['TYPE']),
+                    $course['CRS_ID'],
+                    $course['CRS_CAPACITY'],
+                    $course['SCHEDULE'],
+                    $course['TERM'],
                     new Room(
-                        oci_result($stmt, 'ROOM_ID'),
-                        oci_result($stmt, 'ROOM_CAPACITY')
-                    )),
-                oci_result($stmt, 'GRADE'),
-                oci_result($stmt, 'APPROVED')
+                        $course['ROOM_ID'],
+                        $course['ROOM_CAPACITY']
+                    ),
+                    $course['NO_STUDENTS']),
+                $course['GRADE'],
+                $course['APPROVED']
             );
         }
 
         return $res;
     }
-    //endregion
 }

@@ -68,7 +68,7 @@ class TakenCourse extends Entity implements ITakenCourse {
     }
 
     #[Override]
-    public function setGrade(int $grade): ITakenCourse {
+    public function setGrade(?int $grade): ITakenCourse {
         $this->grade = $grade;
         return $this;
     }
@@ -84,11 +84,11 @@ class TakenCourse extends Entity implements ITakenCourse {
     #[Override]
     public function validate(): bool {
         $errors = "";
+        $this->student->validate();
+        $this->course->validate();
         // TODO refactor validation to return false if no issues was found or a string with all the issues
-        if (empty($this->student) || $this->student->validate()) $errors .= '\nStudent is invalid!';
-        if (empty($this->course) || $this->course->validate()) $errors .= '\nCourse is invalid!';
-        if (empty($this->grade) || ($this->grade > 5) || ($this->grade < 0)) $errors .= '\nGrade is invalid!';
-        if (empty($this->approved)) $errors .= '\nApproved is empty!';
+        if (isset($this->grade) && ($this->grade > 5 || $this->grade < 1)) $errors .= '\nGrade is invalid!';
+        if (!isset($this->approved)) $errors .= '\nApproved is empty!';
         if (!empty($errors)) throw new ValidationException(ltrim($errors, '\n'));
 
         return true;
@@ -100,15 +100,23 @@ class TakenCourse extends Entity implements ITakenCourse {
     public function jsonSerialize(): array {
         return [
             'student' => $this->student->jsonSerialize(),
+            'course' => $this->course->jsonSerialize(),
             'subjectId' => $this->course->getSubject()->getId(),
             'courseId' => $this->course->getId(),
+            'capacity' => $this->course->getCapacity(),
+            'noStudents' => $this->course->getNumberOfStudents(),
             'id' => $this->course->getSubject()->getId() . '-' . $this->course->getId(),
             'name' => $this->course->getSubject()->getName(),
             'schedule' => $this->course->getSchedule(),
             'term' => $this->course->getTerm(),
             'roomId' => $this->course->getRoom()->getId(),
             'grade' => $this->grade,
-            'approved' => $this->approved
+            'approved' => $this->approved,
+            'credit' => $this->course->getSubject()->getCredit(),
+            'approvedVisual' => $this->approved ? '✓' : 'x',
+            'userId' => $this->student->getUser()->getId(),
+            'userName' => $this->student->getUser()->getName(),
+            'userProgramme' => $this->student->getProgramme()->getName() . '/' . $this->student->getProgramme()->getType()
         ];
     }
     //endregion

@@ -59,15 +59,14 @@ try {
     $router = new Router($configService, $tokenService);
 
     $authController = new AuthController($router, $userDao, $tokenService);
-    $userController = new UserController($router, $userDao, $adminDao, $courseTeachDao, $studentDao);
+    $userController = new UserController($router, $userDao, $adminDao, $courseTeachDao, $takenCourseDao, $takenExamDao);
     $programmeController = new ProgrammeController($router, $programmeDao, $adminDao);
     $roomController = new RoomController($router, $roomDao, $adminDao);
-    $subjectController = new SubjectController($router, $subjectDao, $adminDao);
-    $examController = new ExamController($router, $examDao, $subjectDao, $roomDao, $takenExamDao, $studentDao, $adminDao,$userDao);
+    $subjectController = new SubjectController($router, $subjectDao, $adminDao, $courseTeachDao);
+    $examController = new ExamController($router, $examDao, $subjectDao, $roomDao, $takenExamDao, $studentDao, $adminDao,$userDao, $takenCourseDao);
     $messageController = new MessageController($router, $messageDao);
     $roleController = new RoleController($router, $userDao, $adminDao, $studentDao, $programmeDao, $courseTeachDao);
     $courseController = new CourseController($router, $courseDao, $subjectDao, $roomDao, $takenCourseDao, $studentDao, $adminDao, $courseTeachDao, $userDao);
-
 } catch (MuricaException $ex) {
     exit(json_encode(['_success' => false,
                          'error' => [

@@ -119,7 +119,7 @@ class RoleController extends Controller {
                 return new ErrorModel($this->router, 404, 'Failed to give admin role', "User not found with id '$uri'");
             }
             $admin = $this->adminDao->create(new Admin($users[0]));
-            return (new EntityModel($this->router, $admin[0], true))
+            return (new EntityModel($this->router, $admin, true))
                 ->linkTo('role', RoleController::class, 'allRoles')
                 ->withSelfRef(RoleController::class, 'setAdmin', [], ['id' => $admin->getUser()->getId()]);
 
