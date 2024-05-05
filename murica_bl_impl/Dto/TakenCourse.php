@@ -103,6 +103,8 @@ class TakenCourse extends Entity implements ITakenCourse {
             'course' => $this->course->jsonSerialize(),
             'subjectId' => $this->course->getSubject()->getId(),
             'courseId' => $this->course->getId(),
+            'capacity' => $this->course->getCapacity(),
+            'noStudents' => $this->course->getNumberOfStudents(),
             'id' => $this->course->getSubject()->getId() . '-' . $this->course->getId(),
             'name' => $this->course->getSubject()->getName(),
             'schedule' => $this->course->getSchedule(),
@@ -114,8 +116,7 @@ class TakenCourse extends Entity implements ITakenCourse {
             'approvedVisual' => $this->approved ? '✓' : 'x',
             'userId' => $this->student->getUser()->getId(),
             'userName' => $this->student->getUser()->getName(),
-            'userProgramme' => $this->student->getProgramme()->getName() . '/' . $this->student->getProgramme()->getType(),
-            'noStudents' => $this->course->getNumberOfStudents()
+            'userProgramme' => $this->student->getProgramme()->getName() . '/' . $this->student->getProgramme()->getType()
         ];
     }
     //endregion
