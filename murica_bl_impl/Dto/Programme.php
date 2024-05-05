@@ -12,13 +12,15 @@ class Programme extends Entity implements IProgramme {
     private ?string $name;
     private ?string $type;
     private ?int $noTerms;
+    private ?int $noStudents;
     //endregion
 
     //region Ctor
-    public function __construct(?string $name=null, ?string $type=null, ?int $noTerms=null) {
+    public function __construct(?string $name=null, ?string $type=null, ?int $noTerms=null, ?int $noStudents=null) {
         $this->name = isset($name) ? trim($name) : null;
         $this->type = isset($type) ? trim($type) : null;
         $this->noTerms = $noTerms;
+        $this->noStudents = $noStudents;
     }
     //endregion
 
@@ -36,6 +38,11 @@ class Programme extends Entity implements IProgramme {
     #[Override]
     public function getNoTerms(): ?int {
         return $this->noTerms;
+    }
+
+    #[Override]
+    public function getNoStudents(): ?int {
+        return $this->noStudents;
     }
     //endregion
 
@@ -55,6 +62,12 @@ class Programme extends Entity implements IProgramme {
     #[Override]
     public function setNoTerms(int $noTerms): IProgramme {
         $this->noTerms = $noTerms;
+        return $this;
+    }
+
+    #[Override]
+    public function setNoStudents(?int $noStudents): IProgramme {
+        $this->noStudents = $noStudents;
         return $this;
     }
     //endregion
@@ -84,7 +97,8 @@ class Programme extends Entity implements IProgramme {
         return [
             'name' => $this->name,
             'type' => $this->type,
-            'noTerms' => $this->noTerms
+            'noTerms' => $this->noTerms,
+            'noStudents' => $this->noStudents
         ];
     }
     //endregion

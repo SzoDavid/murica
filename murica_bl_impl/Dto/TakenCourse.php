@@ -103,6 +103,8 @@ class TakenCourse extends Entity implements ITakenCourse {
             'course' => $this->course->jsonSerialize(),
             'subjectId' => $this->course->getSubject()->getId(),
             'courseId' => $this->course->getId(),
+            'capacity' => $this->course->getCapacity(),
+            'noStudents' => $this->course->getNumberOfStudents(),
             'id' => $this->course->getSubject()->getId() . '-' . $this->course->getId(),
             'name' => $this->course->getSubject()->getName(),
             'schedule' => $this->course->getSchedule(),

@@ -17,24 +17,18 @@ class Exam extends Entity implements IExam {
     private ?string $id;
     private ?string $startTime;
     private ?string $endTime;
+    private ?int $noStudents;
     private ?IUser $teacher;
     private ?IRoom $room;
     //endregion
 
     //region Ctor
-    /**
-     * @param ISubject|null $subject
-     * @param string|null $id
-     * @param string|null $startTime
-     * @param string|null $endTime
-     * @param IUser|null $teacher
-     * @param IRoom|null $room
-     */
-    public function __construct(ISubject $subject = null, string $id = null, string $startTime = null, string $endTime = null, IUser $teacher = null, IRoom $room = null) {
+    public function __construct(?ISubject $subject=null, ?string $id=null, ?string $startTime=null, ?string $endTime=null, ?int $noStudents=null, ?IUser $teacher=null, ?IRoom $room=null) {
         $this->subject = $subject;
         $this->id = isset($id) ? strtoupper(trim($id)) : null;
         $this->startTime = isset($startTime) ? trim($startTime) : null;
         $this->endTime = isset($endTime) ? trim($endTime) : null;
+        $this->noStudents = $noStudents;
         $this->teacher = $teacher;
         $this->room = $room;
     }
@@ -59,6 +53,11 @@ class Exam extends Entity implements IExam {
     #[Override]
     public function getEndTime(): ?string {
         return $this->endTime;
+    }
+
+    #[Override]
+    public function getNoStudents(): ?int {
+        return $this->noStudents;
     }
 
     #[Override]
@@ -94,6 +93,12 @@ class Exam extends Entity implements IExam {
     #[Override]
     public function setEndTime(string $endTime): IExam {
         $this->endTime = $endTime;
+        return $this;
+    }
+
+    #[Override]
+    public function setNoStudents(int $noStudents): IExam {
+        $this->noStudents = $noStudents;
         return $this;
     }
 
@@ -149,8 +154,10 @@ class Exam extends Entity implements IExam {
             'startTime' => $this->startTime,
             'endTime' => $this->endTime,
             'teacher' => $this->teacher,
+            'capacity' => $this->room->getCapacity(),
             'room' => $this->room,
-            'roomId' => $this->room->getId()
+            'roomId' => $this->room->getId(),
+            'noStudents' => $this->noStudents
         ];
     }
     //endregion

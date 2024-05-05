@@ -55,8 +55,9 @@ class OracleProgrammeDao implements IProgrammeDao {
         } catch (OciException $e) {
             throw new DataAccessException('Failed to create programme', $e);
         }
-
-        return $this->findByCrit(new Programme($name, $type))[0];
+        //TODO this returns nothing
+        //return $this->findByCrit(new Programme($name, $type))[0];
+        return $model;
     }
 
     /**
@@ -123,12 +124,22 @@ class OracleProgrammeDao implements IProgrammeDao {
      */
     #[Override]
     public function findAll(): array {
-        $sql = sprintf("SELECT %s AS NAME, %s AS TYPE, %s AS NO_TERMS FROM %s.%s",
-                       TableDefinition::PROGRAMME_TABLE_FIELD_NAME,
-                       TableDefinition::PROGRAMME_TABLE_FIELD_TYPE,
-                       TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::PROGRAMME_TABLE);
+        $sql = "SELECT 
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NAME . " AS NAME,
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_TYPE . " AS TYPE, 
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS . " AS NO_TERMS,
+                    COUNT(STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME . ") AS NO_STUDENTS
+                FROM 
+                    " . $this->configService->getTableOwner() . "." . TableDefinition::PROGRAMME_TABLE . " PRG 
+                LEFT JOIN
+                    " . $this->configService->getTableOwner() . "." . TableDefinition::STUDENT_TABLE . " STD
+                ON 
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NAME . " = STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME . " AND 
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_TYPE . " = STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE . "
+                GROUP BY 
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NAME . ",
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_TYPE . ", 
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS;
 
         try {
             $programmes = $this->dataSource->getConnection()
@@ -149,12 +160,18 @@ class OracleProgrammeDao implements IProgrammeDao {
     public function findByCrit(IProgramme $model): array {
         $crits = array();
 
-        $sql = sprintf("SELECT %s AS NAME, %s AS TYPE, %s AS NO_TERMS FROM %s.%s",
-                       TableDefinition::PROGRAMME_TABLE_FIELD_NAME,
-                       TableDefinition::PROGRAMME_TABLE_FIELD_TYPE,
-                       TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS,
-                       $this->configService->getTableOwner(),
-                       TableDefinition::PROGRAMME_TABLE);
+        $sql = "SELECT 
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NAME . " AS NAME,
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_TYPE . " AS TYPE, 
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS . " AS NO_TERMS,
+                    COUNT(STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME . ") AS NO_STUDENTS
+                FROM 
+                    " . $this->configService->getTableOwner() . "." . TableDefinition::PROGRAMME_TABLE . " PRG 
+                LEFT JOIN
+                    " . $this->configService->getTableOwner() . "." . TableDefinition::STUDENT_TABLE . " STD
+                ON 
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NAME . " = STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_NAME . " AND
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_TYPE . " = STD." . TableDefinition::STUDENT_TABLE_FIELD_PROGRAMME_TYPE;
 
         $name = $model->getName();
         $type = $model->getType();
@@ -166,6 +183,11 @@ class OracleProgrammeDao implements IProgrammeDao {
 
         if (!empty($crits))
             $sql .= " WHERE " . implode(" AND ", $crits);
+
+        $sql .= " GROUP BY 
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NAME . ",
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_TYPE . ", 
+                    PRG." . TableDefinition::PROGRAMME_TABLE_FIELD_NO_TERMS;
 
         try {
             $stmt = $this->dataSource->getConnection()->query($sql);
@@ -190,7 +212,8 @@ class OracleProgrammeDao implements IProgrammeDao {
             $res[] = new Programme(
                 $programme['NAME'],
                 $programme['TYPE'],
-                $programme['NO_TERMS']);
+                $programme['NO_TERMS'],
+                $programme['NO_STUDENTS']);
         }
 
         return $res;

@@ -203,6 +203,7 @@ function buildCourses(contentElement, container, record) {
         const tableColumns = {
             id: 'Id',
             capacity: 'Capacity',
+            noStudents: 'Students',
             schedule: 'Schedule',
             term: 'Term',
         };
@@ -416,6 +417,7 @@ function programmes(contentElement) {
             name: 'Name',
             type: 'Type',
             noTerms: 'Number of terms',
+            noStudents: 'Number of students'
         };
 
         const programmeTable= new DropDownTable(tableColumns, response._embedded.programmes,

@@ -28,6 +28,8 @@ function takenCourses(contentElement) {
         const tableColumns = {
             id: 'Id',
             name: 'Name',
+            capacity: 'Capacity',
+            noStudents: 'Students',
             term: 'Term',
             schedule: 'Schedule',
             grade: 'Grade',
@@ -65,7 +67,6 @@ function removeTakenCourse(record, contentElement) {
         else $('#drop-course-error').html(string2html(response.error.details)).removeClass('hidden');
     });
 }
-
 //endregion
 
 //region Course registration
@@ -78,7 +79,7 @@ function courseRegistration(contentElement) {
     $('#navbar-course-registration').addClass('active');
     $('#navbar-courses').addClass('active');
 
-    contentElement.append($('<h1>').text('Register courses'));
+    contentElement.append($('<h1>').text('Course registration'));
 
     requestInvoker.executePost('subject/all', { token: tokenObj.token }).then((response) => {
         if (!response._success) {
@@ -113,6 +114,7 @@ function subjectDetails(record, contentElement) {
         const tableColumns = {
             id: 'Id',
             capacity: 'Capacity',
+            noStudents: 'Students',
             schedule: 'Schedule',
             term: 'Term',
         };
@@ -183,6 +185,8 @@ function takenExams(contentElement) {
             startTime: 'Start',
             endTime: 'End',
             roomId: 'Term',
+            capacity: 'Capacity',
+            noStudents: 'Students'
         };
 
         const examTable= new DropDownTable(tableColumns, response._embedded.takenExams,
@@ -247,6 +251,8 @@ function examRegistration(contentElement) {
             startTime: 'Start',
             endTime: 'End',
             roomId: 'Term',
+            capacity: 'Capacity',
+            noStudents: 'Students'
         };
 
         const examsTable= new DropDownTable(tableColumns, response._embedded.exams,

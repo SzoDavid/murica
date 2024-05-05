@@ -21,6 +21,7 @@ function courses(contentElement) {
             id: 'Id',
             name: 'Name',
             capacity: 'Capacity',
+            noStudents: 'Students',
             schedule: 'Schedule',
             term: 'Term',
             room: 'Room'
@@ -138,6 +139,8 @@ function exams(contentElement) {
             startTime: 'Start',
             endTime: 'End',
             roomId: 'Room',
+            capacity: 'Capacity',
+            noStudents: 'Students'
         };
 
         const examsTable= new DropDownTable(tableColumns, response._embedded.exams, (record) => {return examDetails(record, contentElement)}).build();
