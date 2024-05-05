@@ -268,16 +268,16 @@ class CourseController extends Controller {
                 return new ErrorModel($this->router, 404, 'Failed to create course', "Room not found with id '{$requestData['roomId']}'");
             }
 
-            $courses = $this->courseDao->create(new Course($subjects[0],
+            $course = $this->courseDao->create(new Course($subjects[0],
                                                            $requestData['id'],
                                                            $requestData['capacity'],
                                                            $requestData['schedule'],
                                                            $requestData['term'],
                                                            $rooms[0]));
-            return (new EntityModel($this->router, $courses[0], true))
+            return (new EntityModel($this->router, $course, true))
                 ->linkTo('allCourses', CourseController::class, 'allCourses')
                 ->withSelfRef(CourseController::class, 'getCourseByIdAndSubjectId', [],
-                              ['id' => $courses[0]->getId(), 'subjectId' => $courses[0]->getSubject()->getId()]);
+                              ['id' => $course->getId(), 'subjectId' => $course->getSubject()->getId()]);
         } catch (DataAccessException|ValidationException|ModelException $e) {
             return new ErrorModel($this->router, 500, 'Failed to create course', $e->getTraceMessages());
         }

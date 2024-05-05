@@ -361,7 +361,7 @@
     INSERT INTO MURICA_TAKEN_EXAM VALUES ('CFQ3MI', 'Mernokinformatikus', 'BSc', 'MB1121','MB112E');
     INSERT INTO MURICA_TAKEN_EXAM VALUES ('VBNCXY', 'Programtervezo informatikus', 'BSc', 'IB0422','IB042E');
     INSERT INTO MURICA_TAKEN_EXAM VALUES ('YB5N3N', 'Programtervezo informatikus', 'BSc', 'IB0420','IB042E');
-    INSERT INTO MURICA_TAKEN_EXAM VALUES ('ZV692D', 'Programtervezo informatikus', 'BSc', 'IB042E1','IB042E');
+    INSERT INTO MURICA_TAKEN_EXAM VALUES ('ZV692D', 'Programtervezo informatikus', 'BSc', 'IB0421','IB042E');
 
     INSERT INTO murica_tokens VALUES('48a38d49-143b-4bdf-bd2d-47e255dbbf57', 'ADMIN1', TO_DATE('2024-06-01 13:30', 'YYYY-MM-DD HH24:MI'));
     INSERT INTO murica_tokens VALUES('9f4edc47-9fe5-48c5-9402-ae5da616bc4d', 'OKTAT1', TO_DATE('2024-06-01 13:30', 'YYYY-MM-DD HH24:MI'));
