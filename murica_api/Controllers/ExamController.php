@@ -272,6 +272,7 @@ class ExamController extends Controller {
                                                      $requestData['id'],
                                                      $requestData['startTime'],
                                                      $requestData['endTime'],
+                                                     null,
                                                      $teachers[0],
                                                      $rooms[0]));
 
